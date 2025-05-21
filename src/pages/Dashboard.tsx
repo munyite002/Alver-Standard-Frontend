@@ -21,11 +21,13 @@ export function DashboardPage() {
             <main className="flex-1 space-y-6 p-6 pt-4 md:p-8 md:pt-6">
                 <DashboardStats />
                 <TransactionTable onViewTransaction={handleViewTransaction} />
-                <TransactionModal
-                    isOpen={isModalOpen}
-                    onClose={() => setIsModalOpen(false)}
-                    transaction={selectedTransaction}
-                />
+                {isModalOpen && (
+                    <TransactionModal
+                        isOpen={isModalOpen}
+                        onClose={() => setIsModalOpen(false)}
+                        transaction={selectedTransaction}
+                    />
+                )}
             </main>
         </div>
     );
