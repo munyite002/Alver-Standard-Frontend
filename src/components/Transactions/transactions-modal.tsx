@@ -26,7 +26,7 @@ export function TransactionModal({ isOpen, onClose, transaction }: TransactionMo
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl">Transaction Details</DialogTitle>
         </DialogHeader>
@@ -39,7 +39,7 @@ export function TransactionModal({ isOpen, onClose, transaction }: TransactionMo
             </div>
             <div className="text-right">
               <p className="text-sm text-muted-foreground">Date & Time</p>
-              <p className="font-medium">{new Date(transaction.transTime).toLocaleString()}</p>
+              <p className="font-medium">{new Date(transaction.createdAt).toLocaleString()}</p>
             </div>
           </div>
 
@@ -52,7 +52,7 @@ export function TransactionModal({ isOpen, onClose, transaction }: TransactionMo
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Amount</p>
-              <p className="font-medium text-lg">${transaction.transAmount.toFixed(2)}</p>
+              <p className="font-medium text-lg">Ksh {transaction.transAmount.toFixed(2)}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Business Code</p>
@@ -77,7 +77,7 @@ export function TransactionModal({ isOpen, onClose, transaction }: TransactionMo
             {transaction.orgAccountBalance !== null && (
               <div>
                 <p className="text-sm text-muted-foreground">Account Balance</p>
-                <p className="font-medium">${(transaction.orgAccountBalance ?? 0).toFixed(2)}</p>
+                <p className="font-medium">Ksh {(transaction.orgAccountBalance ?? 0).toFixed(2)}</p>
               </div>
             )}
           </div>
@@ -117,7 +117,7 @@ export function TransactionModal({ isOpen, onClose, transaction }: TransactionMo
             <>
               <Separator />
               <div>
-                <p className="text-sm text-muted-foreground">Third Party Transaction ID</p>
+                <p className="text-sm text-muted-foreground">Mpesa Reference No</p>
                 <p className="font-medium">{transaction.thirdPartyTransId}</p>
               </div>
             </>
