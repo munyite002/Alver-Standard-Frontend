@@ -7,7 +7,9 @@ import {
     ChevronsRight,
     Eye,
     Filter,
-    MoreHorizontal
+    MoreHorizontal,
+    ArrowUp,
+    ArrowDown
 } from "lucide-react";
 import {
     DropdownMenu,
@@ -49,10 +51,16 @@ export function TransactionTable({
         <Card>
             <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Recent Transactions</CardTitle>
-                <Button variant="outline" size="sm" className="h-8 gap-1">
-                    <Filter className="h-3.5 w-3.5" />
-                    Filter
-                </Button>
+                <div>
+                    <Button variant="outline" size="sm" className="h-8 gap-1 mx-2">
+                        <Filter className="h-3.5 w-3.5" />
+                        Filter
+                    </Button>
+                    <Button variant="outline" size="sm" className="h-8 gap-1">
+                        <ArrowDown className="h-3.5 w-3.5" />
+                        Sort
+                    </Button>
+                </div>
             </CardHeader>
             <CardContent>
                 <div className="rounded-md border">

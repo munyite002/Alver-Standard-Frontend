@@ -23,6 +23,8 @@ export function DashboardPage() {
 
     const [metrics, setMetrics] = useState<any>(null);
 
+    const [searchQuery, setSearchQuery] = useState("");
+
     const [transactions, setTransactions] = useState<any>(null);
 
     const handleViewTransaction = (transaction: Payment) => {
@@ -55,12 +57,29 @@ export function DashboardPage() {
         fetchTransactions();
     }, []);
 
+    const filteredTransactions = transactions
+        ? transactions.filter((transaction: Payment) => {
+              const query = searchQuery.toLowerCase();
+              return (
+                  transaction.transId?.toLowerCase().includes(query) ||
+                  transaction.billRefNumber?.toLowerCase().includes(query) ||
+                  transaction.firstName?.toLowerCase().includes(query) ||
+                  transaction.lastName?.toLowerCase().includes(query) ||
+                  transaction.msisdn?.includes(query) ||
+                  transaction.middleName?.toLowerCase().includes(query)
+              );
+          })
+        : [];
+
     return (
         <div className="flex min-h-screen flex-col">
-            <DashboardHeader />
+            <DashboardHeader searchQuery={searchQuery} setSearchQuery={setSearchQuery}/>
             <main className="flex-1 space-y-6 p-6 pt-4 md:p-8 md:pt-6">
                 <DashboardStats metrics={metrics} />
-                <TransactionTable onViewTransaction={handleViewTransaction} transactions={transactions}/>
+                <TransactionTable
+                    onViewTransaction={handleViewTransaction}
+                    transactions={filteredTransactions}
+                />
                 {isModalOpen && (
                     <TransactionModal
                         isOpen={isModalOpen}
