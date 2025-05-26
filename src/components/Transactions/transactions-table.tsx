@@ -6,8 +6,6 @@ import {
     ChevronsLeft,
     ChevronsRight,
     Eye,
-    Filter,
-    MoreHorizontal,
     ArrowDownUp
 } from "lucide-react";
 import {
@@ -41,7 +39,10 @@ export function TransactionTable({
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 8;
     const totalPages = Math.ceil(transactions?.length / itemsPerPage);
-    const [sort, setSort] = useState<{ key?: string; direction?: "asc" | "desc" }>({});
+    const [sort, setSort] = useState<{
+        key?: string;
+        direction?: "asc" | "desc";
+    }>({});
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     // Sort transactions based on sort value
@@ -64,21 +65,11 @@ export function TransactionTable({
 
     const currentTransactions = sortedTransactions.slice(startIndex, endIndex);
 
-
-
     return (
         <Card>
             <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Recent Transactions</CardTitle>
                 <div>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 gap-1 mx-2"
-                    >
-                        <Filter className="h-3.5 w-3.5" />
-                        Filter
-                    </Button>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button
@@ -93,10 +84,10 @@ export function TransactionTable({
                                             ? "Date (Oldest)"
                                             : "Date (Newest)"
                                         : sort.key === "transAmount"
-                                            ? sort.direction === "asc"
-                                                ? "Amount (Low to High)"
-                                                : "Amount (High to Low)"
-                                            : "Sort"
+                                        ? sort.direction === "asc"
+                                            ? "Amount (Low to High)"
+                                            : "Amount (High to Low)"
+                                        : "Sort"
                                     : "Sort"}
                             </Button>
                         </DropdownMenuTrigger>
@@ -196,27 +187,6 @@ export function TransactionTable({
                                                     View details
                                                 </span>
                                             </Button>
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                    >
-                                                        <MoreHorizontal className="h-4 w-4" />
-                                                        <span className="sr-only">
-                                                            More options
-                                                        </span>
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem>
-                                                        Export
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem>
-                                                        Print
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
                                         </div>
                                     </TableCell>
                                 </TableRow>
