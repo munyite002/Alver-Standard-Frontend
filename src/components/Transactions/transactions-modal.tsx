@@ -9,7 +9,10 @@ import { Button } from "@/components/ui/button";
 import type { Payment } from "@/lib/types";
 import { Separator } from "@/components/ui/separator";
 import { MailCheck, Printer } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { toast, Toaster } from "sonner";
+import { resendSms } from "@/../api/users.api";
+import useAxiosWithAuth from "utils/axiosInterceptor";
 
 interface TransactionModalProps {
     isOpen: boolean;
@@ -22,7 +25,9 @@ export function TransactionModal({
     onClose,
     transaction
 }: TransactionModalProps) {
+    const axiosInstance = useAxiosWithAuth(import.meta.env.VITE_STAGING_API);
     const printRef = useRef<HTMLDivElement>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     if (!transaction) return null;
 
@@ -33,6 +38,21 @@ export function TransactionModal({
             .padEnd(20, "0")
             .slice(0, 20);
         return normalizedToken.match(/.{1,4}/g)?.join(" ") || normalizedToken;
+    };
+
+    const handleResendSms = async () => {
+        try {
+            setIsSubmitting(true);
+            const data = {
+                phone: transaction?.msisdn,
+                token: transaction?.token
+            };
+            await resendSms(axiosInstance, data);
+            toast.success("Successfully Resend Token SMS to user");
+        } catch (err) {
+            console.log("Error: ", err);
+            toast.error("An Error occured please try again later");
+        }
     };
 
     const handlePrint = () => {
@@ -238,6 +258,7 @@ export function TransactionModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
+            <Toaster richColors position="top-right" />
             <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-xl">
@@ -249,16 +270,20 @@ export function TransactionModal({
                     <div className="receipt-container">
                         <div className="receipt-body">
                             <div className="section">
-                                <div className="label">Transaction Date & Time</div>
+                                <div className="label">
+                                    Transaction Date & Time
+                                </div>
                                 <div className="value">
-                                    {new Date(transaction.createdAt).toLocaleString('en-US', {
-                                        weekday: 'long',
-                                        year: 'numeric',
-                                        month: 'long',
-                                        day: 'numeric',
-                                        hour: '2-digit',
-                                        minute: '2-digit',
-                                        second: '2-digit'
+                                    {new Date(
+                                        transaction.createdAt
+                                    ).toLocaleString("en-US", {
+                                        weekday: "long",
+                                        year: "numeric",
+                                        month: "long",
+                                        day: "numeric",
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                        second: "2-digit"
                                     })}
                                 </div>
                             </div>
@@ -271,7 +296,9 @@ export function TransactionModal({
                             </div>
 
                             <div className="token-section">
-                                <div className="token-label">Electricity Token</div>
+                                <div className="token-label">
+                                    Electricity Token
+                                </div>
                                 <div className="token-value">
                                     {formatToken(transaction.token)}
                                 </div>
@@ -280,13 +307,19 @@ export function TransactionModal({
                             <hr className="divider" />
 
                             <div className="section">
-                                <div className="label">Customer Phone Number</div>
-                                <div className="value">{transaction.msisdn}</div>
+                                <div className="label">
+                                    Customer Phone Number
+                                </div>
+                                <div className="value">
+                                    {transaction.msisdn}
+                                </div>
                             </div>
 
                             {transaction.billRefNumber && (
                                 <div className="section">
-                                    <div className="label">Bill Reference Number</div>
+                                    <div className="label">
+                                        Bill Reference Number
+                                    </div>
                                     <div className="value">
                                         {transaction.billRefNumber}
                                     </div>
@@ -294,17 +327,25 @@ export function TransactionModal({
                             )}
 
                             <div className="section customer-info">
-                                <div className="label">Customer Information</div>
+                                <div className="label">
+                                    Customer Information
+                                </div>
                                 <div className="value">
-                                    {[transaction.firstName, transaction.middleName, transaction.lastName]
+                                    {[
+                                        transaction.firstName,
+                                        transaction.middleName,
+                                        transaction.lastName
+                                    ]
                                         .filter(Boolean)
-                                        .join(' ') || 'N/A'}
+                                        .join(" ") || "N/A"}
                                 </div>
                             </div>
 
                             {transaction.thirdPartyTransId && (
                                 <div className="section highlight">
-                                    <div className="label">M-Pesa Reference Number</div>
+                                    <div className="label">
+                                        M-Pesa Reference Number
+                                    </div>
                                     <div className="value">
                                         {transaction.thirdPartyTransId}
                                     </div>
@@ -313,13 +354,16 @@ export function TransactionModal({
 
                             <div className="footer-info">
                                 <div className="footer-text">
-                                    <strong>Transaction ID:</strong> {transaction.transId}
+                                    <strong>Transaction ID:</strong>{" "}
+                                    {transaction.transId}
                                 </div>
                                 <div className="footer-text">
-                                    Thank you for your payment. Please keep this receipt for your records.
+                                    Thank you for your payment. Please keep this
+                                    receipt for your records.
                                 </div>
                                 <div className="footer-text">
-                                    For support, please contact our customer service team.
+                                    For support, please contact our customer
+                                    service team.
                                 </div>
                             </div>
                         </div>
@@ -491,9 +535,15 @@ export function TransactionModal({
                             <Printer className="h-4 w-4" />
                             Print
                         </Button>
-                        <Button variant="outline" size="sm" className="gap-1">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1"
+                            onClick={handleResendSms}
+                            disabled={isSubmitting}
+                        >
                             <MailCheck className="h-4 w-4" />
-                            Re-Send SMS
+                            {isSubmitting ? "Sending..." : "Re-Send SMS"}
                         </Button>
                     </div>
                     <Button onClick={onClose}>Close</Button>

@@ -22,7 +22,7 @@ export async function updateUser(axiosInstance: any, data: any) {
         }
     );
 
-    return response
+    return response;
 }
 export async function updatePassword(axiosInstance: any, data: any) {
     const response = await axiosInstance.patch(
@@ -33,5 +33,17 @@ export async function updatePassword(axiosInstance: any, data: any) {
         }
     );
 
-    return response
+    return response;
+}
+
+export async function resendSms(axiosInstance: any, data: any) {
+    const response = await axiosInstance.patch(
+        `${import.meta.env.VITE_PUBLIC_STAGING_API}/users/resend/token/sms`,
+        data,
+        {
+            headers: { Authorization: getAuthHeaders() }
+        }
+    );
+
+    return response;
 }
