@@ -12,7 +12,7 @@ import { MailCheck, Printer } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast, Toaster } from "sonner";
 import { resendSms } from "@/../api/users.api";
-import useAxiosWithAuth from "utils/axiosInterceptor";
+import useAxiosWithAuth from "@/../utils/axiosInterceptor";
 
 interface TransactionModalProps {
     isOpen: boolean;
