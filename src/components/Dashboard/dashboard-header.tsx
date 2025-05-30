@@ -1,11 +1,17 @@
-import { Bell, Menu, Search } from "lucide-react";
+import { Menu, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { DashboardNav } from "@/components/Dashboard/dashboard-nav";
 import { UserNav } from "@/components/User/user-nav";
 
-export function DashboardHeader({ searchQuery, setSearchQuery }: { searchQuery: string; setSearchQuery: (value: string) => void }) {
+export function DashboardHeader({
+    searchQuery,
+    setSearchQuery
+}: {
+    searchQuery?: string;
+    setSearchQuery?: (value: string) => void;
+}) {
     return (
         <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-6">
             <Sheet>
@@ -30,18 +36,22 @@ export function DashboardHeader({ searchQuery, setSearchQuery }: { searchQuery: 
                         placeholder="Search transactions..."
                         className="w-full rounded-lg bg-background pl-8 md:w-[300px]"
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={(e) => {
+                            if (searchQuery && setSearchQuery) {
+                                setSearchQuery(e.target.value);
+                            }
+                        }}
                     />
                 </div>
             </div>
             <div className="flex items-center gap-2 ml-auto">
-                <Button variant="outline" size="icon" className="relative">
+                {/* <Button variant="outline" size="icon" className="relative">
                     <Bell className="h-5 w-5" />
                     <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
                         3
                     </span>
                     <span className="sr-only">Notifications</span>
-                </Button>
+                </Button> */}
                 <UserNav />
             </div>
         </header>

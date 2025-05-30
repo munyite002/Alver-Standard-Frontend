@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { DashboardHeader } from "@/components/Dashboard/dashboard-header";
@@ -6,7 +7,6 @@ import {
     Card,
     CardContent,
     CardDescription,
-    CardFooter,
     CardHeader,
     CardTitle
 } from "@/components/ui/card";
@@ -14,23 +14,80 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Save } from "lucide-react";
+import { updatePassword, updateUser } from "@/../api/users.api";
+import { toast, Toaster } from "sonner";
+// import { Switch } from "@/components/ui/switch";
+import { ArrowLeft } from "lucide-react";
+import useAxiosWithAuth from "@/../utils/axiosInterceptor";
+//@ts-ignore
+import { useGlobalContext } from "@/../context/GlobalContext.jsx";
 
 export function SettingsPage() {
+    const { user } = useGlobalContext();
+    const axiosInstance = useAxiosWithAuth(
+        import.meta.env.VITE_PUBLIC_STAGING_API
+    );
     const navigate = useNavigate();
     const [isSaving, setIsSaving] = useState(false);
 
-    const handleSave = () => {
-        setIsSaving(true);
-        // Simulate API call
-        setTimeout(() => {
+    const [passwordData, setPasswordData] = useState({
+        oldPassword: "",
+        newPassword: "",
+        confirmNewPassword: ""
+    });
+
+    const [userData, setUserData] = useState({
+        name: user?.name || "",
+        email: user?.email || ""
+    });
+
+    const handleSave = async () => {
+        try {
+            setIsSaving(true);
+            const data = {
+                name: userData.name,
+                email: userData?.email
+            };
+            await updateUser(axiosInstance, data);
+            toast.success("User Updated Successfully");
+        } catch (err) {
+            console.log(`Error updating User: ${err}`);
+            toast.error(
+                //@ts-ignore
+                `Error Updating User: ${err?.response?.data?.error}`
+            );
+        } finally {
             setIsSaving(false);
-        }, 1000);
+        }
+    };
+
+    const handleUpdateUserPassword = async () => {
+        if (passwordData.newPassword !== passwordData.confirmNewPassword) {
+            toast.error("Password doesn't match");
+            return;
+        }
+        try {
+            setIsSaving(true);
+            const data = {
+                newPassword: passwordData.newPassword,
+                oldPassword: passwordData.oldPassword
+            };
+            await updatePassword(axiosInstance, data);
+            toast.success("Password Updated Successfully");
+        } catch (err) {
+            console.log(`Error updating password: ${err}`);
+            toast.error(
+                //@ts-ignore
+                `Error Updating User Password: ${err?.response?.data?.error}`
+            );
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     return (
         <div className="flex min-h-screen flex-col">
+            <Toaster position="top-right" richColors />
             <DashboardHeader />
             <div className="flex-1 space-y-4 p-6 pt-4 md:p-8 md:pt-6">
                 <div className="flex items-center justify-between">
@@ -46,16 +103,13 @@ export function SettingsPage() {
                             Settings
                         </h2>
                     </div>
-                    <Button onClick={handleSave} disabled={isSaving}>
-                        {isSaving ? "Saving..." : "Save changes"}
-                    </Button>
                 </div>
                 <Tabs defaultValue="account" className="space-y-4">
-                    <TabsList>
+                    <TabsList className="w-full">
                         <TabsTrigger value="account">Account</TabsTrigger>
-                        <TabsTrigger value="notifications">
-                            Notifications
-                        </TabsTrigger>
+                        {/* <TabsTrigger value="configurations">
+                            Configurations
+                        </TabsTrigger> */}
                         <TabsTrigger value="security">Security</TabsTrigger>
                     </TabsList>
                     <TabsContent value="account" className="space-y-4">
@@ -71,22 +125,18 @@ export function SettingsPage() {
                                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                     <div className="space-y-2">
                                         <Label htmlFor="first-name">
-                                            First name
+                                            UserName
                                         </Label>
                                         <Input
-                                            id="first-name"
-                                            placeholder="Enter your first name"
-                                            defaultValue="Admin"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="last-name">
-                                            Last name
-                                        </Label>
-                                        <Input
-                                            id="last-name"
-                                            placeholder="Enter your last name"
-                                            defaultValue="User"
+                                            id="userName"
+                                            placeholder="Enter your Name"
+                                            value={userData?.name}
+                                            onChange={(e) =>
+                                                setUserData((prev) => ({
+                                                    ...prev,
+                                                    name: e.target.value
+                                                }))
+                                            }
                                         />
                                     </div>
                                 </div>
@@ -96,20 +146,25 @@ export function SettingsPage() {
                                         id="email"
                                         type="email"
                                         placeholder="Enter your email"
-                                        defaultValue="admin@example.com"
+                                        value={userData?.email}
+                                        onChange={(e) =>
+                                            setUserData((prev) => ({
+                                                ...prev,
+                                                email: e.target.value
+                                            }))
+                                        }
                                     />
                                 </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="bio">Bio</Label>
-                                    <Input
-                                        id="bio"
-                                        placeholder="Enter your bio"
-                                    />
-                                </div>
+                                <Button
+                                    onClick={handleSave}
+                                    disabled={isSaving}
+                                >
+                                    {isSaving ? "Saving..." : "Save changes"}
+                                </Button>
                             </CardContent>
                         </Card>
 
-                        <Card>
+                        {/* <Card>
                             <CardHeader>
                                 <CardTitle>Company Information</CardTitle>
                                 <CardDescription>
@@ -155,66 +210,65 @@ export function SettingsPage() {
                                     />
                                 </div>
                             </CardContent>
-                        </Card>
+                        </Card> */}
                     </TabsContent>
-                    <TabsContent value="notifications" className="space-y-4">
+                    <TabsContent value="configurations" className="space-y-4">
                         <Card>
                             <CardHeader>
-                                <CardTitle>Notification Preferences</CardTitle>
+                                <CardTitle>
+                                    Price Tariff Configuration
+                                </CardTitle>
                                 <CardDescription>
-                                    Configure how you receive notifications.
+                                    Manage and update your current pricing
+                                    structure.
                                 </CardDescription>
                             </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="space-y-4">
+                            <CardContent className="space-y-6">
+                                {/* Current Tariff Display */}
+                                <div className="space-y-2">
                                     <h3 className="text-sm font-medium">
-                                        Email Notifications
+                                        Current Tariff
                                     </h3>
                                     <Separator />
-                                    <div className="flex items-center justify-between">
-                                        <div className="space-y-0.5">
-                                            <Label htmlFor="new-payments">
-                                                New Payments
+                                    <div className="grid grid-cols-3 gap-4 pt-2">
+                                        <div>
+                                            <Label className="text-muted-foreground">
+                                                Rate
                                             </Label>
-                                            <p className="text-sm text-muted-foreground">
-                                                Receive notifications for new
-                                                payments.
+                                            <p className="text-lg font-semibold">
+                                                Ksh 31/kWh
                                             </p>
                                         </div>
-                                        <Switch
-                                            id="new-payments"
-                                            defaultChecked
-                                        />
                                     </div>
+                                </div>
+
+                                {/* Tariff Modification Form */}
+                                <div className="space-y-4">
+                                    <h3 className="text-sm font-medium">
+                                        Update Tariff
+                                    </h3>
                                     <Separator />
-                                    <div className="flex items-center justify-between">
-                                        <div className="space-y-0.5">
-                                            <Label htmlFor="payment-failed">
-                                                Failed Payments
-                                            </Label>
-                                            <p className="text-sm text-muted-foreground">
-                                                Receive notifications for failed
-                                                payments.
-                                            </p>
+                                    <form className="space-y-4">
+                                        <div className="grid grid-cols-3 gap-4">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="base-rate">
+                                                    Base Rate ($/kWh)
+                                                </Label>
+                                                <Input
+                                                    id="base-rate"
+                                                    type="number"
+                                                    step="1"
+                                                    min="30"
+                                                    defaultValue="30"
+                                                />
+                                            </div>
                                         </div>
-                                        <Switch
-                                            id="payment-failed"
-                                            defaultChecked
-                                        />
-                                    </div>
-                                    <Separator />
-                                    <div className="flex items-center justify-between">
-                                        <div className="space-y-0.5">
-                                            <Label htmlFor="account-updates">
-                                                Account Updates
-                                            </Label>
-                                            <p className="text-sm text-muted-foreground">
-                                                Receive notifications for
-                                                account updates.
-                                            </p>
+                                        <div className="flex justify-end pt-4">
+                                            <Button type="submit">
+                                                Update Tariff
+                                            </Button>
                                         </div>
-                                        <Switch id="account-updates" />
-                                    </div>
+                                    </form>
                                 </div>
                             </CardContent>
                         </Card>
@@ -236,6 +290,13 @@ export function SettingsPage() {
                                     <Input
                                         id="current-password"
                                         type="password"
+                                        value={passwordData.oldPassword}
+                                        onChange={(e) =>
+                                            setPasswordData((prev) => ({
+                                                ...prev,
+                                                oldPassword: e.target.value
+                                            }))
+                                        }
                                     />
                                 </div>
                                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -246,6 +307,13 @@ export function SettingsPage() {
                                         <Input
                                             id="new-password"
                                             type="password"
+                                            value={passwordData.newPassword}
+                                            onChange={(e) =>
+                                                setPasswordData((prev) => ({
+                                                    ...prev,
+                                                    newPassword: e.target.value
+                                                }))
+                                            }
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -255,18 +323,29 @@ export function SettingsPage() {
                                         <Input
                                             id="confirm-password"
                                             type="password"
+                                            value={
+                                                passwordData.confirmNewPassword
+                                            }
+                                            onChange={(e) =>
+                                                setPasswordData((prev) => ({
+                                                    ...prev,
+                                                    confirmNewPassword:
+                                                        e.target.value
+                                                }))
+                                            }
                                         />
                                     </div>
                                 </div>
                             </CardContent>
-                            <CardFooter>
-                                <Button variant="outline" className="w-full">
-                                    <Save className="mr-2 h-4 w-4" />
-                                    Change password
-                                </Button>
-                            </CardFooter>
+                            <Button
+                                onClick={handleUpdateUserPassword}
+                                disabled={isSaving}
+                                className="mx-4 max-w-[150px]"
+                            >
+                                {isSaving ? "Saving..." : "Save changes"}
+                            </Button>
                         </Card>
-                        <Card>
+                        {/* <Card>
                             <CardHeader>
                                 <CardTitle>Two-Factor Authentication</CardTitle>
                                 <CardDescription>
@@ -286,7 +365,7 @@ export function SettingsPage() {
                                     <Switch id="2fa" />
                                 </div>
                             </CardContent>
-                        </Card>
+                        </Card> */}
                     </TabsContent>
                 </Tabs>
             </div>
