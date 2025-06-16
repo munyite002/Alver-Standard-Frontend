@@ -1,40 +1,45 @@
-import { BarChart3, CreditCard, Home, Settings, Users } from "lucide-react"
-import { Link } from "react-router-dom"
+import { CreditCard, Settings, Gauge } from "lucide-react"
+import { Link, useLocation } from "react-router-dom"
+import { cn } from "@/lib/utils"
 
 export function DashboardNav() {
+  const location = useLocation()
+  const pathname = location.pathname
+
   return (
     <nav className="grid items-start px-2 text-sm font-medium">
       <Link
-        to="#"
-        className="flex items-center gap-3 rounded-lg px-3 py-2 text-primary transition-all hover:text-primary"
-      >
-        <Home className="h-4 w-4" />
-        Dashboard
-      </Link>
-      <Link
-        to="#"
-        className="flex items-center gap-3 rounded-lg bg-accent px-3 py-2 text-accent-foreground transition-all"
+        to="/"
+        className={cn(
+          "flex items-center gap-3 rounded-lg px-3 py-2 transition-all",
+          pathname === "/" || pathname === "/dashboard"
+            ? "bg-accent text-accent-foreground"
+            : "text-muted-foreground hover:text-primary"
+        )}
       >
         <CreditCard className="h-4 w-4" />
         Transactions
       </Link>
       <Link
-        to="#"
-        className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+        to="/meters"
+        className={cn(
+          "flex items-center gap-3 rounded-lg px-3 py-2 transition-all",
+          pathname === "/meters"
+            ? "bg-accent text-accent-foreground"
+            : "text-muted-foreground hover:text-primary"
+        )}
       >
-        <Users className="h-4 w-4" />
-        Customers
+        <Gauge className="h-4 w-4" />
+        Meters
       </Link>
       <Link
-        to="#"
-        className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-      >
-        <BarChart3 className="h-4 w-4" />
-        Analytics
-      </Link>
-      <Link
-        to="#"
-        className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
+        to="/settings"
+        className={cn(
+          "flex items-center gap-3 rounded-lg px-3 py-2 transition-all",
+          pathname === "/settings"
+            ? "bg-accent text-accent-foreground"
+            : "text-muted-foreground hover:text-primary"
+        )}
       >
         <Settings className="h-4 w-4" />
         Settings

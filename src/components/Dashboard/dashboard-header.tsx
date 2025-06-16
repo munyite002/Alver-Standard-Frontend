@@ -27,9 +27,7 @@ export function DashboardHeader({
                     <DashboardNav />
                 </SheetContent>
             </Sheet>
-            <div className="hidden md:block">
-                <h1 className="text-xl font-semibold">Payments Dashboard</h1>
-            </div>
+            
             <div className="flex-1 md:grow-0 md:w-[300px]">
                 <div className="relative">
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />

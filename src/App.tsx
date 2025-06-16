@@ -7,6 +7,7 @@ import { LoginPage } from "./pages/login.js";
 import RootLayout from "./pages/layout.js";
 import { DashboardPage } from "@/pages/Dashboard";
 import { SettingsPage } from "@/pages/Settings.js";
+import Meters from "@/pages/Meters";
 // import Configurations from "./pages/Configurations.js";
 import Unauthorized from "@/pages/Unauthorized.js";
 import NotFound from "@/pages/NotFound.js";
@@ -39,7 +40,7 @@ function App() {
                                 path="/dashboard"
                                 element={<DashboardPage />}
                             />
-
+                            <Route path="/meters" element={<Meters />} />
                             <Route path="/settings" element={<SettingsPage />} />
                             {/* <Route
                                 path="/configurations"
