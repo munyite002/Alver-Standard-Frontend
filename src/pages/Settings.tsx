@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { updatePassword, updateUser } from "@/../api/users.api";
-import { getTariffs, createTariff, updateTariff, type Tariff } from "@/../api/tariffs.api";
+import { getTariffs, type Tariff } from "@/../api/tariffs.api";
 import { toast, Toaster } from "sonner";
 import { ArrowLeft } from "lucide-react";
 import useAxiosWithAuth from "@/../utils/axiosInterceptor";
@@ -47,6 +47,7 @@ export function SettingsPage() {
         email: user?.email || ""
     });
 
+    //@ts-ignore
     const [newTariffData, setNewTariffData] = useState<{
         name: string;
         provider: "KPLC" | "ALVER_POWER";
