@@ -1,5 +1,7 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { DashboardHeader } from "@/components/Dashboard/dashboard-header";
 import { Button } from "@/components/ui/button";
@@ -13,14 +15,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
 import { updatePassword, updateUser } from "@/../api/users.api";
+import { getTariffs, createTariff, updateTariff, type Tariff } from "@/../api/tariffs.api";
 import { toast, Toaster } from "sonner";
-// import { Switch } from "@/components/ui/switch";
 import { ArrowLeft } from "lucide-react";
 import useAxiosWithAuth from "@/../utils/axiosInterceptor";
 //@ts-ignore
 import { useGlobalContext } from "@/../context/GlobalContext.jsx";
+import { TariffConfiguration } from "@/components/Settings/tariff-configuration";
 
 export function SettingsPage() {
     const { user } = useGlobalContext();
@@ -29,6 +31,10 @@ export function SettingsPage() {
     );
     const navigate = useNavigate();
     const [isSaving, setIsSaving] = useState(false);
+    //@ts-ignore
+    const [tariffs, setTariffs] = useState<Tariff[]>([]);
+    //@ts-ignore
+    const [isLoadingTariffs, setIsLoadingTariffs] = useState(true);
 
     const [passwordData, setPasswordData] = useState({
         oldPassword: "",
@@ -40,6 +46,32 @@ export function SettingsPage() {
         name: user?.name || "",
         email: user?.email || ""
     });
+
+    const [newTariffData, setNewTariffData] = useState<{
+        name: string;
+        provider: "KPLC" | "ALVER_POWER";
+        ratePerUnit: number;
+    }>({
+        name: "",
+        provider: "KPLC",
+        ratePerUnit: 0
+    });
+
+    useEffect(() => {
+        fetchTariffs();
+    }, []);
+
+    const fetchTariffs = async () => {
+        try {
+            setIsLoadingTariffs(true);
+            const response = await getTariffs(axiosInstance);
+            setTariffs(response.data);
+        } catch (err) {
+            console.error("Error fetching tariffs:", err);
+        } finally {
+            setIsLoadingTariffs(false);
+        }
+    };
 
     const handleSave = async () => {
         try {
@@ -85,6 +117,8 @@ export function SettingsPage() {
         }
     };
 
+
+
     return (
         <div className="flex min-h-screen flex-col">
             <Toaster position="top-right" richColors />
@@ -107,9 +141,9 @@ export function SettingsPage() {
                 <Tabs defaultValue="account" className="space-y-4">
                     <TabsList className="w-full">
                         <TabsTrigger value="account">Account</TabsTrigger>
-                        {/* <TabsTrigger value="configurations">
+                        <TabsTrigger value="configurations">
                             Configurations
-                        </TabsTrigger> */}
+                        </TabsTrigger>
                         <TabsTrigger value="security">Security</TabsTrigger>
                     </TabsList>
                     <TabsContent value="account" className="space-y-4">
@@ -163,115 +197,9 @@ export function SettingsPage() {
                                 </Button>
                             </CardContent>
                         </Card>
-
-                        {/* <Card>
-                            <CardHeader>
-                                <CardTitle>Company Information</CardTitle>
-                                <CardDescription>
-                                    Update your company details and business
-                                    information.
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="company-name">
-                                        Company name
-                                    </Label>
-                                    <Input
-                                        id="company-name"
-                                        placeholder="Enter your company name"
-                                        defaultValue="Acme Inc."
-                                    />
-                                </div>
-                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="business-id">
-                                            Business ID
-                                        </Label>
-                                        <Input
-                                            id="business-id"
-                                            placeholder="Enter your business ID"
-                                            defaultValue="123456"
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="tax-id">Tax ID</Label>
-                                        <Input
-                                            id="tax-id"
-                                            placeholder="Enter your tax ID"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="address">Address</Label>
-                                    <Input
-                                        id="address"
-                                        placeholder="Enter your address"
-                                    />
-                                </div>
-                            </CardContent>
-                        </Card> */}
                     </TabsContent>
                     <TabsContent value="configurations" className="space-y-4">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>
-                                    Price Tariff Configuration
-                                </CardTitle>
-                                <CardDescription>
-                                    Manage and update your current pricing
-                                    structure.
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-                                {/* Current Tariff Display */}
-                                <div className="space-y-2">
-                                    <h3 className="text-sm font-medium">
-                                        Current Tariff
-                                    </h3>
-                                    <Separator />
-                                    <div className="grid grid-cols-3 gap-4 pt-2">
-                                        <div>
-                                            <Label className="text-muted-foreground">
-                                                Rate
-                                            </Label>
-                                            <p className="text-lg font-semibold">
-                                                Ksh 31/kWh
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Tariff Modification Form */}
-                                <div className="space-y-4">
-                                    <h3 className="text-sm font-medium">
-                                        Update Tariff
-                                    </h3>
-                                    <Separator />
-                                    <form className="space-y-4">
-                                        <div className="grid grid-cols-3 gap-4">
-                                            <div className="space-y-2">
-                                                <Label htmlFor="base-rate">
-                                                    Base Rate ($/kWh)
-                                                </Label>
-                                                <Input
-                                                    id="base-rate"
-                                                    type="number"
-                                                    step="1"
-                                                    min="30"
-                                                    defaultValue="30"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="flex justify-end pt-4">
-                                            <Button type="submit">
-                                                Update Tariff
-                                            </Button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </CardContent>
-                        </Card>
+                        <TariffConfiguration />
                     </TabsContent>
                     <TabsContent value="security" className="space-y-4">
                         <Card>
@@ -345,27 +273,6 @@ export function SettingsPage() {
                                 {isSaving ? "Saving..." : "Save changes"}
                             </Button>
                         </Card>
-                        {/* <Card>
-                            <CardHeader>
-                                <CardTitle>Two-Factor Authentication</CardTitle>
-                                <CardDescription>
-                                    Add an extra layer of security to your
-                                    account.
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <div className="space-y-0.5">
-                                        <Label htmlFor="2fa">Enable 2FA</Label>
-                                        <p className="text-sm text-muted-foreground">
-                                            Protect your account with two-factor
-                                            authentication.
-                                        </p>
-                                    </div>
-                                    <Switch id="2fa" />
-                                </div>
-                            </CardContent>
-                        </Card> */}
                     </TabsContent>
                 </Tabs>
             </div>
