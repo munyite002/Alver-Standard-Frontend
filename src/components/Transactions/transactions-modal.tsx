@@ -31,8 +31,8 @@ export function TransactionModal({
 
     if (!transaction) return null;
 
-    const formatToken = (token: string | null | undefined) => {
-        if (!token) return "N/A";
+    const formatToken = (token: string | null | undefined, transaction: Payment | null) => {
+        if (!token) return transaction?.transactionType;
         const normalizedToken = token
             .replace(/\D/g, "")
             .padEnd(20, "0")
@@ -45,7 +45,7 @@ export function TransactionModal({
             setIsSubmitting(true);
             const data = {
                 phone: transaction?.msisdn,
-                token: transaction?.token
+                token: transaction?.token || transaction?.transactionType
             };
             await resendSms(axiosInstance, data);
             toast.success("Successfully Resend Token SMS to user");
@@ -300,7 +300,7 @@ export function TransactionModal({
                                     Electricity Token
                                 </div>
                                 <div className="token-value">
-                                    {formatToken(transaction.token)}
+                                    {formatToken(transaction.token, transaction)}
                                 </div>
                             </div>
 
@@ -422,16 +422,16 @@ export function TransactionModal({
                             </div>
                             <div>
                                 <p className="text-sm text-muted-foreground">
-                                    Phone Number
+                                    MSISDN
                                 </p>
                                 <p className="font-medium">
-                                    {transaction.msisdn}
+                                    {transaction.msisdn.slice(0,20)}...
                                 </p>
                             </div>
                             {transaction.billRefNumber && (
                                 <div>
                                     <p className="text-sm text-muted-foreground">
-                                        Bill Reference
+                                        Meter Number
                                     </p>
                                     <p className="font-medium">
                                         {transaction.billRefNumber}
@@ -468,7 +468,7 @@ export function TransactionModal({
                         <div>
                             <p className="text-sm font-medium mb-2">Token</p>
                             <div className="bg-gray-50 p-3 rounded-md font-mono text-lg tracking-wider">
-                                {formatToken(transaction.token)}
+                                {formatToken(transaction.token, transaction)}
                             </div>
                         </div>
 

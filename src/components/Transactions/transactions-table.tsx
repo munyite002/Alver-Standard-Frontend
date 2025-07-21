@@ -23,7 +23,6 @@ import {
     TableRow
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Payment } from "@/lib/types";
 
@@ -144,8 +143,8 @@ export function TransactionTable({
                                 <TableHead>Transaction ID</TableHead>
                                 <TableHead>Date</TableHead>
                                 <TableHead>Amount</TableHead>
-                                <TableHead>Phone</TableHead>
-                                <TableHead>Status</TableHead>
+                                <TableHead>User</TableHead>
+                                <TableHead>Meter Number</TableHead>
                                 <TableHead className="w-[80px]">
                                     Actions
                                 </TableHead>
@@ -160,16 +159,14 @@ export function TransactionTable({
                                     <TableCell>
                                         {new Date(
                                             transaction.createdAt
-                                        ).toLocaleDateString()}
+                                        ).toLocaleString()}
                                     </TableCell>
                                     <TableCell>
                                         Ksh {transaction.transAmount.toFixed(2)}
                                     </TableCell>
-                                    <TableCell>{transaction.msisdn}</TableCell>
+                                    <TableCell>{transaction.firstName}</TableCell>
                                     <TableCell>
-                                        <Badge className="bg-emerald-100 text-emerald-800">
-                                            Payment
-                                        </Badge>
+                                            {transaction.billRefNumber}
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex items-center justify-end gap-2">
