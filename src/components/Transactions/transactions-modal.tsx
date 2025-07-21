@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
     Dialog,
     DialogContent,
@@ -8,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import type { Payment } from "@/lib/types";
 import { Separator } from "@/components/ui/separator";
-import { MailCheck, Printer } from "lucide-react";
+import { MailCheck, Printer, Copy, Check } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast, Toaster } from "sonner";
 import { resendSms } from "@/../api/users.api";
@@ -28,6 +29,7 @@ export function TransactionModal({
     const axiosInstance = useAxiosWithAuth(import.meta.env.VITE_STAGING_API);
     const printRef = useRef<HTMLDivElement>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [copiedField, setCopiedField] = useState(null);
 
     if (!transaction) return null;
 
@@ -39,6 +41,27 @@ export function TransactionModal({
             .slice(0, 20);
         return normalizedToken.match(/.{1,4}/g)?.join(" ") || normalizedToken;
     };
+
+    const copyToClipboard = (text: any, fieldName: any) => {
+        navigator.clipboard.writeText(text).then(() => {
+            setCopiedField(fieldName);
+            setTimeout(() => setCopiedField(null), 2000);
+        });
+    };
+
+    const CopyButton = ({ text, fieldName }: any) => (
+        <button
+            onClick={() => copyToClipboard(text, fieldName)}
+            className="ml-2 p-1 rounded hover:bg-gray-100 transition-colors"
+            title="Copy"
+        >
+            {copiedField === fieldName ? (
+                <Check className="h-3 w-3 text-green-500" />
+            ) : (
+                <Copy className="h-3 w-3 text-gray-400" />
+            )}
+        </button>
+    );
 
     const handleResendSms = async () => {
         try {
@@ -53,9 +76,9 @@ export function TransactionModal({
             console.log("Error: ", err);
             toast.error("An Error occured please try again later");
         }
-	finally {
-		setIsSubmitting(false);
-	}
+        finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handlePrint = () => {
@@ -364,94 +387,73 @@ export function TransactionModal({
                     </div>
                 </div>
                 {/* MODAL CONTENT */}
-                <div>
-                    <div className="grid gap-6 py-4">
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    {/* Simple header with blue accent */}
+                    <div className="border-l-4 border-l-blue-500 bg-blue-50/30 px-6 py-4">
                         <div className="flex justify-between items-center">
                             <div>
-                                <p className="text-sm text-muted-foreground">
-                                    Transaction ID
-                                </p>
-                                <p className="font-medium">
+                                <p className="text-sm text-gray-600">Transaction ID</p>
+                                <p className="font-semibold text-gray-900 flex items-center">
                                     {transaction.transId}
+                                    <CopyButton text={transaction.transId} fieldName="Transaction ID" />
                                 </p>
                             </div>
                             <div className="text-right">
-                                <p className="text-sm text-muted-foreground">
-                                    Date & Time
-                                </p>
-                                <p className="font-medium">
-                                    {new Date(
-                                        transaction.createdAt
-                                    ).toLocaleString()}
+                                <p className="text-sm text-gray-600">Date & Time</p>
+                                <p className="font-semibold text-gray-900">
+                                    {new Date(transaction.createdAt).toLocaleString()}
                                 </p>
                             </div>
                         </div>
+                    </div>
 
-                        <Separator />
-
-                        <div className="grid grid-cols-2 gap-4">
+                    <div className="p-6">
+                        {/* Transaction basics */}
+                        <div className="grid grid-cols-2 gap-6 mb-6">
                             <div>
-                                <p className="text-sm text-muted-foreground">
-                                    Transaction Type
-                                </p>
-                                <p className="font-medium">
-                                    {transaction.transactionType}
-                                </p>
+                                <p className="text-sm text-gray-600 mb-1">Transaction Type</p>
+                                <p className="font-semibold text-gray-900">{transaction.transactionType}</p>
                             </div>
                             <div>
-                                <p className="text-sm text-muted-foreground">
-                                    Amount
-                                </p>
-                                <p className="font-medium text-lg">
+                                <p className="text-sm text-gray-600 mb-1">Amount</p>
+                                <p className="font-semibold text-xl text-blue-600">
                                     Ksh {transaction.transAmount.toFixed(2)}
                                 </p>
                             </div>
                             <div>
-                                <p className="text-sm text-muted-foreground">
-                                    Business Code
-                                </p>
-                                <p className="font-medium">
+                                <p className="text-sm text-gray-600 mb-1">Business Code</p>
+                                <p className="font-semibold text-gray-900 flex items-center">
                                     {transaction.businessShortCode}
+                                    <CopyButton text={transaction.businessShortCode} fieldName="Business Code" />
                                 </p>
                             </div>
                             <div>
-                                <p className="text-sm text-muted-foreground">
-                                    MSISDN
-                                </p>
-                                <p className="font-medium">
-                                    {transaction.msisdn.slice(0,20)}...
+                                <p className="text-sm text-gray-600 mb-1">Phone Number</p>
+                                <p className="font-semibold text-gray-900 flex items-center">
+                                    {transaction.msisdn}
+                                    <CopyButton text={transaction.msisdn} fieldName="Phone" />
                                 </p>
                             </div>
                             {transaction.billRefNumber && (
                                 <div>
-                                    <p className="text-sm text-muted-foreground">
-                                        Meter Number
-                                    </p>
-                                    <p className="font-medium">
+                                    <p className="text-sm text-gray-600 mb-1">Meter Number</p>
+                                    <p className="font-semibold text-gray-900 flex items-center">
                                         {transaction.billRefNumber}
+                                        <CopyButton text={transaction.billRefNumber} fieldName="Meter" />
                                     </p>
                                 </div>
                             )}
                             {transaction.invoiceNumber && (
                                 <div>
-                                    <p className="text-sm text-muted-foreground">
-                                        Invoice Number
-                                    </p>
-                                    <p className="font-medium">
-                                        {transaction.invoiceNumber}
-                                    </p>
+                                    <p className="text-sm text-gray-600 mb-1">Invoice Number</p>
+                                    <p className="font-semibold text-gray-900">{transaction.invoiceNumber}</p>
                                 </div>
                             )}
                             {transaction.orgAccountBalance !== null && (
                                 <div>
-                                    <p className="text-sm text-muted-foreground">
-                                        Account Balance
-                                    </p>
-                                    <p className="font-medium">
-                                        Ksh{" "}
-                                        {(
-                                            transaction.orgAccountBalance ?? 0
-                                        ).toFixed(2)}
+                                    <p className="text-sm text-gray-600 mb-1">Account Balance</p>
+                                    <p className="font-semibold text-gray-900">
+                                        Ksh {(transaction.orgAccountBalance ?? 0).toFixed(2)}
                                     </p>
                                 </div>
                             )}
@@ -459,44 +461,39 @@ export function TransactionModal({
 
                         <Separator />
 
-                        <div>
-                            <p className="text-sm font-medium mb-2">Token</p>
-                            <div className="bg-gray-50 p-3 rounded-md font-mono text-lg tracking-wider">
-                                {formatToken(transaction.token, transaction)}
+                        {/* Token section */}
+                        {transaction.token && (
+                            <div className="my-6">
+                                <p className="text-sm text-gray-600 mb-2">Token</p>
+                                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                                    <div className="flex items-center justify-between">
+                                        <code className="font-mono text-lg text-gray-900">
+                                            {formatToken(transaction.token, transaction)}
+                                        </code>
+                                        <CopyButton text={transaction.token} fieldName="Token" />
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         <Separator />
 
-                        <div>
-                            <p className="text-sm font-medium mb-2">
-                                Customer Information
-                            </p>
-                            <div className="grid grid-cols-2 gap-4">
+                        {/* Customer info */}
+                        <div className="my-6">
+                            <h3 className="text-sm font-semibold text-gray-900 mb-4">Customer Information</h3>
+                            <div className="grid grid-cols-2 gap-6">
                                 <div>
-                                    <p className="text-sm text-muted-foreground">
-                                        First Name
-                                    </p>
-                                    <p className="font-medium">
-                                        {transaction.firstName || "N/A"}
-                                    </p>
+                                    <p className="text-sm text-gray-600 mb-1">First Name</p>
+                                    <p className="font-semibold text-gray-900">{transaction.firstName || "N/A"}</p>
                                 </div>
                                 <div>
-                                    <p className="text-sm text-muted-foreground">
-                                        Last Name
-                                    </p>
-                                    <p className="font-medium">
-                                        {transaction.lastName || "N/A"}
-                                    </p>
+                                    <p className="text-sm text-gray-600 mb-1">Last Name</p>
+                                    <p className="font-semibold text-gray-900">{transaction.lastName || "N/A"}</p>
                                 </div>
                                 {transaction.middleName && (
                                     <div>
-                                        <p className="text-sm text-muted-foreground">
-                                            Middle Name
-                                        </p>
-                                        <p className="font-medium">
-                                            {transaction.middleName}
-                                        </p>
+                                        <p className="text-sm text-gray-600 mb-1">Middle Name</p>
+                                        <p className="font-semibold text-gray-900">{transaction.middleName}</p>
                                     </div>
                                 )}
                             </div>
@@ -505,12 +502,11 @@ export function TransactionModal({
                         {transaction.thirdPartyTransId && (
                             <>
                                 <Separator />
-                                <div>
-                                    <p className="text-sm text-muted-foreground">
-                                        Mpesa Reference No
-                                    </p>
-                                    <p className="font-medium">
+                                <div className="mt-6">
+                                    <p className="text-sm text-gray-600 mb-1">M-Pesa Reference</p>
+                                    <p className="font-semibold text-gray-900 flex items-center">
                                         {transaction.thirdPartyTransId}
+                                        <CopyButton text={transaction.thirdPartyTransId} fieldName="M-Pesa Ref" />
                                     </p>
                                 </div>
                             </>
