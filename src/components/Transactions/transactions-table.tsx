@@ -7,7 +7,11 @@ import {
     ChevronsRight,
     Eye,
     ArrowDownUp,
-    LoaderIcon
+    DollarSign,
+    Calendar,
+    Hash,
+    User,
+    Search
 } from "lucide-react";
 import {
     DropdownMenu,
@@ -66,6 +70,21 @@ export function TransactionTable({
     });
 
     const currentTransactions = sortedTransactions.slice(startIndex, endIndex);
+
+    const formatDate = (dateString: any) => {
+        const date = new Date(dateString);
+        return {
+            date: date.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            }),
+            time: date.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit'
+            })
+        };
+    };
 
     return (
         <Card>
@@ -140,69 +159,122 @@ export function TransactionTable({
             </CardHeader>
             <CardContent>
                 <div className="rounded-md border">
-                    <Table>
+                    <Table className="w-full">
                         <TableHeader>
-                            <TableRow>
-                                <TableHead>Transaction ID</TableHead>
-                                <TableHead>Date</TableHead>
-                                <TableHead>Amount</TableHead>
-                                <TableHead>User</TableHead>
-                                <TableHead>Meter Number</TableHead>
-                                <TableHead className="w-[80px]">
-                                    Actions
+                            <TableRow className="bg-gray-50 border-b border-gray-200">
+                                <TableHead className="text-left py-4 px-6 text-sm font-semibold text-gray-900">
+                                    <div className="flex items-center gap-2">
+                                        <Hash className="h-4 w-4 text-gray-500" />
+                                        Transaction
+                                    </div>
                                 </TableHead>
+                                <TableHead className="text-left py-4 px-6 text-sm font-semibold text-gray-900">
+                                    <div className="flex items-center gap-2">
+                                        <Calendar className="h-4 w-4 text-gray-500" />
+                                        Date & Time
+                                    </div>
+                                </TableHead>
+                                <TableHead className="text-left py-4 px-6 text-sm font-semibold text-gray-900">
+                                    <div className="flex items-center gap-2">
+                                        <DollarSign className="h-4 w-4 text-gray-500" />
+                                        Amount
+                                    </div>
+                                </TableHead>
+                                <TableHead className="text-left py-4 px-6 text-sm font-semibold text-gray-900">
+                                    <div className="flex items-center gap-2">
+                                        <User className="h-4 w-4 text-gray-500" />
+                                        Customer
+                                    </div>
+                                </TableHead>
+                                <TableHead className="text-center py-4 px-6 text-sm font-semibold text-gray-900 w-20">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
-                        {isLoading ? (
-                            <TableBody>
+                        <TableBody>
+                            {isLoading ? (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="text-center">
-                                        <div className="w-full flex items-center justify-center py-6">
-                                            <LoaderIcon className="h-10 w-10 animate-spin text-muted-foreground" />
+                                    <TableCell colSpan={6} className="text-center py-12">
+                                        <div className="flex flex-col items-center justify-center space-y-3">
+                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                                            <p className="text-sm text-gray-500">Loading transactions...</p>
                                         </div>
                                     </TableCell>
                                 </TableRow>
-                            </TableBody>
-                        ) : (
-                            <TableBody>
-                                {currentTransactions.length > 0 ? (
-                                    currentTransactions.map((transaction: any) => (
-                                        <TableRow key={transaction.id}>
-                                            <TableCell className="font-medium">
-                                                {transaction?.transId?.slice(0, 8)}...
-                                            </TableCell>
-                                            <TableCell>
-                                                {new Date(transaction.createdAt).toLocaleString()}
-                                            </TableCell>
-                                            <TableCell>
-                                                Ksh {transaction.transAmount.toFixed(2)}
-                                            </TableCell>
-                                            <TableCell>{transaction.firstName}</TableCell>
-                                            <TableCell>{transaction.billRefNumber}</TableCell>
-                                            <TableCell>
-                                                <div className="flex items-center justify-end gap-2">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        onClick={() => onViewTransaction(transaction)}
-                                                    >
-                                                        <Eye className="h-4 w-4" />
-                                                        <span className="sr-only">View details</span>
-                                                    </Button>
+                            ) : currentTransactions.length > 0 ? (
+                                currentTransactions.map((transaction, index) => {
+                                    const { date, time } = formatDate(transaction.createdAt);
+                                    return (
+                                        <TableRow
+                                            key={transaction.id}
+                                            className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${index === currentTransactions.length - 1 ? 'border-b-0' : ''
+                                                }`}
+                                        >
+                                            <TableCell className="py-4 px-6">
+                                                <div className="space-y-1">
+                                                    <div className="font-mono text-sm font-medium text-gray-900">
+                                                        {transaction.transId}
+                                                    </div>
+                                                    <div className="text-xs text-gray-500">
+                                                        {transaction.billRefNumber}
+                                                    </div>
                                                 </div>
                                             </TableCell>
+                                            <TableCell className="py-4 px-6">
+                                                <div className="space-y-1">
+                                                    <div className="text-sm font-medium text-gray-900">{date}</div>
+                                                    <div className="text-xs text-gray-500">{time}</div>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="py-4 px-6">
+                                                <div className="text-sm font-semibold text-gray-900">
+                                                    Ksh {transaction.transAmount.toLocaleString('en-US', {
+                                                        minimumFractionDigits: 2,
+                                                        maximumFractionDigits: 2
+                                                    })}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="py-4 px-6">
+                                                <div className="flex items-center space-x-3">
+                                                    <div className="flex-shrink-0">
+                                                        <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                                            <span className="text-sm font-medium text-blue-600">
+                                                                {transaction.firstName.split(' ').map((n: string) => n[0]).join('').toUpperCase()}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-sm font-medium text-gray-900">
+                                                            {transaction.firstName}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="py-4 px-6 text-center">
+                                                <button
+                                                    onClick={() => onViewTransaction(transaction)}
+                                                    className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                                                >
+                                                    <Eye className="h-4 w-4" />
+                                                    <span className="sr-only">View transaction details</span>
+                                                </button>
+                                            </TableCell>
                                         </TableRow>
-                                    ))
-                                ) : (
-                                    <TableRow>
-                                        <TableCell colSpan={6} className="text-center">
-                                            No transactions found.
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        )}
-
+                                    );
+                                })
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="text-center py-12">
+                                        <div className="flex flex-col items-center justify-center space-y-3">
+                                            <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center">
+                                                <Search className="h-6 w-6 text-gray-400" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-900">No transactions found</p>
+                                            </div>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
                     </Table>
                 </div>
 

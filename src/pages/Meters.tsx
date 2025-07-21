@@ -267,19 +267,20 @@ const Meters: React.FC = () => {
       <div className="rounded-md border">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Meter Number</TableHead>
-              <TableHead>Location</TableHead>
-              <TableHead>Deficit (Ksh)</TableHead>
-              <TableHead>Actions</TableHead>
+            <TableRow className="border-b border-gray-100">
+              <TableHead className="py-4 px-6 text-sm font-semibold text-gray-700">Meter Number</TableHead>
+              <TableHead className="py-4 px-6 text-sm font-semibold text-gray-700">Location</TableHead>
+              <TableHead className="py-4 px-6 text-sm font-semibold text-gray-700">Deficit (Ksh)</TableHead>
+              <TableHead className="py-4 px-6 text-sm font-semibold text-gray-700">Actions</TableHead>
             </TableRow>
           </TableHeader>
           {isLoading ? (
             <TableBody>
               <TableRow>
-                <TableCell colSpan={6} className="text-center">
-                  <div className="w-full flex items-center justify-center py-6">
-                    <LoaderIcon className="h-10 w-10 animate-spin text-muted-foreground" />
+                <TableCell colSpan={4} className="text-center py-12">
+                  <div className="flex flex-col items-center justify-center">
+                    <LoaderIcon className="h-8 w-8 animate-spin text-blue-600 mb-3" />
+                    <p className="text-gray-500 text-sm">Loading meters...</p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -287,35 +288,63 @@ const Meters: React.FC = () => {
           ) : (
             <TableBody>
               {currentMeters.length > 0 ? (
-                currentMeters.map((meter) => (
-                  <TableRow key={meter.id}>
-                    <TableCell>{meter.meterNumber}</TableCell>
-                    <TableCell>{meter.location}</TableCell>
-                    <TableCell>{meter.openingDeficit}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
+                currentMeters.map((meter, index) => (
+                  <TableRow
+                    key={meter.id}
+                    className={`border-b border-gray-50 hover:bg-gray-25 transition-colors duration-150 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'
+                      }`}
+                  >
+                    <TableCell className="py-4 px-6">
+                      <div className="flex items-center">
+                        <div className="w-2 h-2 bg-blue-600 rounded-full mr-3"></div>
+                        <span className="font-medium text-gray-900">{meter.meterNumber}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-4 px-6">
+                      <span className="text-gray-700">{meter.location}</span>
+                    </TableCell>
+                    <TableCell className="py-4 px-6">
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${meter.openingDeficit > 0
+                          ? 'bg-red-100 text-red-800'
+                          : 'bg-green-100 text-green-800'
+                        }`}>
+                        {new Intl.NumberFormat('en-KE', {
+                          style: 'currency',
+                          currency: 'KES',
+                          minimumFractionDigits: 0,
+                        }).format(meter.openingDeficit)}
+                      </span>
+                    </TableCell>
+                    <TableCell className="py-4 px-6">
+                      <div className="flex items-center gap-2">
+                        <button
                           onClick={() => handleOpen(meter)}
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 hover:text-blue-700 transition-all duration-150"
                         >
                           <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
+                        </button>
+                        <button
                           onClick={() => handleDelete(meter.id)}
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 transition-all duration-150"
                         >
                           <Trash2 className="h-4 w-4" />
-                        </Button>
+                        </button>
                       </div>
                     </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
-                    No meters found matching your criteria
+                  <TableCell colSpan={4} className="text-center py-12">
+                    <div className="flex flex-col items-center">
+                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                      </div>
+                      <h3 className="text-lg font-medium text-gray-900 mb-1">No meters found</h3>
+                      <p className="text-gray-500 text-sm">No meters found matching your criteria</p>
+                    </div>
                   </TableCell>
                 </TableRow>
               )}

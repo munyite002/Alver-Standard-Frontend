@@ -7,41 +7,41 @@ export function DashboardNav() {
   const pathname = location.pathname
 
   return (
-    <nav className="grid items-start px-2 text-sm font-medium">
+    <nav className="space-y-2">
       <Link
         to="/"
         className={cn(
-          "flex items-center gap-3 rounded-lg px-3 py-2 transition-all",
+          "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
           pathname === "/" || pathname === "/dashboard"
-            ? "bg-accent text-accent-foreground"
-            : "text-muted-foreground hover:text-primary"
+            ? "bg-blue-50 text-blue-700 border border-blue-200"
+            : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
         )}
       >
-        <CreditCard className="h-4 w-4" />
+        <CreditCard className={cn("h-4 w-4", pathname === "/" || pathname === "/dashboard" ? "text-blue-600" : "text-gray-500")} />
         Transactions
       </Link>
       <Link
         to="/meters"
         className={cn(
-          "flex items-center gap-3 rounded-lg px-3 py-2 transition-all",
+          "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
           pathname === "/meters"
-            ? "bg-accent text-accent-foreground"
-            : "text-muted-foreground hover:text-primary"
+            ? "bg-blue-50 text-blue-700 border border-blue-200"
+            : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
         )}
       >
-        <Gauge className="h-4 w-4" />
+        <Gauge className={cn("h-4 w-4", pathname === "/meters" ? "text-blue-600" : "text-gray-500")} />
         Meters
       </Link>
       <Link
         to="/settings"
         className={cn(
-          "flex items-center gap-3 rounded-lg px-3 py-2 transition-all",
+          "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
           pathname === "/settings"
-            ? "bg-accent text-accent-foreground"
-            : "text-muted-foreground hover:text-primary"
+            ? "bg-blue-50 text-blue-700 border border-blue-200"
+            : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
         )}
       >
-        <Settings className="h-4 w-4" />
+        <Settings className={cn("h-4 w-4", pathname === "/settings" ? "text-blue-600" : "text-gray-500")} />
         Settings
       </Link>
     </nav>

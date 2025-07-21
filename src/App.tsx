@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 // @ts-ignore
 import { GlobalProvider } from "../context/GlobalContext.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.js";
-import { LoginPage } from "./pages/login.js";
+import LoginPage from "./pages/login.js";
 import RootLayout from "./pages/layout.js";
 import { DashboardPage } from "@/pages/Dashboard";
 import { SettingsPage } from "@/pages/Settings.js";
