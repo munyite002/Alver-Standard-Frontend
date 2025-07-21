@@ -146,7 +146,11 @@ export function TariffConfiguration() {
                                                             ? {
                                                                   ...t,
                                                                   ratePerUnit:
-                                                                      parseFloat(e.target.value)
+                                                                      parseFloat(
+                                                                          e
+                                                                              .target
+                                                                              .value
+                                                                      )
                                                               }
                                                             : t
                                                     )
@@ -177,15 +181,13 @@ export function TariffConfiguration() {
                         </p>
                     )}
                 </div>
-
-                {/* Tariff Creation Form */}
                 {/* Tariff Creation Form */}
                 {(() => {
                     const hasKPLC = tariffs.some(
-                        (t) => t.name === "KPLC_STANDARD"
+                        (t) => t.name.includes("KPLC")
                     );
-                    const hasAlver = tariffs.some(
-                        (t) => t.name === "ALVER_POWER"
+                    const hasAlver = tariffs.some((t) =>
+                        t.name.includes("ALVER")
                     );
 
                     // Show form only if both are NOT present

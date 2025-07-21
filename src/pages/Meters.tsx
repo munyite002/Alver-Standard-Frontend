@@ -19,16 +19,23 @@ import {
   TableHeader,
   TableRow,
 } from "../components/ui/table";
-import { Pencil, Trash2, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { Pencil, Trash2, Plus, ChevronLeft, ChevronRight, Search, Filter, X } from "lucide-react";
 import { getAllMeters, createMeter, updateMeter, deleteMeter } from '../api/meters.api';
 import type { Meter } from '../api/meters.api';
 import { toast, Toaster } from 'sonner';
 
 const Meters: React.FC = () => {
   const [meters, setMeters] = useState<Meter[]>([]);
+  const [filteredMeters, setFilteredMeters] = useState<Meter[]>([]);
   const [open, setOpen] = useState(false);
   const [editingMeter, setEditingMeter] = useState<Meter | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [locationFilter, setLocationFilter] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [minDeficit, setMinDeficit] = useState<number | ''>('');
+  const [maxDeficit, setMaxDeficit] = useState<number | ''>('');
+  
   const itemsPerPage = 10;
   const [formData, setFormData] = useState({
     meterNumber: '',
@@ -36,10 +43,12 @@ const Meters: React.FC = () => {
     openingDeficit: 0,
   });
   const [isSaving, setIsSaving] = useState(false);
+
   const fetchMeters = async () => {
     try {
       const data = await getAllMeters();
       setMeters(data);
+      setFilteredMeters(data);
     } catch (error) {
       console.error('Error fetching meters:', error);
     }
@@ -48,6 +57,37 @@ const Meters: React.FC = () => {
   useEffect(() => {
     fetchMeters();
   }, []);
+
+  // Apply search and filters whenever they change
+  useEffect(() => {
+    let result = meters;
+    
+    // Apply search
+    if (searchQuery) {
+      result = result.filter(meter =>
+        meter.meterNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        meter.location.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    
+    // Apply location filter
+    if (locationFilter) {
+      result = result.filter(meter =>
+        meter.location.toLowerCase().includes(locationFilter.toLowerCase())
+      );
+    }
+    
+    // Apply deficit range filter
+    if (minDeficit !== '') {
+      result = result.filter(meter => meter.openingDeficit >= minDeficit);
+    }
+    if (maxDeficit !== '') {
+      result = result.filter(meter => meter.openingDeficit <= maxDeficit);
+    }
+    
+    setFilteredMeters(result);
+    setCurrentPage(1); // Reset to first page when filters change
+  }, [searchQuery, locationFilter, minDeficit, maxDeficit, meters]);
 
   const handleOpen = (meter?: Meter) => {
     if (meter) {
@@ -106,11 +146,21 @@ const Meters: React.FC = () => {
     }
   };
 
+  const resetFilters = () => {
+    setSearchQuery('');
+    setLocationFilter('');
+    setMinDeficit('');
+    setMaxDeficit('');
+  };
+
   // Calculate pagination values
-  const totalPages = Math.ceil(meters.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredMeters.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentMeters = meters.slice(startIndex, endIndex);
+  const currentMeters = filteredMeters.slice(startIndex, endIndex);
+
+  // Get unique locations for filter dropdown
+  const uniqueLocations = [...new Set(meters.map(meter => meter.location))];
 
   return (
     <div className="p-6">
@@ -120,6 +170,94 @@ const Meters: React.FC = () => {
           <Plus className="mr-2 h-4 w-4" />
           Add Meter
         </Button>
+      </div>
+
+      {/* Search and Filter Bar */}
+      <div className="flex flex-col gap-4 mb-6">
+        <div className="relative">
+          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search meters by number or location..."
+            className="pl-9"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <X 
+              className="absolute right-3 top-3 h-4 w-4 text-muted-foreground cursor-pointer"
+              onClick={() => setSearchQuery('')}
+            />
+          )}
+        </div>
+
+        <div className="flex items-center gap-4">
+          <Button 
+            variant="outline" 
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex items-center gap-2"
+          >
+            <Filter className="h-4 w-4" />
+            Filters
+          </Button>
+
+          {(locationFilter || minDeficit !== '' || maxDeficit !== '') && (
+            <Button 
+              variant="ghost" 
+              onClick={resetFilters}
+              className="flex items-center gap-2"
+            >
+              Clear filters
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+
+        {showFilters && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-lg">
+            <div className="grid gap-2">
+              <label htmlFor="location-filter" className="text-sm font-medium">
+                Location
+              </label>
+              <select
+                id="location-filter"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                value={locationFilter}
+                onChange={(e) => setLocationFilter(e.target.value)}
+              >
+                <option value="">All Locations</option>
+                {uniqueLocations.map(location => (
+                  <option key={location} value={location}>{location}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="grid gap-2">
+              <label htmlFor="min-deficit" className="text-sm font-medium">
+                Min Deficit (Ksh)
+              </label>
+              <Input
+                id="min-deficit"
+                type="number"
+                placeholder="Minimum"
+                value={minDeficit}
+                onChange={(e) => setMinDeficit(e.target.value === '' ? '' : Number(e.target.value))}
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <label htmlFor="max-deficit" className="text-sm font-medium">
+                Max Deficit (Ksh)
+              </label>
+              <Input
+                id="max-deficit"
+                type="number"
+                placeholder="Maximum"
+                value={maxDeficit}
+                onChange={(e) => setMaxDeficit(e.target.value === '' ? '' : Number(e.target.value))}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="rounded-md border">
@@ -133,31 +271,39 @@ const Meters: React.FC = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {currentMeters.map((meter) => (
-              <TableRow key={meter.id}>
-                <TableCell>{meter.meterNumber}</TableCell>
-                <TableCell>{meter.location}</TableCell>
-                <TableCell>{meter.openingDeficit}</TableCell>
-                <TableCell>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleOpen(meter)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDelete(meter.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+            {currentMeters.length > 0 ? (
+              currentMeters.map((meter) => (
+                <TableRow key={meter.id}>
+                  <TableCell>{meter.meterNumber}</TableCell>
+                  <TableCell>{meter.location}</TableCell>
+                  <TableCell>{meter.openingDeficit}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleOpen(meter)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(meter.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                  No meters found matching your criteria
                 </TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
       </div>
@@ -165,7 +311,7 @@ const Meters: React.FC = () => {
       {/* Pagination Controls */}
       <div className="flex items-center justify-between mt-4">
         <div className="text-sm text-gray-500">
-          Showing {startIndex + 1} to {Math.min(endIndex, meters.length)} of {meters.length} entries
+          Showing {startIndex + 1} to {Math.min(endIndex, filteredMeters.length)} of {filteredMeters.length} entries
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -245,4 +391,4 @@ const Meters: React.FC = () => {
   );
 };
 
-export default Meters; 
+export default Meters;
