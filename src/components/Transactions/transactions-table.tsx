@@ -186,6 +186,12 @@ export function TransactionTable({
                                         Customer
                                     </div>
                                 </TableHead>
+                                <TableHead className="text-left py-4 px-6 text-sm font-semibold text-gray-900">
+                                    <div className="flex items-center gap-2">
+                                        <User className="h-4 w-4 text-gray-500" />
+                                        Meter Number
+                                    </div>
+                                </TableHead>
                                 <TableHead className="text-center py-4 px-6 text-sm font-semibold text-gray-900 w-20">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -248,6 +254,15 @@ export function TransactionTable({
                                                     </div>
                                                 </div>
                                             </TableCell>
+                                           <TableCell className="py-4 px-6">
+                                                <div className="flex items-center space-x-3">
+                                                    <div>
+                                                        <div className="text-sm font-medium text-blue-400">
+                                                            {transaction.billRefNumber}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                           </TableCell>
                                             <TableCell className="py-4 px-6 text-center">
                                                 <button
                                                     onClick={() => onViewTransaction(transaction)}

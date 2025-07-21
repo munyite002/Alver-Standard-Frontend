@@ -428,9 +428,9 @@ export function TransactionModal({
                                 </p>
                             </div>
                             <div>
-                                <p className="text-sm text-gray-600 mb-1">Phone Number</p>
+                                <p className="text-sm text-gray-600 mb-1">MSISDN</p>
                                 <p className="font-semibold text-gray-900 flex items-center">
-                                    {transaction.msisdn}
+                                    {transaction.msisdn.slice(0,20)}...
                                     <CopyButton text={transaction.msisdn} fieldName="Phone" />
                                 </p>
                             </div>
