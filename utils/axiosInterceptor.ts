@@ -34,8 +34,8 @@ const useAxiosWithAuth = (url: any) => {
         (response) => response,
         async (error) => {
             const originalRequest = error.config;
-            if (error.response?.status === 401 && !originalRequest._retry) {
-                // console.log("Token expired. Refreshing token...");
+            console.log("Error From Axios Interceptor: ", error);
+            if ((error.response?.status == 401 || error.response?.status === 403) && !originalRequest._retry) {
                 originalRequest._retry = true;
                 const refreshToken = localStorage.getItem("refreshToken");
                 const token = localStorage.getItem("token");
@@ -54,7 +54,7 @@ const useAxiosWithAuth = (url: any) => {
                         const res = await response.data;
                         const newAccessToken = res.token;
                         const newRefreshToken = res.refreshToken;
-                        localStorage.setItem("accessToken", newAccessToken);
+                        localStorage.setItem("token", newAccessToken);
                         localStorage.setItem("refreshToken", newRefreshToken);
                         return axiosInstance(originalRequest);
                     } catch (error) {
