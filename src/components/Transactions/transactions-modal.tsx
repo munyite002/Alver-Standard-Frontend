@@ -53,6 +53,9 @@ export function TransactionModal({
             console.log("Error: ", err);
             toast.error("An Error occured please try again later");
         }
+	finally {
+		setIsSubmitting(false);
+	}
     };
 
     const handlePrint = () => {
