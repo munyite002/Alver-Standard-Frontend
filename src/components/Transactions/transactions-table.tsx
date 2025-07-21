@@ -6,7 +6,8 @@ import {
     ChevronsLeft,
     ChevronsRight,
     Eye,
-    ArrowDownUp
+    ArrowDownUp,
+    LoaderIcon
 } from "lucide-react";
 import {
     DropdownMenu,
@@ -29,11 +30,13 @@ import type { Payment } from "@/lib/types";
 interface TransactionTableProps {
     onViewTransaction: (transaction: Payment) => void;
     transactions: any;
+    isLoading: boolean
 }
 
 export function TransactionTable({
     onViewTransaction,
-    transactions
+    transactions,
+    isLoading
 }: TransactionTableProps) {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 8;
@@ -83,10 +86,10 @@ export function TransactionTable({
                                             ? "Date (Oldest)"
                                             : "Date (Newest)"
                                         : sort.key === "transAmount"
-                                        ? sort.direction === "asc"
-                                            ? "Amount (Low to High)"
-                                            : "Amount (High to Low)"
-                                        : "Sort"
+                                            ? sort.direction === "asc"
+                                                ? "Amount (Low to High)"
+                                                : "Amount (High to Low)"
+                                            : "Sort"
                                     : "Sort"}
                             </Button>
                         </DropdownMenuTrigger>
@@ -150,45 +153,56 @@ export function TransactionTable({
                                 </TableHead>
                             </TableRow>
                         </TableHeader>
-                        <TableBody>
-                            {currentTransactions?.map((transaction: any) => (
-                                <TableRow key={transaction.id}>
-                                    <TableCell className="font-medium">
-                                        {transaction?.transId?.slice(0, 8)}...
-                                    </TableCell>
-                                    <TableCell>
-                                        {new Date(
-                                            transaction.createdAt
-                                        ).toLocaleString()}
-                                    </TableCell>
-                                    <TableCell>
-                                        Ksh {transaction.transAmount.toFixed(2)}
-                                    </TableCell>
-                                    <TableCell>{transaction.firstName}</TableCell>
-                                    <TableCell>
-                                            {transaction.billRefNumber}
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center justify-end gap-2">
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={() =>
-                                                    onViewTransaction(
-                                                        transaction
-                                                    )
-                                                }
-                                            >
-                                                <Eye className="h-4 w-4" />
-                                                <span className="sr-only">
-                                                    View details
-                                                </span>
-                                            </Button>
+                        {isLoading ? (
+                            <TableBody>
+                                <TableRow>
+                                    <TableCell colSpan={6} className="text-center">
+                                        <div className="w-full flex items-center justify-center py-6">
+                                            <LoaderIcon className="h-10 w-10 animate-spin text-muted-foreground" />
                                         </div>
                                     </TableCell>
                                 </TableRow>
-                            ))}
-                        </TableBody>
+                            </TableBody>
+                        ) : (
+                            <TableBody>
+                                {currentTransactions.length > 0 ? (
+                                    currentTransactions.map((transaction: any) => (
+                                        <TableRow key={transaction.id}>
+                                            <TableCell className="font-medium">
+                                                {transaction?.transId?.slice(0, 8)}...
+                                            </TableCell>
+                                            <TableCell>
+                                                {new Date(transaction.createdAt).toLocaleString()}
+                                            </TableCell>
+                                            <TableCell>
+                                                Ksh {transaction.transAmount.toFixed(2)}
+                                            </TableCell>
+                                            <TableCell>{transaction.firstName}</TableCell>
+                                            <TableCell>{transaction.billRefNumber}</TableCell>
+                                            <TableCell>
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => onViewTransaction(transaction)}
+                                                    >
+                                                        <Eye className="h-4 w-4" />
+                                                        <span className="sr-only">View details</span>
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={6} className="text-center">
+                                            No transactions found.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        )}
+
                     </Table>
                 </div>
 

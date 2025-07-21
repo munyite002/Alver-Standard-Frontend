@@ -16,6 +16,10 @@ export function DashboardPage() {
     const axiosInstance = useAxiosWithAuth(
         import.meta.env.VITE_PUBLIC_STAGING_API
     );
+
+    const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
+    const [isLoadingMetrics, setIsLoadingMetrics] = useState(true);
+
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const [selectedTransaction, setSelectedTransaction] =
@@ -34,21 +38,27 @@ export function DashboardPage() {
 
     async function fetchDashboardMetrics() {
         try {
+            setIsLoadingMetrics(true)
             const response = await getDashboardMetrics(axiosInstance);
             setMetrics(response.data);
         } catch (error) {
             console.error("Error: ", error);
             setMetrics(null);
+        } finally {
+            setIsLoadingMetrics(false);
         }
     }
 
     async function fetchTransactions() {
         try {
+            setIsLoadingTransactions(true);
             const response = await getAllTransactions(axiosInstance);
             setTransactions(response.data);
         } catch (error) {
             console.error("Error: ", error);
             setMetrics(null);
+        } finally {
+            setIsLoadingTransactions(false);
         }
     }
 
@@ -73,12 +83,16 @@ export function DashboardPage() {
 
     return (
         <div className="flex min-h-screen flex-col">
-            <DashboardHeader searchQuery={searchQuery} setSearchQuery={setSearchQuery}/>
+            <DashboardHeader
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+            />
             <main className="flex-1 space-y-6 p-6 pt-4 md:p-8 md:pt-6">
-                <DashboardStats metrics={metrics} />
+                <DashboardStats metrics={metrics} isLoading={isLoadingMetrics} />
                 <TransactionTable
                     onViewTransaction={handleViewTransaction}
                     transactions={filteredTransactions}
+                    isLoading={isLoadingTransactions}
                 />
                 {isModalOpen && (
                     <TransactionModal

@@ -19,7 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "../components/ui/table";
-import { Pencil, Trash2, Plus, ChevronLeft, ChevronRight, Search, Filter, X } from "lucide-react";
+import { Pencil, Trash2, Plus, ChevronLeft, ChevronRight, Search, Filter, X, LoaderIcon } from "lucide-react";
 import { getAllMeters, createMeter, updateMeter, deleteMeter } from '../api/meters.api';
 import type { Meter } from '../api/meters.api';
 import { toast, Toaster } from 'sonner';
@@ -35,7 +35,8 @@ const Meters: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [minDeficit, setMinDeficit] = useState<number | ''>('');
   const [maxDeficit, setMaxDeficit] = useState<number | ''>('');
-  
+  const [isLoading, setIsLoading] = useState(false);
+
   const itemsPerPage = 10;
   const [formData, setFormData] = useState({
     meterNumber: '',
@@ -46,11 +47,14 @@ const Meters: React.FC = () => {
 
   const fetchMeters = async () => {
     try {
+      setIsLoading(true)
       const data = await getAllMeters();
       setMeters(data);
       setFilteredMeters(data);
     } catch (error) {
       console.error('Error fetching meters:', error);
+    } finally {
+      setIsLoading(false)
     }
   };
 
@@ -61,7 +65,7 @@ const Meters: React.FC = () => {
   // Apply search and filters whenever they change
   useEffect(() => {
     let result = meters;
-    
+
     // Apply search
     if (searchQuery) {
       result = result.filter(meter =>
@@ -69,14 +73,14 @@ const Meters: React.FC = () => {
         meter.location.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
-    
+
     // Apply location filter
     if (locationFilter) {
       result = result.filter(meter =>
         meter.location.toLowerCase().includes(locationFilter.toLowerCase())
       );
     }
-    
+
     // Apply deficit range filter
     if (minDeficit !== '') {
       result = result.filter(meter => meter.openingDeficit >= minDeficit);
@@ -84,7 +88,7 @@ const Meters: React.FC = () => {
     if (maxDeficit !== '') {
       result = result.filter(meter => meter.openingDeficit <= maxDeficit);
     }
-    
+
     setFilteredMeters(result);
     setCurrentPage(1); // Reset to first page when filters change
   }, [searchQuery, locationFilter, minDeficit, maxDeficit, meters]);
@@ -119,7 +123,7 @@ const Meters: React.FC = () => {
     try {
       if (editingMeter) {
         await updateMeter(editingMeter.id, formData);
-        toast.success('Meter updated successfully');    
+        toast.success('Meter updated successfully');
       } else {
         await createMeter(formData);
         toast.success('Meter created successfully');
@@ -183,7 +187,7 @@ const Meters: React.FC = () => {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           {searchQuery && (
-            <X 
+            <X
               className="absolute right-3 top-3 h-4 w-4 text-muted-foreground cursor-pointer"
               onClick={() => setSearchQuery('')}
             />
@@ -191,8 +195,8 @@ const Meters: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => setShowFilters(!showFilters)}
             className="flex items-center gap-2"
           >
@@ -201,8 +205,8 @@ const Meters: React.FC = () => {
           </Button>
 
           {(locationFilter || minDeficit !== '' || maxDeficit !== '') && (
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               onClick={resetFilters}
               className="flex items-center gap-2"
             >
@@ -270,41 +274,53 @@ const Meters: React.FC = () => {
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
-            {currentMeters.length > 0 ? (
-              currentMeters.map((meter) => (
-                <TableRow key={meter.id}>
-                  <TableCell>{meter.meterNumber}</TableCell>
-                  <TableCell>{meter.location}</TableCell>
-                  <TableCell>{meter.openingDeficit}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleOpen(meter)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDelete(meter.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
+          {isLoading ? (
+            <TableBody>
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
-                  No meters found matching your criteria
+                <TableCell colSpan={6} className="text-center">
+                  <div className="w-full flex items-center justify-center py-6">
+                    <LoaderIcon className="h-10 w-10 animate-spin text-muted-foreground" />
+                  </div>
                 </TableCell>
               </TableRow>
-            )}
-          </TableBody>
+            </TableBody>
+          ) : (
+            <TableBody>
+              {currentMeters.length > 0 ? (
+                currentMeters.map((meter) => (
+                  <TableRow key={meter.id}>
+                    <TableCell>{meter.meterNumber}</TableCell>
+                    <TableCell>{meter.location}</TableCell>
+                    <TableCell>{meter.openingDeficit}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleOpen(meter)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDelete(meter.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                    No meters found matching your criteria
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          )}
         </Table>
       </div>
 
@@ -386,7 +402,7 @@ const Meters: React.FC = () => {
           </form>
         </DialogContent>
       </Dialog>
-      <Toaster position='top-right' richColors/>
+      <Toaster position='top-right' richColors />
     </div>
   );
 };
