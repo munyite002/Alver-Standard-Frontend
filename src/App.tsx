@@ -11,8 +11,8 @@ import Meters from "@/pages/Meters";
 // import Configurations from "./pages/Configurations.js";
 import Unauthorized from "@/pages/Unauthorized.js";
 import NotFound from "@/pages/NotFound.js";
-// import ForgotPasswordPage from "./pages/ForgotPassword.js";
-// import ResetPasswordPage from "./pages/ResetPassword.js";
+import { ForgotPasswordPage } from "./pages/ForgotPassword.js";
+import { ResetPasswordPage } from "./pages/ResetPassword.js";
 import "./App.css";
 
 function App() {
@@ -22,15 +22,14 @@ function App() {
                 <Routes>
                     {/* Public Routes */}
                     <Route path="/login" element={<LoginPage />} />
-                    {/* <Route
+                    <Route
                         path="/forgot-password"
                         element={<ForgotPasswordPage />}
-                    /> */}
-                    {/* <Route
+                    />
+                    <Route
                         path="/reset-password"
                         element={<ResetPasswordPage />}
-                    /> */}
-                    {/* <Route path="/success" element={<SuccessPage />} /> */}
+                    />
 
                     {/* Protected Routes */}
                     <Route element={<ProtectedRoute />}>

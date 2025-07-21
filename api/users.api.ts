@@ -37,3 +37,19 @@ export async function resendSms(axiosInstance: any, data: any) {
 
     return response;
 }
+
+export async function initiateForgotPassword(data: any) {
+    const response = await axios.post(
+        `${import.meta.env.VITE_PUBLIC_STAGING_API}/users/reset/password/initiate`,
+        data
+    );
+    return response;
+}
+
+export async function resetPasswordWithOTP(data: any) {
+    const response = await axios.post(
+        `${import.meta.env.VITE_PUBLIC_STAGING_API}/users/reset/password/otp`,
+        data
+    );
+    return response;
+}

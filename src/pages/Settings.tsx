@@ -44,7 +44,8 @@ export function SettingsPage() {
 
     const [userData, setUserData] = useState({
         name: user?.name || "",
-        email: user?.email || ""
+        email: user?.email || "",
+        phone: user?.phone.slice(3,) || "",
     });
 
     //@ts-ignore
@@ -79,7 +80,8 @@ export function SettingsPage() {
             setIsSaving(true);
             const data = {
                 name: userData.name,
-                email: userData?.email
+                email: userData?.email,
+                phone: `254${userData?.phone}`
             };
             await updateUser(axiosInstance, data);
             toast.success("User Updated Successfully");
@@ -189,6 +191,24 @@ export function SettingsPage() {
                                             }))
                                         }
                                     />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="email">Phone</Label>
+                                    <div className="flex items-center space-x-2">
+                                        <span>+254</span>
+                                        <Input
+                                        id="phone"
+                                        type="text"
+                                        placeholder="Enter your phone number"
+                                        value={userData?.phone}
+                                        onChange={(e) =>
+                                            setUserData((prev) => ({
+                                                ...prev,
+                                                phone: e.target.value
+                                            }))
+                                        }
+                                    />
+                                    </div>
                                 </div>
                                 <Button
                                     onClick={handleSave}
