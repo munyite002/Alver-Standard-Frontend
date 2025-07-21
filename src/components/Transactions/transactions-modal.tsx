@@ -309,19 +309,10 @@ export function TransactionModal({
 
                             <hr className="divider" />
 
-                            <div className="section">
-                                <div className="label">
-                                    Customer Phone Number
-                                </div>
-                                <div className="value">
-                                    {transaction.msisdn}
-                                </div>
-                            </div>
-
                             {transaction.billRefNumber && (
                                 <div className="section">
                                     <div className="label">
-                                        Bill Reference Number
+                                        Meter Number
                                     </div>
                                     <div className="value">
                                         {transaction.billRefNumber}
