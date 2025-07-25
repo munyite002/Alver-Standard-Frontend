@@ -32,11 +32,11 @@ export function TariffConfiguration() {
 
     const [newTariffData, setNewTariffData] = useState<{
         name: string;
-        provider: "KPLC" | "ALVER_POWER";
+        provider: any;
         ratePerUnit: number;
     }>({
         name: "",
-        provider: "KPLC",
+        provider: "",
         ratePerUnit: 0
     });
 
@@ -144,14 +144,14 @@ export function TariffConfiguration() {
                                                     prev.map((t) =>
                                                         t.id === tariff.id
                                                             ? {
-                                                                  ...t,
-                                                                  ratePerUnit:
-                                                                      parseFloat(
-                                                                          e
-                                                                              .target
-                                                                              .value
-                                                                      )
-                                                              }
+                                                                ...t,
+                                                                ratePerUnit:
+                                                                    parseFloat(
+                                                                        e
+                                                                            .target
+                                                                            .value
+                                                                    )
+                                                            }
                                                             : t
                                                     )
                                                 )
@@ -182,119 +182,92 @@ export function TariffConfiguration() {
                     )}
                 </div>
                 {/* Tariff Creation Form */}
-                {(() => {
-                    const hasKPLC = tariffs.some(
-                        (t) => t.name.includes("KPLC")
-                    );
-                    const hasAlver = tariffs.some((t) =>
-                        t.name.includes("ALVER")
-                    );
-
-                    // Show form only if both are NOT present
-                    if (!(hasKPLC && hasAlver)) {
-                        return (
-                            <div className="space-y-4">
-                                <h3 className="text-sm font-medium">
-                                    Create New Tariff
-                                </h3>
-                                <Separator />
-                                <form
-                                    onSubmit={handleCreateTariff}
-                                    className="space-y-4"
-                                >
-                                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="tariff-name">
-                                                Tariff Name
-                                            </Label>
-                                            <Input
-                                                id="tariff-name"
-                                                placeholder="e.g., Standard Plan"
-                                                value={newTariffData.name}
-                                                onChange={(e) =>
-                                                    setNewTariffData(
-                                                        (prev) => ({
-                                                            ...prev,
-                                                            name: e.target.value
-                                                        })
-                                                    )
-                                                }
-                                                required
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="provider">
-                                                Provider
-                                            </Label>
-                                            <select
-                                                id="provider"
-                                                className="w-full h-10 px-3 rounded-md border border-input bg-background"
-                                                value={newTariffData.provider}
-                                                onChange={(e) =>
-                                                    setNewTariffData(
-                                                        (prev) => ({
-                                                            ...prev,
-                                                            provider: e.target
-                                                                .value as
-                                                                | "KPLC"
-                                                                | "ALVER_POWER"
-                                                        })
-                                                    )
-                                                }
-                                                required
-                                            >
-                                                <option value="KPLC">
-                                                    KPLC
-                                                </option>
-                                                <option value="ALVER_POWER">
-                                                    ALVER POWER
-                                                </option>
-                                            </select>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="rate-per-unit">
-                                                Rate per Unit (Ksh/kWh)
-                                            </Label>
-                                            <Input
-                                                id="rate-per-unit"
-                                                type="number"
-                                                min="0"
-                                                step="0.01"
-                                                value={
-                                                    newTariffData.ratePerUnit
-                                                }
-                                                onChange={(e) =>
-                                                    setNewTariffData(
-                                                        (prev) => ({
-                                                            ...prev,
-                                                            ratePerUnit:
-                                                                parseFloat(
-                                                                    e.target
-                                                                        .value
-                                                                )
-                                                        })
-                                                    )
-                                                }
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="flex justify-end pt-4">
-                                        <Button
-                                            type="submit"
-                                            disabled={isSaving}
-                                        >
-                                            {isSaving
-                                                ? "Creating..."
-                                                : "Create Tariff"}
-                                        </Button>
-                                    </div>
-                                </form>
+                <div className="space-y-4">
+                    <h3 className="text-sm font-medium">
+                        Create New Tariff
+                    </h3>
+                    <Separator />
+                    <form
+                        onSubmit={handleCreateTariff}
+                        className="space-y-4"
+                    >
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                            <div className="space-y-2">
+                                <Label htmlFor="tariff-name">
+                                    Tariff Name
+                                </Label>
+                                <Input
+                                    id="tariff-name"
+                                    placeholder="e.g., Standard Plan"
+                                    value={newTariffData.name}
+                                    onChange={(e) =>
+                                        setNewTariffData(
+                                            (prev) => ({
+                                                ...prev,
+                                                name: e.target.value
+                                            })
+                                        )
+                                    }
+                                    required
+                                />
                             </div>
-                        );
-                    }
-                    return null;
-                })()}
+                            <div className="space-y-2">
+                                <Label htmlFor="provider">
+                                    Provider
+                                </Label>
+                                <Input
+                                    id="provider"
+                                    placeholder="e.g., KPLC"
+                                    value={newTariffData.provider}
+                                    onChange={(e) =>
+                                        setNewTariffData((prev) => ({
+                                            ...prev,
+                                            provider: e.target.value
+                                        }))
+                                    }
+                                    required
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="rate-per-unit">
+                                    Rate per Unit (Ksh/kWh)
+                                </Label>
+                                <Input
+                                    id="rate-per-unit"
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    value={
+                                        newTariffData.ratePerUnit
+                                    }
+                                    onChange={(e) =>
+                                        setNewTariffData(
+                                            (prev) => ({
+                                                ...prev,
+                                                ratePerUnit:
+                                                    parseFloat(
+                                                        e.target
+                                                            .value
+                                                    )
+                                            })
+                                        )
+                                    }
+                                    required
+                                />
+                            </div>
+                        </div>
+                        <div className="flex justify-end pt-4">
+                            <Button
+                                type="submit"
+                                disabled={isSaving}
+                            >
+                                {isSaving
+                                    ? "Creating..."
+                                    : "Create Tariff"}
+                            </Button>
+                        </div>
+                    </form>
+                </div>
             </CardContent>
         </Card>
     );

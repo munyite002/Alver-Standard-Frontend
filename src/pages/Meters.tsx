@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState } from 'react';
@@ -22,9 +24,12 @@ import {
 import { Pencil, Trash2, Plus, ChevronLeft, ChevronRight, Search, Filter, X, LoaderIcon } from "lucide-react";
 import { getAllMeters, createMeter, updateMeter, deleteMeter } from '../api/meters.api';
 import type { Meter } from '../api/meters.api';
+import { getTariffs } from "../../api/tariffs.api"
 import { toast, Toaster } from 'sonner';
+import useAxiosWithAuth from "@/../utils/axiosInterceptor";
 
 const Meters: React.FC = () => {
+  const axiosInstance = useAxiosWithAuth(import.meta.env.VITE_PUBLIC_STAGING_API)
   const [meters, setMeters] = useState<Meter[]>([]);
   const [filteredMeters, setFilteredMeters] = useState<Meter[]>([]);
   const [open, setOpen] = useState(false);
@@ -36,12 +41,16 @@ const Meters: React.FC = () => {
   const [minDeficit, setMinDeficit] = useState<number | ''>('');
   const [maxDeficit, setMaxDeficit] = useState<number | ''>('');
   const [isLoading, setIsLoading] = useState(false);
+  //@ts-ignore
+  const [isLoadingTariffs, setIsLoadingTariffs] = useState(false);
+  const [tariffs, setTariffs] = useState<any[]>([]);
 
   const itemsPerPage = 10;
   const [formData, setFormData] = useState({
     meterNumber: '',
     location: '',
     openingDeficit: 0,
+    tariffId: ''
   });
   const [isSaving, setIsSaving] = useState(false);
 
@@ -58,8 +67,22 @@ const Meters: React.FC = () => {
     }
   };
 
+  const fetchTariffs = async () => {
+    try {
+      setIsLoadingTariffs(true);
+      const response = await getTariffs(axiosInstance);
+      setTariffs(response.data);
+    } catch (err) {
+      console.error("Error fetching tariffs:", err);
+      toast.error("Failed to fetch tariffs");
+    } finally {
+      setIsLoadingTariffs(false);
+    }
+  };
+
   useEffect(() => {
     fetchMeters();
+    fetchTariffs()
   }, []);
 
   // Apply search and filters whenever they change
@@ -100,6 +123,7 @@ const Meters: React.FC = () => {
         meterNumber: meter.meterNumber,
         location: meter.location,
         openingDeficit: meter.openingDeficit,
+        tariffId: meter.tariffId || '',
       });
     } else {
       setEditingMeter(null);
@@ -107,6 +131,7 @@ const Meters: React.FC = () => {
         meterNumber: '',
         location: '',
         openingDeficit: 0,
+        tariffId: '',
       });
     }
     setOpen(true);
@@ -305,8 +330,8 @@ const Meters: React.FC = () => {
                     </TableCell>
                     <TableCell className="py-4 px-6">
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${meter.openingDeficit > 0
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-green-100 text-green-800'
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-green-100 text-green-800'
                         }`}>
                         {new Intl.NumberFormat('en-KE', {
                           style: 'currency',
@@ -419,20 +444,34 @@ const Meters: React.FC = () => {
                   required
                 />
               </div>
+              <div className="grid gap-2">
+                <label htmlFor="tariff">Tariff</label>
+                <select
+                  id="tariff"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  value={formData.tariffId || ''}
+                  onChange={(e) => setFormData({ ...formData, tariffId: e.target.value })}
+                >
+                  <option value="">Select Tariff</option>
+                  {tariffs.map(tariff => (
+                    <option key={tariff.id} value={tariff.id}>{tariff.name}</option>
+                  ))}
+                </select>
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={handleClose}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isSaving}>
+                  {isSaving ? 'Saving...' : editingMeter ? 'Update' : 'Create'}
+                </Button>
+              </DialogFooter>
             </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={handleClose}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isSaving}>
-                {isSaving ? 'Saving...' : editingMeter ? 'Update' : 'Create'}
-              </Button>
-            </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
       <Toaster position='top-right' richColors />
-    </div>
+    </div >
   );
 };
 

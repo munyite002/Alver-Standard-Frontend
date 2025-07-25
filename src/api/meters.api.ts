@@ -5,6 +5,7 @@ export interface Meter {
   meterNumber: string;
   location: string;
   openingDeficit: number;
+  tariffId?: string;
   createdAt: string;
   updatedAt: string;
 }
