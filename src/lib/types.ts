@@ -17,3 +17,12 @@ export interface Payment {
   createdAt: string | Date
   updatedAt: string | Date
 }
+
+export interface Log {
+  id: string
+  event: string
+  details: string
+  user: string
+  createdAt: string | Date
+  updatedAt: string | Date
+}

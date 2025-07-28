@@ -8,6 +8,7 @@ import RootLayout from "./pages/layout.js";
 import { DashboardPage } from "@/pages/Dashboard";
 import { SettingsPage } from "@/pages/Settings.js";
 import Meters from "@/pages/Meters";
+import Logs from "@/pages/Logs.js"
 // import Configurations from "./pages/Configurations.js";
 import Unauthorized from "@/pages/Unauthorized.js";
 import NotFound from "@/pages/NotFound.js";
@@ -40,6 +41,7 @@ function App() {
                                 element={<DashboardPage />}
                             />
                             <Route path="/meters" element={<Meters />} />
+                            <Route path="/logs" element={<Logs />} />
                             <Route path="/settings" element={<SettingsPage />} />
                             {/* <Route
                                 path="/configurations"

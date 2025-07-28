@@ -1,4 +1,4 @@
-import { CreditCard, Settings, Gauge } from "lucide-react"
+import { CreditCard, Settings, Gauge, Logs } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
 import { cn } from "@/lib/utils"
 
@@ -43,6 +43,18 @@ export function DashboardNav() {
       >
         <Settings className={cn("h-4 w-4", pathname === "/settings" ? "text-blue-600" : "text-gray-500")} />
         Settings
+      </Link>
+      <Link
+        to="/logs"
+        className={cn(
+          "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+          pathname === "/logs"
+            ? "bg-blue-50 text-blue-700 border border-blue-200"
+            : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+        )}
+      >
+        <Logs className={cn("h-4 w-4", pathname === "/logs" ? "text-blue-600" : "text-gray-500")} />
+        Logs
       </Link>
     </nav>
   )
