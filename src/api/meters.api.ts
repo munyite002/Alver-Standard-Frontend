@@ -10,13 +10,13 @@ export interface Meter {
   updatedAt: string;
 }
 
-export const createMeter = async (meterData: Omit<Meter, 'id' | 'createdAt' | 'updatedAt'>) => {
-  const response = await axios.post(`${import.meta.env.VITE_PUBLIC_STAGING_API}/meters`, meterData);
+export const createMeter = async (axiosInstance, meterData: Omit<Meter, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const response = await axiosInstance.post(`${import.meta.env.VITE_PUBLIC_STAGING_API}/meters`, meterData);
   return response.data;
 };
 
-export const getAllMeters = async () => {
-  const response = await axios.get(`${import.meta.env.VITE_PUBLIC_STAGING_API}/meters`);
+export const getAllMeters = async (axiosInstance) => {
+  const response = await axiosInstance.get(`${import.meta.env.VITE_PUBLIC_STAGING_API}/meters`);
   return response.data;
 };
 
@@ -25,11 +25,11 @@ export const getMeterById = async (id: string) => {
   return response.data;
 };
 
-export const updateMeter = async (id: string, meterData: Partial<Meter>) => {
-  const response = await axios.put(`${import.meta.env.VITE_PUBLIC_STAGING_API}/meters/${id}`, meterData);
+export const updateMeter = async (axiosInstance, id: string, meterData: Partial<Meter>) => {
+  const response = await axiosInstance.put(`${import.meta.env.VITE_PUBLIC_STAGING_API}/meters/${id}`, meterData);
   return response.data;
 };
 
-export const deleteMeter = async (id: string) => {
-  await axios.delete(`${import.meta.env.VITE_PUBLIC_STAGING_API}/meters/${id}`);
+export const deleteMeter = async (axiosInstance, id: string) => {
+  await axiosInstance.delete(`${import.meta.env.VITE_PUBLIC_STAGING_API}/meters/${id}`);
 }; 

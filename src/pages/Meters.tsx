@@ -57,7 +57,7 @@ const Meters: React.FC = () => {
   const fetchMeters = async () => {
     try {
       setIsLoading(true)
-      const data = await getAllMeters();
+      const data = await getAllMeters(axiosInstance);
       setMeters(data);
       setFilteredMeters(data);
     } catch (error) {
@@ -147,10 +147,10 @@ const Meters: React.FC = () => {
     setIsSaving(true);
     try {
       if (editingMeter) {
-        await updateMeter(editingMeter.id, formData);
+        await updateMeter(axiosInstance, editingMeter.id, formData);
         toast.success('Meter updated successfully');
       } else {
-        await createMeter(formData);
+        await createMeter(axiosInstance, formData);
         toast.success('Meter created successfully');
       }
       handleClose();
@@ -167,7 +167,7 @@ const Meters: React.FC = () => {
   const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this meter?')) {
       try {
-        await deleteMeter(id);
+        await deleteMeter(axiosInstance, id);
         fetchMeters();
       } catch (error) {
         console.error('Error deleting meter:', error);
