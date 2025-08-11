@@ -21,8 +21,8 @@ import {
   TableHeader,
   TableRow,
 } from "../components/ui/table";
-import { Pencil, Trash2, Plus, ChevronLeft, ChevronRight, Search, Filter, X, LoaderIcon } from "lucide-react";
-import { getAllMeters, createMeter, updateMeter, deleteMeter } from '../api/meters.api';
+import { Pencil, Trash2, Plus, ChevronLeft, ChevronRight, Search, Filter, X, LoaderIcon, Eye } from "lucide-react";
+import { getAllMeters, createMeter, updateMeter, deleteMeter, generateMeterCredit, generateTamperCode } from '../api/meters.api';
 import type { Meter } from '../api/meters.api';
 import { getTariffs } from "../../api/tariffs.api"
 import { toast, Toaster } from 'sonner';
@@ -53,6 +53,8 @@ const Meters: React.FC = () => {
     tariffId: ''
   });
   const [isSaving, setIsSaving] = useState(false);
+
+  const [actionDialogOpen, setActionDialogOpen] = useState(false);
 
   const fetchMeters = async () => {
     try {
@@ -190,6 +192,13 @@ const Meters: React.FC = () => {
 
   // Get unique locations for filter dropdown
   const uniqueLocations = [...new Set(meters.map(meter => meter.location))];
+
+
+  const meter = editingMeter || currentMeters[0];
+  const [tamperCode, setTamperCode] = useState<string | null>(null);
+  const [creditCode, setCreditCode] = useState<string | null>(null);
+  const [isTamperLoading, setIsTamperLoading] = useState(false);
+  const [isCreditLoading, setIsCreditLoading] = useState(false);
 
   return (
     <div className="p-6">
@@ -354,6 +363,12 @@ const Meters: React.FC = () => {
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
+                        <button
+                          onClick={() => setActionDialogOpen(true)}
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-cyan-50 hover:bg-cyan-100 text-cyan-600 hover:text-cyan-700 transition-all duration-150"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -468,6 +483,130 @@ const Meters: React.FC = () => {
               </DialogFooter>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* ACTION DIALOG */}
+      <Dialog open={actionDialogOpen} onOpenChange={setActionDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Meter Actions</DialogTitle>
+            <DialogDescription>
+              View meter details and perform actions.
+            </DialogDescription>
+          </DialogHeader>
+          {/* Find the selected meter */}
+          {(() => {
+
+            // These would be replaced with your actual API calls
+            const generateClearTamperCode = async (meterNumber: string) => {
+              setIsTamperLoading(true);
+              setTamperCode(null);
+              try {
+                const response = await generateTamperCode(axiosInstance, {
+                  meterNumber
+                });
+                setTamperCode(response[0].Token);
+              } catch (err) {
+                toast.error("Failed to generate clear tamper code");
+              } finally {
+                setIsTamperLoading(false);
+              }
+            };
+
+            const generateCredit = async (meterId: string, meterNumber: any, amount: number) => {
+              setIsCreditLoading(true);
+              setCreditCode(null);
+              try {
+                const response = await generateMeterCredit(axiosInstance, {
+                  meterId,
+                  meterNumber,
+                  amount
+                })
+                setCreditCode(response[0].Token);
+              } catch (err) {
+                toast.error("Failed to generate credit code");
+              } finally {
+                setIsCreditLoading(false);
+              }
+            };
+
+            if (!meter) {
+              return <div className="text-gray-500">No meter selected.</div>;
+            }
+            return (
+              <div className="space-y-4">
+                <div>
+                  <div className="font-semibold">Meter Number:</div>
+                  <div>{meter.meterNumber}</div>
+                </div>
+                <div>
+                  <div className="font-semibold">Location:</div>
+                  <div>{meter.location}</div>
+                </div>
+                <div>
+                  <div className="font-semibold">Deficit (Ksh):</div>
+                  <div>
+                    {new Intl.NumberFormat('en-KE', {
+                      style: 'currency',
+                      currency: 'KES',
+                      minimumFractionDigits: 0,
+                    }).format(meter.openingDeficit)}
+                  </div>
+                </div>
+                <div className="flex flex-col gap-3">
+                  <Button
+                    variant="secondary"
+                    disabled={isTamperLoading}
+                    onClick={() => generateClearTamperCode(meter?.meterNumber)}
+                  >
+                    {isTamperLoading ? "Generating..." : "Clear Tamper"}
+                  </Button>
+                  {tamperCode && (
+                    <div className="bg-gray-100 rounded p-2 text-center font-mono text-lg tracking-widest">
+                      <span className="font-semibold">Tamper Code:</span> <br />
+                      <span>{tamperCode}</span>
+                    </div>
+                  )}
+                  <form
+                    className="flex flex-col gap-2"
+                    onSubmit={async e => {
+                      e.preventDefault();
+                      // @ts-ignore
+                      const amount = Number(e.target.amount.value);
+                      await generateCredit(meter.id, meter?.meterNumber, amount);
+                    }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Input
+                        name="amount"
+                        type="number"
+                        min={1}
+                        step={1}
+                        placeholder="Amount (Ksh)"
+                        required
+                        className="w-32"
+                      />
+                      <Button type="submit" variant="default" disabled={isCreditLoading}>
+                        {isCreditLoading ? "Generating..." : "Generate Credit"}
+                      </Button>
+                    </div>
+                  </form>
+                  {creditCode && (
+                    <div className="bg-gray-100 rounded p-2 text-center font-mono text-lg tracking-widest">
+                      <span className="font-semibold">Credit Code:</span> <br />
+                      <span>{creditCode}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setActionDialogOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
       <Toaster position='top-right' richColors />

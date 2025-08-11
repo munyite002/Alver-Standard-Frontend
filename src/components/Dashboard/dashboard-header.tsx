@@ -27,7 +27,7 @@ export function DashboardHeader({
                     <DashboardNav />
                 </SheetContent>
             </Sheet>
-            
+
             <div className="flex-1 md:grow-0 md:w-[300px]">
                 <div className="relative">
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -41,16 +41,19 @@ export function DashboardHeader({
                             setSearchQuery(e.target.value);
                         }}
                     />
+
                 </div>
             </div>
             <div className="flex items-center gap-2 ml-auto">
-                {/* <Button variant="outline" size="icon" className="relative">
-                    <Bell className="h-5 w-5" />
-                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
-                        3
-                    </span>
-                    <span className="sr-only">Notifications</span>
-                </Button> */}
+                <div className="text-lg font-semibold text-blue-600 bg-gray-100 px-4 py-2 rounded-md inline-block">
+                    {new Date().toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        month: 'long',
+                        day: 'numeric',
+                        year: 'numeric'
+                    })}
+                </div>
+
                 <UserNav />
             </div>
         </header>

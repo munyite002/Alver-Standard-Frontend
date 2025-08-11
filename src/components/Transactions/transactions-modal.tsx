@@ -430,7 +430,7 @@ export function TransactionModal({
                             <div>
                                 <p className="text-sm text-gray-600 mb-1">MSISDN</p>
                                 <p className="font-semibold text-gray-900 flex items-center">
-                                    {transaction.msisdn.slice(0,20)}...
+                                    {transaction.msisdn.slice(0, 20)}...
                                     <CopyButton text={transaction.msisdn} fieldName="Phone" />
                                 </p>
                             </div>
@@ -471,6 +471,20 @@ export function TransactionModal({
                                             {formatToken(transaction.token, transaction)}
                                         </code>
                                         <CopyButton text={transaction.token} fieldName="Token" />
+                                    </div>
+                                </div>
+                                <div className="my-2 flex justify-between">
+                                    <div>
+                                        <p className="text-sm text-gray-600 mb-2">Units</p>
+                                        <p className="font-semibold text-gray-900">
+                                            {transaction?.units || "N/A"} KWH
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-600 mb-2">Rate</p>
+                                        <p className="font-semibold text-gray-900">
+                                            {transaction?.rate || "N/A"} Ksh/Kwh
+                                        </p>
                                     </div>
                                 </div>
                             </div>
