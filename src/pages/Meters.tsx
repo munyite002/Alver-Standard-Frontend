@@ -618,7 +618,7 @@ const Meters: React.FC = () => {
                       <div className="text-xs text-gray-600">Meter ID: <span className="font-mono">{selectedMeter?.meterNumber}</span></div>
                       <div className="text-xs text-gray-600">Token: <span className="font-mono">{tokenValue}</span></div>
                       <div className="text-xs text-gray-600">Token Type: <span className="font-mono">{tokenType}</span></div>
-                      <Button
+                      {/* <Button
                         variant="default"
                         onClick={() => {
                           // Placeholder for SMS API integration
@@ -626,7 +626,7 @@ const Meters: React.FC = () => {
                         }}
                       >
                         Send SMS
-                      </Button>
+                      </Button> */}
                     </div>
                   )}
                 </div>
