@@ -195,6 +195,7 @@ const Meters: React.FC = () => {
 
 
   const meter = editingMeter || currentMeters[0];
+  const [selectedMeter, setSelectedMeter] = useState<Meter | null>(null);
   const [tamperCode, setTamperCode] = useState<string | null>(null);
   const [creditCode, setCreditCode] = useState<string | null>(null);
   const [isTamperLoading, setIsTamperLoading] = useState(false);
@@ -364,7 +365,10 @@ const Meters: React.FC = () => {
                           <Trash2 className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => setActionDialogOpen(true)}
+                          onClick={() => (
+                            setActionDialogOpen(true),
+                            setSelectedMeter(meter)
+                          )}
                           className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-cyan-50 hover:bg-cyan-100 text-cyan-600 hover:text-cyan-700 transition-all duration-150"
                         >
                           <Eye className="h-4 w-4" />
@@ -506,7 +510,7 @@ const Meters: React.FC = () => {
                 const response = await generateTamperCode(axiosInstance, {
                   meterNumber
                 });
-                setTamperCode(response[0].Token);
+                setTamperCode(response[0].Token || response.split(",")[0]);
               } catch (err) {
                 toast.error("Failed to generate clear tamper code");
               } finally {
@@ -534,15 +538,25 @@ const Meters: React.FC = () => {
             if (!meter) {
               return <div className="text-gray-500">No meter selected.</div>;
             }
+            // Determine token type and value
+            let tokenType = null;
+            let tokenValue = null;
+            if (tamperCode) {
+              tokenType = "tamper";
+              tokenValue = tamperCode;
+            } else if (creditCode) {
+              tokenType = "credit";
+              tokenValue = creditCode;
+            }
             return (
               <div className="space-y-4">
                 <div>
                   <div className="font-semibold">Meter Number:</div>
-                  <div>{meter.meterNumber}</div>
+                  <div>{selectedMeter?.meterNumber}</div>
                 </div>
                 <div>
                   <div className="font-semibold">Location:</div>
-                  <div>{meter.location}</div>
+                  <div>{selectedMeter?.location}</div>
                 </div>
                 <div>
                   <div className="font-semibold">Deficit (Ksh):</div>
@@ -551,14 +565,14 @@ const Meters: React.FC = () => {
                       style: 'currency',
                       currency: 'KES',
                       minimumFractionDigits: 0,
-                    }).format(meter.openingDeficit)}
+                    }).format(selectedMeter?.openingDeficit ?? 0)}
                   </div>
                 </div>
                 <div className="flex flex-col gap-3">
                   <Button
                     variant="secondary"
                     disabled={isTamperLoading}
-                    onClick={() => generateClearTamperCode(meter?.meterNumber)}
+                    onClick={() => selectedMeter?.meterNumber && generateClearTamperCode(selectedMeter.meterNumber)}
                   >
                     {isTamperLoading ? "Generating..." : "Clear Tamper"}
                   </Button>
@@ -574,7 +588,7 @@ const Meters: React.FC = () => {
                       e.preventDefault();
                       // @ts-ignore
                       const amount = Number(e.target.amount.value);
-                      await generateCredit(meter.id, meter?.meterNumber, amount);
+                      await generateCredit(selectedMeter?.id ?? '', selectedMeter?.meterNumber, amount);
                     }}
                   >
                     <div className="flex items-center gap-2">
@@ -596,6 +610,23 @@ const Meters: React.FC = () => {
                     <div className="bg-gray-100 rounded p-2 text-center font-mono text-lg tracking-widest">
                       <span className="font-semibold">Credit Code:</span> <br />
                       <span>{creditCode}</span>
+                    </div>
+                  )}
+                  {/* Send SMS Button and details */}
+                  {tokenType && tokenValue && (
+                    <div className="flex flex-col gap-2 mt-2">
+                      <div className="text-xs text-gray-600">Meter ID: <span className="font-mono">{selectedMeter?.meterNumber}</span></div>
+                      <div className="text-xs text-gray-600">Token: <span className="font-mono">{tokenValue}</span></div>
+                      <div className="text-xs text-gray-600">Token Type: <span className="font-mono">{tokenType}</span></div>
+                      <Button
+                        variant="default"
+                        onClick={() => {
+                          // Placeholder for SMS API integration
+                          toast.info(`Send SMS: Meter ID: ${selectedMeter?.id}, Token: ${tokenValue}, Type: ${tokenType}`);
+                        }}
+                      >
+                        Send SMS
+                      </Button>
                     </div>
                   )}
                 </div>
