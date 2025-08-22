@@ -44,15 +44,34 @@ export function TransactionTable({
 }: TransactionTableProps) {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 8;
-    const totalPages = Math.ceil(transactions?.length / itemsPerPage);
     const [sort, setSort] = useState<{
         key?: string;
         direction?: "asc" | "desc";
     }>({});
+    const [startDate, setStartDate] = useState<string>("");
+    const [endDate, setEndDate] = useState<string>("");
+
+    // Filter transactions by date range
+    const filteredTransactions = (transactions || []).filter((t: any) => {
+        if (!startDate && !endDate) return true;
+        const txDate = new Date(t.createdAt);
+        const start = startDate ? new Date(startDate) : null;
+        const end = endDate ? new Date(endDate) : null;
+        if (start && end) {
+            return txDate >= start && txDate <= end;
+        } else if (start) {
+            return txDate >= start;
+        } else if (end) {
+            return txDate <= end;
+        }
+        return true;
+    });
+
+    const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     // Sort transactions based on sort value
-    const sortedTransactions = [...(transactions || [])].sort((a, b) => {
+    const sortedTransactions = [...filteredTransactions].sort((a, b) => {
         if (!sort.key || !sort.direction) return 0;
         const { key, direction } = sort;
         let aValue = a[key];
@@ -71,6 +90,21 @@ export function TransactionTable({
 
     const currentTransactions = sortedTransactions.slice(startIndex, endIndex);
 
+    // Calculate total amount for filtered transactions
+    const totalAmount = filteredTransactions.reduce((sum: number, t: any) => sum + (t.transAmount || 0), 0);
+
+    // Helper to format date as 'Aug 1st 2025'
+    function formatFancyDate(dateStr: string) {
+        if (!dateStr) return "";
+        const date = new Date(dateStr);
+        const day = date.getDate();
+        const daySuffix =
+            day % 10 === 1 && day !== 11 ? "st" :
+            day % 10 === 2 && day !== 12 ? "nd" :
+            day % 10 === 3 && day !== 13 ? "rd" : "th";
+        return `${date.toLocaleString('en-US', { month: 'short' })} ${day}${daySuffix} ${date.getFullYear()}`;
+    }
+
     const formatDate = (dateString: any) => {
         const date = new Date(dateString);
         return {
@@ -88,9 +122,44 @@ export function TransactionTable({
 
     return (
         <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Recent Transactions</CardTitle>
-                <div>
+            <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="flex flex-col gap-2 md:flex-row md:items-center">
+                    <CardTitle>Recent Transactions</CardTitle>
+                    <div className="flex gap-2 items-center ml-0 md:ml-6">
+                        <label className="text-sm text-gray-700">Start Date:</label>
+                        <input
+                            type="date"
+                            value={startDate}
+                            onChange={e => {
+                                setStartDate(e.target.value);
+                                setCurrentPage(1);
+                            }}
+                            className="border rounded px-2 py-1 text-sm"
+                        />
+                        <label className="text-sm text-gray-700">End Date:</label>
+                        <input
+                            type="date"
+                            value={endDate}
+                            onChange={e => {
+                                setEndDate(e.target.value);
+                                setCurrentPage(1);
+                            }}
+                            className="border rounded px-2 py-1 text-sm"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setStartDate("");
+                                setEndDate("");
+                                setCurrentPage(1);
+                            }}
+                            className="ml-2 px-3 py-1 rounded bg-gray-200 text-gray-700 text-sm hover:bg-gray-300 border"
+                        >
+                            Clear
+                        </button>
+                    </div>
+                </div>
+                <div className="flex gap-4 items-center">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button
@@ -158,6 +227,22 @@ export function TransactionTable({
                 </div>
             </CardHeader>
             <CardContent>
+                <div className="mb-4 flex items-center justify-between">
+                    {(startDate || endDate) && (
+                        <div className="text-sm font-medium text-gray-700">
+                            Transaction total
+                            {startDate && endDate
+                                ? ` between ${formatFancyDate(startDate)} and ${formatFancyDate(endDate)}`
+                                : startDate
+                                    ? ` from ${formatFancyDate(startDate)}`
+                                    : endDate
+                                        ? ` up to ${formatFancyDate(endDate)}`
+                                        : ''
+                            }
+                            : <span className="text-blue-600">Ksh {totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        </div>
+                    )}
+                </div>
                 <div className="rounded-md border">
                     <Table className="w-full">
                         <TableHeader>
@@ -296,13 +381,13 @@ export function TransactionTable({
                 <div className="flex items-center justify-between mt-4">
                     <div className="text-sm text-muted-foreground">
                         Showing{" "}
-                        <span className="font-medium">{startIndex + 1}</span> to{" "}
+                        <span className="font-medium">{filteredTransactions.length === 0 ? 0 : startIndex + 1}</span> to{" "}
                         <span className="font-medium">
-                            {Math.min(endIndex, transactions?.length)}
+                            {Math.min(endIndex, filteredTransactions.length)}
                         </span>{" "}
                         of{" "}
                         <span className="font-medium">
-                            {transactions?.length}
+                            {filteredTransactions.length}
                         </span>{" "}
                         transactions
                     </div>
