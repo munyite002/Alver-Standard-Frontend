@@ -492,7 +492,7 @@ const Meters: React.FC = () => {
 
       {/* ACTION DIALOG */}
       <Dialog open={actionDialogOpen} onOpenChange={setActionDialogOpen}>
-        <DialogContent className="bg-white, max-h-90vh overflow-y-auto">
+        <DialogContent className="bg-white max-h-90vh overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Meter Actions</DialogTitle>
             <DialogDescription>
