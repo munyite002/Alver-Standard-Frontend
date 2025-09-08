@@ -1,0 +1,26 @@
+name: SERVER PIPELINE
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  SSH-TO-SERVER:
+    name: 🎉 SSH to server
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🖥 SSH into server and run script
+        run: |
+          sshpass -p '${{ secrets.SSH_PASSWORD }}' ssh -tt -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'ENDSSH'
+          source ~/.nvm/nvm.sh || true
+          export PATH="$HOME/.nvm/versions/node/$(nvm version)/bin:$PATH"
+          cd ALVER-STRON-METER-SYSTEM/ALVER-STRON-ADMIN-PANEL
+          ./update.sh
+          exit
+          ENDSSH
+
+
+      - name: ✅ Notify Deployment Success
+        run: echo "🎉 Deployment completed successfully!"
