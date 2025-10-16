@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { FileText, TrendingUp, Users, Zap, Filter, Download } from "lucide-react";
 import useAxiosWithAuth from "@/../utils/axiosInterceptor";
 import {
-    getTariffsForReports,
     getTariffReport,
     getRevenueSummary,
 } from "@/../api/reports.api";
@@ -95,6 +94,16 @@ export function ReportsPage() {
 
         // Generate PDF content
         generateTariffReportPDF(tariffReport);
+    };
+
+    const handleDownloadTariffReportCSV = () => {
+        if (!tariffReport) {
+            alert("Please generate a tariff report first");
+            return;
+        }
+
+        // Generate CSV content
+        generateTariffReportCSV(tariffReport);
     };
 
     const generateTariffReportPDF = (report: TariffReport) => {
@@ -325,6 +334,78 @@ export function ReportsPage() {
         printWindow.document.close();
     };
 
+    const generateTariffReportCSV = (report: TariffReport) => {
+        // Generate filename with tariff name and date range
+        const dateRange = report.dateRange.startDate && report.dateRange.endDate 
+            ? `${report.dateRange.startDate} to ${report.dateRange.endDate}`
+            : report.dateRange.startDate 
+                ? `from ${report.dateRange.startDate}`
+                : report.dateRange.endDate
+                    ? `until ${report.dateRange.endDate}`
+                    : 'All Time';
+
+        const filename = `Tariff_Report_${report.tariff.name.replace(/[^a-zA-Z0-9]/g, '_')}_${dateRange.replace(/[^a-zA-Z0-9]/g, '_')}.csv`;
+
+        // Create CSV content
+        let csvContent = '';
+        
+        // Header information
+        csvContent += 'Alver Power Systems - Tariff Report\n';
+        csvContent += `Generated on: ${new Date().toLocaleDateString('en-KE', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        })}\n\n`;
+        
+        // Report information
+        csvContent += 'Report Information\n';
+        csvContent += `Tariff Name,${report.tariff.name}\n`;
+        csvContent += `Provider,${report.tariff.provider}\n`;
+        csvContent += `Rate per Unit,${formatCurrency(report.tariff.ratePerUnit)}\n`;
+        csvContent += `Report Period,${dateRange}\n`;
+        csvContent += `Start Date,${report.dateRange.startDate || 'N/A'}\n`;
+        csvContent += `End Date,${report.dateRange.endDate || 'N/A'}\n\n`;
+        
+        // Summary information
+        csvContent += 'Summary\n';
+        csvContent += `Total Meters,${report.summary.totalMeters}\n`;
+        csvContent += `Total Transactions,${report.summary.totalTransactions}\n`;
+        csvContent += `Total Units,${report.summary.totalUnits.toFixed(2)}\n`;
+        csvContent += `Total Revenue,${formatCurrency(report.summary.totalRevenue)}\n\n`;
+        
+        // Meter breakdown
+        if (report.meterBreakdown.length > 0) {
+            csvContent += 'Meter Breakdown\n';
+            csvContent += 'Meter Number,Transactions,Total Units,Total Revenue,Average Amount\n';
+            report.meterBreakdown.forEach(meter => {
+                csvContent += `${meter.meterNumber},${meter.transactionCount},${meter.totalUnits.toFixed(2)},${formatCurrency(meter.totalRevenue)},${formatCurrency(meter.averageAmount)}\n`;
+            });
+            csvContent += '\n';
+        }
+        
+        // Recent transactions
+        if (report.transactions.length > 0) {
+            csvContent += 'Recent Transactions\n';
+            csvContent += 'Transaction ID,Date & Time,Meter Number,Amount,Units,Phone\n';
+            report.transactions.slice(0, 10).forEach(transaction => {
+                csvContent += `${transaction.transId},${formatDate(transaction.transTime)},${transaction.meterNumber},${formatCurrency(transaction.transAmount)},${transaction.units},${transaction.msisdn}\n`;
+            });
+        }
+
+        // Create and download the file
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-KE', {
             style: 'currency',
@@ -465,13 +546,22 @@ export function ReportsPage() {
                                             <h3 className="text-lg font-semibold text-gray-900">
                                                 {tariffReport.tariff.name}
                                             </h3>
-                                            <button
-                                                onClick={handleDownloadTariffReport}
-                                                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-                                            >
-                                                <Download className="h-4 w-4" />
-                                                Download Report
-                                            </button>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={handleDownloadTariffReport}
+                                                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                                                >
+                                                    <Download className="h-4 w-4" />
+                                                    Download PDF
+                                                </button>
+                                                <button
+                                                    onClick={handleDownloadTariffReportCSV}
+                                                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                                                >
+                                                    <Download className="h-4 w-4" />
+                                                    Download CSV
+                                                </button>
+                                            </div>
                                         </div>
                                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                                             <div>
