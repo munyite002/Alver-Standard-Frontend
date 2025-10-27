@@ -50,7 +50,8 @@ const Meters: React.FC = () => {
     meterNumber: '',
     location: '',
     openingDeficit: 0,
-    tariffId: ''
+    tariffId: '',
+    email: ''
   });
   const [isSaving, setIsSaving] = useState(false);
 
@@ -126,6 +127,7 @@ const Meters: React.FC = () => {
         location: meter.location,
         openingDeficit: meter.openingDeficit,
         tariffId: meter.tariffId || '',
+        email: meter.email || '',
       });
     } else {
       setEditingMeter(null);
@@ -134,6 +136,7 @@ const Meters: React.FC = () => {
         location: '',
         openingDeficit: 0,
         tariffId: '',
+        email: '',
       });
     }
     setOpen(true);
@@ -476,6 +479,16 @@ const Meters: React.FC = () => {
                     <option key={tariff.id} value={tariff.id}>{tariff.name}</option>
                   ))}
                 </select>
+              </div>
+              <div className="grid gap-2">
+                <label htmlFor="email">Email (Optional)</label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="user@example.com"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                />
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={handleClose}>

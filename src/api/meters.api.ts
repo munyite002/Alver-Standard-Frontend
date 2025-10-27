@@ -9,6 +9,7 @@ export interface Meter {
   tariffId?: string;
   createdAt: string;
   updatedAt: string;
+  email: string;
 }
 
 export const createMeter = async (axiosInstance: any, meterData: Omit<Meter, 'id' | 'createdAt' | 'updatedAt'>) => {
@@ -44,3 +45,4 @@ export const generateMeterCredit = async (axiosInstance: any, data: any) => {
   const response = await axiosInstance.post(`${import.meta.env.VITE_PUBLIC_STAGING_API}/meters/generate-credit`, data);
   return response.data;
 };
+
