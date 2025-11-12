@@ -580,7 +580,7 @@ const Meters: React.FC = () => {
                   meterNumber
                 });
                 if (response && response.token) {
-                  setTamperCode(response.token);
+                  setTamperCode(response.token == "N/A" ? response.rawResponse : response.token);
                   toast.success("Clear tamper code generated successfully");
                 } else {
                   toast.error("Failed to generate clear tamper code");
