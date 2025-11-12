@@ -441,7 +441,7 @@ const Meters: React.FC = () => {
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
+        <DialogContent className='bg-white max-h-[90vh] overflow-y-auto'>
           <DialogHeader>
             <DialogTitle>{editingMeter ? 'Edit Meter' : 'Add New Meter'}</DialogTitle>
             <DialogDescription>
