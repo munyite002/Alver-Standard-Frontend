@@ -50,8 +50,12 @@ const Meters: React.FC = () => {
     meterNumber: '',
     location: '',
     openingDeficit: 0,
+    make: '',
     tariffId: '',
-    email: ''
+    email: '',
+    SGC: '',
+    TI: '',
+    KRN: '',
   });
   const [isSaving, setIsSaving] = useState(false);
 
@@ -128,6 +132,10 @@ const Meters: React.FC = () => {
         openingDeficit: meter.openingDeficit,
         tariffId: meter.tariffId || '',
         email: meter.email || '',
+        SGC: meter.SGC || '',
+        TI: meter.TI || '',
+        KRN: meter.KRN || '',
+        make: meter.make || '',
       });
     } else {
       setEditingMeter(null);
@@ -137,6 +145,10 @@ const Meters: React.FC = () => {
         openingDeficit: 0,
         tariffId: '',
         email: '',
+        SGC: '',
+        TI: '',
+        KRN: '',
+        make: '',
       });
     }
     setOpen(true);
@@ -466,6 +478,50 @@ const Meters: React.FC = () => {
                   required
                 />
               </div>
+
+              <div className="grid gap-2">
+                <label htmlFor="make">Make</label>
+                <select
+                  id="make"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  value={formData.make || ''}
+                  onChange={(e) => setFormData({ ...formData, make: e.target.value })}
+                >
+                  <option value="">Select Make</option>
+                  <option value="STRON">STRON</option>
+                  <option value="HES">HES</option>
+                </select>
+              </div>
+
+            {formData.make === 'HES' && (
+              <>
+                <div className="grid gap-2">
+                  <label htmlFor="sgc">SGC</label>
+                  <Input
+                    id="sgc"
+                    value={formData.SGC}
+                    onChange={(e) => setFormData({ ...formData, SGC: e.target.value })}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <label htmlFor="ti">TI</label>
+                  <Input
+                    id="ti"
+                    value={formData.TI}
+                    onChange={(e) => setFormData({ ...formData, TI: e.target.value })}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <label htmlFor="krn">KRN</label>
+                  <Input
+                    id="krn"
+                    value={formData.KRN}
+                    onChange={(e) => setFormData({ ...formData, KRN: e.target.value })}
+                  />
+                </div>
+              </>
+            )}
+
               <div className="grid gap-2">
                 <label htmlFor="tariff">Tariff</label>
                 <select

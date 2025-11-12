@@ -9,7 +9,11 @@ export interface Meter {
   tariffId?: string;
   createdAt: string;
   updatedAt: string;
+  make: any;
   email: string;
+  SGC: any;
+  TI: any;
+  KRN: any;
 }
 
 export const createMeter = async (axiosInstance: any, meterData: Omit<Meter, 'id' | 'createdAt' | 'updatedAt'>) => {
