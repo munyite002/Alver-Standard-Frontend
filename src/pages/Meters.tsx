@@ -579,8 +579,14 @@ const Meters: React.FC = () => {
                 const response = await generateTamperCode(axiosInstance, {
                   meterNumber
                 });
-                setTamperCode(response[0].Token || response.split(",")[0]);
+                if (response && response.token) {
+                  setTamperCode(response.token);
+                  toast.success("Clear tamper code generated successfully");
+                } else {
+                  toast.error("Failed to generate clear tamper code");
+                }
               } catch (err) {
+                console.log("Failed To Generate Clear Tamper Code:", err);
                 toast.error("Failed to generate clear tamper code");
               } finally {
                 setIsTamperLoading(false);
@@ -597,7 +603,6 @@ const Meters: React.FC = () => {
                   meterNumber,
                   amount,
                 });
-                console.log("Resposne From Generate Credit: ", response);
                 // Ensure the response exists and has a token
                 if (response && response.token) {
                   setCreditCode(response.token);
