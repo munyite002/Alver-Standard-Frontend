@@ -493,34 +493,34 @@ const Meters: React.FC = () => {
                 </select>
               </div>
 
-            {formData.make === 'HES' && (
-              <>
-                <div className="grid gap-2">
-                  <label htmlFor="sgc">SGC</label>
-                  <Input
-                    id="sgc"
-                    value={formData.SGC}
-                    onChange={(e) => setFormData({ ...formData, SGC: e.target.value })}
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <label htmlFor="ti">TI</label>
-                  <Input
-                    id="ti"
-                    value={formData.TI}
-                    onChange={(e) => setFormData({ ...formData, TI: e.target.value })}
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <label htmlFor="krn">KRN</label>
-                  <Input
-                    id="krn"
-                    value={formData.KRN}
-                    onChange={(e) => setFormData({ ...formData, KRN: e.target.value })}
-                  />
-                </div>
-              </>
-            )}
+              {formData.make === 'HES' && (
+                <>
+                  <div className="grid gap-2">
+                    <label htmlFor="sgc">SGC</label>
+                    <Input
+                      id="sgc"
+                      value={formData.SGC}
+                      onChange={(e) => setFormData({ ...formData, SGC: e.target.value })}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <label htmlFor="ti">TI</label>
+                    <Input
+                      id="ti"
+                      value={formData.TI}
+                      onChange={(e) => setFormData({ ...formData, TI: e.target.value })}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <label htmlFor="krn">KRN</label>
+                    <Input
+                      id="krn"
+                      value={formData.KRN}
+                      onChange={(e) => setFormData({ ...formData, KRN: e.target.value })}
+                    />
+                  </div>
+                </>
+              )}
 
               <div className="grid gap-2">
                 <label htmlFor="tariff">Tariff</label>
@@ -587,22 +587,32 @@ const Meters: React.FC = () => {
               }
             };
 
-            const generateCredit = async (meterId: string, meterNumber: any, amount: number) => {
+            const generateCredit = async (meterId: string, meterNumber: string, amount: number) => {
               setIsCreditLoading(true);
               setCreditCode(null);
+
               try {
                 const response = await generateMeterCredit(axiosInstance, {
                   meterId,
                   meterNumber,
-                  amount
-                })
-                setCreditCode(response.Token);
+                  amount,
+                });
+                console.log("Resposne From Generate Credit: ", response);
+                // Ensure the response exists and has a token
+                if (response && response.token) {
+                  setCreditCode(response.token);
+                  toast.success("Credit generated successfully");
+                } else {
+                  toast.error("Failed to generate credit code");
+                }
               } catch (err) {
+                console.error("Error generating credit:", err);
                 toast.error("Failed to generate credit code");
               } finally {
                 setIsCreditLoading(false);
               }
             };
+
 
             if (!meter) {
               return <div className="text-gray-500">No meter selected.</div>;
