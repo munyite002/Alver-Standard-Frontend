@@ -596,7 +596,7 @@ const Meters: React.FC = () => {
                   meterNumber,
                   amount
                 })
-                setCreditCode(response[0].Token);
+                setCreditCode(response.Token);
               } catch (err) {
                 toast.error("Failed to generate credit code");
               } finally {
