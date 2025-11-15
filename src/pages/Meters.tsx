@@ -540,7 +540,7 @@ const Meters: React.FC = () => {
                 <label htmlFor="email">Email (Optional)</label>
                 <Input
                   id="email"
-                  type="email"
+                  type="text"
                   placeholder="user@example.com"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
