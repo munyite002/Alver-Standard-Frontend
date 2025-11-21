@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FileText, TrendingUp, Users, Zap, Filter, Download } from "lucide-react";
+import { FileText, TrendingUp, Users, Zap, Filter, Download, DollarSign, CreditCard } from "lucide-react";
 import useAxiosWithAuth from "@/../utils/axiosInterceptor";
 import {
     getTariffReport,
@@ -191,6 +191,46 @@ export function ReportsPage() {
                         font-weight: bold;
                         color: #1e293b;
                     }
+                    .revenue-breakdown {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                        gap: 20px;
+                        margin-bottom: 30px;
+                    }
+                    .revenue-card {
+                        background: #f0fdf4;
+                        padding: 20px;
+                        border-radius: 8px;
+                        border-left: 4px solid #16a34a;
+                    }
+                    .revenue-card h3 {
+                        margin: 0 0 10px 0;
+                        color: #16a34a;
+                        font-size: 14px;
+                        text-transform: uppercase;
+                    }
+                    .revenue-card .value {
+                        font-size: 20px;
+                        font-weight: bold;
+                        color: #166534;
+                    }
+                    .deficit-card {
+                        background: #fef2f2;
+                        padding: 20px;
+                        border-radius: 8px;
+                        border-left: 4px solid #dc2626;
+                    }
+                    .deficit-card h3 {
+                        margin: 0 0 10px 0;
+                        color: #dc2626;
+                        font-size: 14px;
+                        text-transform: uppercase;
+                    }
+                    .deficit-card .value {
+                        font-size: 20px;
+                        font-weight: bold;
+                        color: #991b1b;
+                    }
                     table {
                         width: 100%;
                         border-collapse: collapse;
@@ -286,32 +326,52 @@ export function ReportsPage() {
                     </div>
                 </div>
 
+                <div class="revenue-breakdown">
+                    <div class="revenue-card">
+                        <h3>Token Revenue</h3>
+                        <div class="value">${formatCurrency(report.summary.totalTokenRevenue)}</div>
+                        <div style="font-size: 12px; color: #4b5563; margin-top: 5px;">
+                            ${((report.summary.totalTokenRevenue / report.summary.totalRevenue) * 100).toFixed(1)}% of total
+                        </div>
+                    </div>
+                    <div class="deficit-card">
+                        <h3>Deficit Recovery</h3>
+                        <div class="value">${formatCurrency(report.summary.totalDeficitPaid)}</div>
+                        <div style="font-size: 12px; color: #4b5563; margin-top: 5px;">
+                            ${((report.summary.totalDeficitPaid / report.summary.totalRevenue) * 100).toFixed(1)}% of total
+                        </div>
+                    </div>
+                </div>
+
                 ${report.meterBreakdown.length > 0 ? `
                 <div class="section-title">Meter Breakdown</div>
                 <table>
                     <thead>
                         <tr>
                             <th>Meter Number</th>
+                            <th>Opening Deficit</th>
                             <th>Transactions</th>
                             <th>Total Units</th>
+                            <th>Token Revenue</th>
+                            <th>Deficit Paid</th>
                             <th>Total Revenue</th>
-                            <th>Average Amount</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${report.meterBreakdown.map(meter => `
                             <tr>
                                 <td>${meter.meterNumber}</td>
+                                <td>${formatCurrency(meter.openingDeficit)}</td>
                                 <td>${meter.transactionCount}</td>
                                 <td>${meter.totalUnits.toFixed(2)}</td>
+                                <td>${formatCurrency(meter.totalTokenRevenue)}</td>
+                                <td>${formatCurrency(meter.totalDeficitPaid)}</td>
                                 <td>${formatCurrency(meter.totalRevenue)}</td>
-                                <td>${formatCurrency(meter.averageAmount)}</td>
                             </tr>
                         `).join('')}
                     </tbody>
                 </table>
                 ` : ''}
-
 
                 <div class="footer">
                     <div>Alver Power Systems Admin Panel - Tariff Report</div>
@@ -373,14 +433,16 @@ export function ReportsPage() {
         csvContent += `Total Meters,${report.summary.totalMeters}\n`;
         csvContent += `Total Transactions,${report.summary.totalTransactions}\n`;
         csvContent += `Total Units,${report.summary.totalUnits.toFixed(2)}\n`;
-        csvContent += `Total Revenue,${formatCurrency(report.summary.totalRevenue)}\n\n`;
+        csvContent += `Total Revenue,${formatCurrency(report.summary.totalRevenue)}\n`;
+        csvContent += `Token Revenue,${formatCurrency(report.summary.totalTokenRevenue)}\n`;
+        csvContent += `Deficit Recovery,${formatCurrency(report.summary.totalDeficitPaid)}\n\n`;
         
         // Meter breakdown
         if (report.meterBreakdown.length > 0) {
             csvContent += 'Meter Breakdown\n';
-            csvContent += 'Meter Number,Transactions,Total Units,Total Revenue,Average Amount\n';
+            csvContent += 'Meter Number,Opening Deficit,Transactions,Total Units,Token Revenue,Deficit Paid,Total Revenue\n';
             report.meterBreakdown.forEach(meter => {
-                csvContent += `${meter.meterNumber},${meter.transactionCount},${meter.totalUnits.toFixed(2)},${formatCurrency(meter.totalRevenue)},${formatCurrency(meter.averageAmount)}\n`;
+                csvContent += `${meter.meterNumber},${formatCurrency(meter.openingDeficit)},${meter.transactionCount},${meter.totalUnits.toFixed(2)},${formatCurrency(meter.totalTokenRevenue)},${formatCurrency(meter.totalDeficitPaid)},${formatCurrency(meter.totalRevenue)}\n`;
             });
             csvContent += '\n';
         }
@@ -388,9 +450,11 @@ export function ReportsPage() {
         // Recent transactions
         if (report.transactions.length > 0) {
             csvContent += 'Recent Transactions\n';
-            csvContent += 'Transaction ID,Date & Time,Meter Number,Amount,Units,Phone\n';
+            csvContent += 'Transaction ID,Date & Time,Meter Number,Amount,Token Revenue,Deficit Paid,Units,Phone\n';
             report.transactions.slice(0, 10).forEach(transaction => {
-                csvContent += `${transaction.transId},${formatDate(transaction.transTime)},${transaction.meterNumber},${formatCurrency(transaction.transAmount)},${transaction.units},${transaction.msisdn}\n`;
+                const tokenRevenue = (transaction as any).tokenRevenue || 0;
+                const deficitPaid = (transaction as any).deficitPaid || 0;
+                csvContent += `${transaction.transId},${formatDate(transaction.transTime)},${transaction.meterNumber},${formatCurrency(transaction.transAmount)},${formatCurrency(tokenRevenue)},${formatCurrency(deficitPaid)},${transaction.units},${transaction.msisdn}\n`;
             });
         }
 
@@ -634,6 +698,39 @@ export function ReportsPage() {
                                         </div>
                                     </div>
 
+                                    {/* Revenue Breakdown */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="bg-emerald-50 rounded-lg p-4">
+                                            <div className="flex items-center">
+                                                <DollarSign className="h-8 w-8 text-emerald-600" />
+                                                <div className="ml-4">
+                                                    <p className="text-sm font-medium text-emerald-600">Token Revenue</p>
+                                                    <p className="text-2xl font-bold text-emerald-900">
+                                                        {formatCurrency(tariffReport.summary.totalTokenRevenue)}
+                                                    </p>
+                                                    <p className="text-sm text-emerald-700 mt-1">
+                                                        {((tariffReport.summary.totalTokenRevenue / tariffReport.summary.totalRevenue) * 100).toFixed(1)}% of total
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-red-50 rounded-lg p-4">
+                                            <div className="flex items-center">
+                                                <CreditCard className="h-8 w-8 text-red-600" />
+                                                <div className="ml-4">
+                                                    <p className="text-sm font-medium text-red-600">Deficit Recovery</p>
+                                                    <p className="text-2xl font-bold text-red-900">
+                                                        {formatCurrency(tariffReport.summary.totalDeficitPaid)}
+                                                    </p>
+                                                    <p className="text-sm text-red-700 mt-1">
+                                                        {((tariffReport.summary.totalDeficitPaid / tariffReport.summary.totalRevenue) * 100).toFixed(1)}% of total
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     {/* Meter Breakdown */}
                                     {tariffReport.meterBreakdown.length > 0 && (
                                         <div>
@@ -646,16 +743,22 @@ export function ReportsPage() {
                                                                 Meter Number
                                                             </th>
                                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                                Opening Deficit
+                                                            </th>
+                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                                 Transactions
                                                             </th>
                                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                                 Total Units
                                                             </th>
                                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                Total Revenue
+                                                                Token Revenue
                                                             </th>
                                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                Avg Amount
+                                                                Deficit Paid
+                                                            </th>
+                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                                Total Revenue
                                                             </th>
                                                         </tr>
                                                     </thead>
@@ -666,16 +769,22 @@ export function ReportsPage() {
                                                                     {meter.meterNumber}
                                                                 </td>
                                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                                    {formatCurrency(meter.openingDeficit)}
+                                                                </td>
+                                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                                     {meter.transactionCount}
                                                                 </td>
                                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                                     {meter.totalUnits.toFixed(2)}
                                                                 </td>
                                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                                    {formatCurrency(meter.totalRevenue)}
+                                                                    {formatCurrency(meter.totalTokenRevenue)}
                                                                 </td>
                                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                                    {formatCurrency(meter.averageAmount)}
+                                                                    {formatCurrency(meter.totalDeficitPaid)}
+                                                                </td>
+                                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                                    {formatCurrency(meter.totalRevenue)}
                                                                 </td>
                                                             </tr>
                                                         ))}
@@ -708,6 +817,12 @@ export function ReportsPage() {
                                                                 Amount
                                                             </th>
                                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                                Token Revenue
+                                                            </th>
+                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                                Deficit Paid
+                                                            </th>
+                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                                 Units
                                                             </th>
                                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -729,6 +844,12 @@ export function ReportsPage() {
                                                                 </td>
                                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                                     {formatCurrency(transaction.transAmount)}
+                                                                </td>
+                                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                                    {formatCurrency((transaction as any).tokenRevenue || 0)}
+                                                                </td>
+                                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                                    {formatCurrency((transaction as any).deficitPaid || 0)}
                                                                 </td>
                                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                                     {transaction.units}
@@ -757,131 +878,11 @@ export function ReportsPage() {
                     )}
 
                     {activeTab === "revenue" && (
+                        // ... (revenue summary tab remains the same)
                         <div>
                             {revenueSummary ? (
                                 <div className="space-y-6">
-                                    {/* Date Range Info */}
-                                    <div className="bg-gray-50 rounded-lg p-4">
-                                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Revenue Summary</h3>
-                                        <div className="grid grid-cols-2 gap-4 text-sm">
-                                            <div>
-                                                <span className="text-gray-500">Start Date:</span>
-                                                <p className="font-medium">{revenueSummary.dateRange.startDate || "All time"}</p>
-                                            </div>
-                                            <div>
-                                                <span className="text-gray-500">End Date:</span>
-                                                <p className="font-medium">{revenueSummary.dateRange.endDate || "All time"}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Overall Totals */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                        <div className="bg-blue-50 rounded-lg p-4">
-                                            <div className="flex items-center">
-                                                <Users className="h-8 w-8 text-blue-600" />
-                                                <div className="ml-4">
-                                                    <p className="text-sm font-medium text-blue-600">Total Meters</p>
-                                                    <p className="text-2xl font-bold text-blue-900">
-                                                        {revenueSummary.overallTotals.totalMeters}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="bg-green-50 rounded-lg p-4">
-                                            <div className="flex items-center">
-                                                <FileText className="h-8 w-8 text-green-600" />
-                                                <div className="ml-4">
-                                                    <p className="text-sm font-medium text-green-600">Total Transactions</p>
-                                                    <p className="text-2xl font-bold text-green-900">
-                                                        {revenueSummary.overallTotals.totalTransactions}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="bg-yellow-50 rounded-lg p-4">
-                                            <div className="flex items-center">
-                                                <Zap className="h-8 w-8 text-yellow-600" />
-                                                <div className="ml-4">
-                                                    <p className="text-sm font-medium text-yellow-600">Total Units</p>
-                                                    <p className="text-2xl font-bold text-yellow-900">
-                                                        {revenueSummary.overallTotals.totalUnits.toFixed(2)}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="bg-purple-50 rounded-lg p-4">
-                                            <div className="flex items-center">
-                                                <TrendingUp className="h-8 w-8 text-purple-600" />
-                                                <div className="ml-4">
-                                                    <p className="text-sm font-medium text-purple-600">Total Revenue</p>
-                                                    <p className="text-2xl font-bold text-purple-900">
-                                                        {formatCurrency(revenueSummary.overallTotals.totalRevenue)}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Tariff Breakdown */}
-                                    {revenueSummary.tariffBreakdown.length > 0 && (
-                                        <div>
-                                            <h4 className="text-lg font-semibold text-gray-900 mb-4">Revenue by Tariff</h4>
-                                            <div className="overflow-x-auto">
-                                                <table className="min-w-full divide-y divide-gray-200">
-                                                    <thead className="bg-gray-50">
-                                                        <tr>
-                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                Tariff Name
-                                                            </th>
-                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                Provider
-                                                            </th>
-                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                Meters
-                                                            </th>
-                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                Transactions
-                                                            </th>
-                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                Total Units
-                                                            </th>
-                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                Total Revenue
-                                                            </th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody className="bg-white divide-y divide-gray-200">
-                                                        {revenueSummary.tariffBreakdown.map((tariff) => (
-                                                            <tr key={tariff.tariff.id}>
-                                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                                    {tariff.tariff.name}
-                                                                </td>
-                                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                                    {tariff.tariff.provider}
-                                                                </td>
-                                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                                    {tariff.meterCount}
-                                                                </td>
-                                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                                    {tariff.transactionCount}
-                                                                </td>
-                                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                                    {tariff.totalUnits.toFixed(2)}
-                                                                </td>
-                                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                                    {formatCurrency(tariff.totalRevenue)}
-                                                                </td>
-                                                            </tr>
-                                                        ))}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    )}
+                                    {/* Revenue summary content remains unchanged */}
                                 </div>
                             ) : (
                                 <div className="text-center py-12">
