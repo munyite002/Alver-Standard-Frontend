@@ -14,6 +14,7 @@ import type {
     RevenueSummary
 } from "@/../api/reports.api";
 import { getTariffs } from "@/../api/tariffs.api";
+import * as XLSX from 'xlsx';
 
 export function ReportsPage() {
     const axiosInstance = useAxiosWithAuth(import.meta.env.VITE_PUBLIC_STAGING_API);
