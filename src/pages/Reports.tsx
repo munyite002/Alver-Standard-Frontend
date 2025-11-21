@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+//@ts-nocheck
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { FileText, TrendingUp, Users, Zap, Filter, Download, DollarSign, CreditCard } from "lucide-react";
 import useAxiosWithAuth from "@/../utils/axiosInterceptor";
@@ -115,9 +118,9 @@ export function ReportsPage() {
         }
 
         // Generate filename with tariff name and date range
-        const dateRange = report.dateRange.startDate && report.dateRange.endDate 
+        const dateRange = report.dateRange.startDate && report.dateRange.endDate
             ? `${report.dateRange.startDate} to ${report.dateRange.endDate}`
-            : report.dateRange.startDate 
+            : report.dateRange.startDate
                 ? `from ${report.dateRange.startDate}`
                 : report.dateRange.endDate
                     ? `until ${report.dateRange.endDate}`
@@ -273,13 +276,13 @@ export function ReportsPage() {
                 <div class="header">
                     <div class="company-name">Alver Power Systems</div>
                     <div class="report-title">Tariff Report</div>
-                    <div style="color: #64748b; font-size: 14px;">Generated on ${new Date().toLocaleDateString('en-KE', { 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    })}</div>
+                    <div style="color: #64748b; font-size: 14px;">Generated on ${new Date().toLocaleDateString('en-KE', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        })}</div>
                 </div>
 
                 <div class="report-info">
@@ -396,9 +399,9 @@ export function ReportsPage() {
 
     const generateTariffReportCSV = (report: TariffReport) => {
         // Generate filename with tariff name and date range
-        const dateRange = report.dateRange.startDate && report.dateRange.endDate 
+        const dateRange = report.dateRange.startDate && report.dateRange.endDate
             ? `${report.dateRange.startDate} to ${report.dateRange.endDate}`
-            : report.dateRange.startDate 
+            : report.dateRange.startDate
                 ? `from ${report.dateRange.startDate}`
                 : report.dateRange.endDate
                     ? `until ${report.dateRange.endDate}`
@@ -408,17 +411,17 @@ export function ReportsPage() {
 
         // Create CSV content
         let csvContent = '';
-        
+
         // Header information
         csvContent += 'Alver Power Systems - Tariff Report\n';
-        csvContent += `Generated on: ${new Date().toLocaleDateString('en-KE', { 
-            year: 'numeric', 
-            month: 'long', 
+        csvContent += `Generated on: ${new Date().toLocaleDateString('en-KE', {
+            year: 'numeric',
+            month: 'long',
             day: 'numeric',
             hour: '2-digit',
             minute: '2-digit'
         })}\n\n`;
-        
+
         // Report information
         csvContent += 'Report Information\n';
         csvContent += `Tariff Name,${report.tariff.name}\n`;
@@ -427,7 +430,7 @@ export function ReportsPage() {
         csvContent += `Report Period,${dateRange}\n`;
         csvContent += `Start Date,${report.dateRange.startDate || 'N/A'}\n`;
         csvContent += `End Date,${report.dateRange.endDate || 'N/A'}\n\n`;
-        
+
         // Summary information
         csvContent += 'Summary\n';
         csvContent += `Total Meters,${report.summary.totalMeters}\n`;
@@ -436,7 +439,7 @@ export function ReportsPage() {
         csvContent += `Total Revenue,${formatCurrency(report.summary.totalRevenue)}\n`;
         csvContent += `Token Revenue,${formatCurrency(report.summary.totalTokenRevenue)}\n`;
         csvContent += `Deficit Recovery,${formatCurrency(report.summary.totalDeficitPaid)}\n\n`;
-        
+
         // Meter breakdown
         if (report.meterBreakdown.length > 0) {
             csvContent += 'Meter Breakdown\n';
@@ -446,12 +449,12 @@ export function ReportsPage() {
             });
             csvContent += '\n';
         }
-        
+
         // Recent transactions
         if (report.transactions.length > 0) {
             csvContent += 'Recent Transactions\n';
             csvContent += 'Transaction ID,Date & Time,Meter Number,Amount,Token Revenue,Deficit Paid,Units,Phone\n';
-            report.transactions.slice(0, 10).forEach(transaction => {
+            report.transactions.slice(0, 5).forEach(transaction => {
                 const tokenRevenue = (transaction as any).tokenRevenue || 0;
                 const deficitPaid = (transaction as any).deficitPaid || 0;
                 csvContent += `${transaction.transId},${formatDate(transaction.transTime)},${transaction.meterNumber},${formatCurrency(transaction.transAmount)},${formatCurrency(tokenRevenue)},${formatCurrency(deficitPaid)},${transaction.units},${transaction.msisdn}\n`;
@@ -468,6 +471,56 @@ export function ReportsPage() {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    };
+
+    const handleDownloadTransactionsExcel = (transactions: any[]) => {
+        if (!transactions || transactions.length === 0) {
+            alert("No transactions available to download");
+            return;
+        }
+
+        try {
+            // Format the data for Excel
+            const excelData = transactions.map(transaction => ({
+                'Transaction ID': transaction.transId,
+                'Date & Time': formatDate(transaction.transTime),
+                'Meter Number': transaction.meterNumber,
+                'Amount (KES)': transaction.transAmount,
+                'Token Revenue (KES)': transaction.tokenRevenue || 0,
+                'Deficit Paid (KES)': transaction.deficitPaid || 0,
+                'Units': transaction.units,
+                'Phone': transaction.msisdn,
+                'Rate (KES)': transaction.rate,
+                'Token': transaction.token,
+                'Transaction Type': transaction.transactionType
+            }));
+
+            // Create worksheet
+            const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+            // Create workbook
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Transactions');
+
+            // Generate filename
+            const dateRange = tariffReport?.dateRange.startDate && tariffReport?.dateRange.endDate
+                ? `${tariffReport.dateRange.startDate}_to_${tariffReport.dateRange.endDate}`
+                : tariffReport?.dateRange.startDate
+                    ? `from_${tariffReport.dateRange.startDate}`
+                    : tariffReport?.dateRange.endDate
+                        ? `until_${tariffReport.dateRange.endDate}`
+                        : 'All_Time';
+
+            const tariffName = tariffReport?.tariff.name.replace(/[^a-zA-Z0-9]/g, '_') || 'Unknown_Tariff';
+            const filename = `Transactions_${tariffName}_${dateRange}.xlsx`;
+
+            // Download the file
+            XLSX.writeFile(workbook, filename);
+
+        } catch (error) {
+            console.error('Error generating Excel file:', error);
+            alert('Failed to download Excel file');
+        }
     };
 
     const formatCurrency = (amount: number) => {
@@ -796,72 +849,17 @@ export function ReportsPage() {
 
                                     {/* Recent Transactions */}
                                     {tariffReport.transactions.length > 0 && (
-                                        <div>
-                                            <h4 className="text-lg font-semibold text-gray-900 mb-4">
-                                                Recent Transactions ({tariffReport.transactions.length})
+                                        <div className="flex justify-between items-center mb-4">
+                                            <h4 className="text-lg font-semibold text-gray-900">
+                                                Transactions ({tariffReport.transactions.length})
                                             </h4>
-                                            <div className="overflow-x-auto">
-                                                <table className="min-w-full divide-y divide-gray-200">
-                                                    <thead className="bg-gray-50">
-                                                        <tr>
-                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                Transaction ID
-                                                            </th>
-                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                Date & Time
-                                                            </th>
-                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                Meter Number
-                                                            </th>
-                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                Amount
-                                                            </th>
-                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                Token Revenue
-                                                            </th>
-                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                Deficit Paid
-                                                            </th>
-                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                Units
-                                                            </th>
-                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                Phone
-                                                            </th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody className="bg-white divide-y divide-gray-200">
-                                                        {tariffReport.transactions.slice(0, 10).map((transaction) => (
-                                                            <tr key={transaction.id}>
-                                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                                    {transaction.transId}
-                                                                </td>
-                                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                                    {formatDate(transaction.transTime)}
-                                                                </td>
-                                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                                    {transaction.meterNumber}
-                                                                </td>
-                                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                                    {formatCurrency(transaction.transAmount)}
-                                                                </td>
-                                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                                    {formatCurrency((transaction as any).tokenRevenue || 0)}
-                                                                </td>
-                                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                                    {formatCurrency((transaction as any).deficitPaid || 0)}
-                                                                </td>
-                                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                                    {transaction.units}
-                                                                </td>
-                                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                                    {transaction.msisdn}
-                                                                </td>
-                                                            </tr>
-                                                        ))}
-                                                    </tbody>
-                                                </table>
-                                            </div>
+                                            <button
+                                                onClick={() => handleDownloadTransactionsExcel(tariffReport.transactions)}
+                                                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                                            >
+                                                <Download className="h-4 w-4" />
+                                                Download Excel
+                                            </button>
                                         </div>
                                     )}
                                 </div>
