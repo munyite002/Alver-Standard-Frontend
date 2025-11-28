@@ -14,6 +14,7 @@ import type {
     RevenueSummary
 } from "@/../api/reports.api";
 import { getTariffs } from "@/../api/tariffs.api";
+import * as XLSX from 'xlsx';
 
 export function ReportsPage() {
     const axiosInstance = useAxiosWithAuth(import.meta.env.VITE_PUBLIC_STAGING_API);
@@ -105,8 +106,78 @@ export function ReportsPage() {
             return;
         }
 
-        // Generate CSV content
-        generateTariffReportCSV(tariffReport);
+        // Generate filename with tariff name and date range
+        const dateRange = tariffReport.dateRange.startDate && tariffReport.dateRange.endDate
+            ? `${tariffReport.dateRange.startDate} to ${tariffReport.dateRange.endDate}`
+            : tariffReport.dateRange.startDate
+                ? `from ${tariffReport.dateRange.startDate}`
+                : tariffReport.dateRange.endDate
+                    ? `until ${tariffReport.dateRange.endDate}`
+                    : 'All Time';
+
+        const filename = `Tariff_Report_${tariffReport.tariff.name.replace(/[^a-zA-Z0-9]/g, '_')}_${dateRange.replace(/[^a-zA-Z0-9]/g, '_')}.csv`;
+
+        // Create CSV content
+        let csvContent = '';
+
+        // Header information
+        csvContent += 'Alver Power Systems - Tariff Report\n';
+        csvContent += `Generated on: ${new Date().toLocaleDateString('en-KE', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        })}\n\n`;
+
+        // Report information
+        csvContent += 'Report Information\n';
+        csvContent += `Tariff Name,${tariffReport.tariff.name}\n`;
+        csvContent += `Provider,${tariffReport.tariff.provider}\n`;
+        csvContent += `Rate per Unit,${formatCurrency(tariffReport.tariff.ratePerUnit)}\n`;
+        csvContent += `Report Period,${dateRange}\n`;
+        csvContent += `Start Date,${tariffReport.dateRange.startDate || 'N/A'}\n`;
+        csvContent += `End Date,${tariffReport.dateRange.endDate || 'N/A'}\n\n`;
+
+        // Summary information - Modified to remove token revenue and deficit, add service charge and payable
+        csvContent += 'Summary\n';
+        csvContent += `Total Meters,${tariffReport.summary.totalMeters}\n`;
+        csvContent += `Total Transactions,${tariffReport.summary.totalTransactions}\n`;
+        csvContent += `Total Units,${tariffReport.summary.totalUnits.toFixed(2)}\n`;
+        csvContent += `Total Revenue,${formatCurrency(tariffReport.summary.totalRevenue)}\n`;
+
+        // Calculate service charge and payable to client
+        const virtualUnits = tariffReport.summary.totalRevenue / tariffReport.tariff.ratePerUnit;
+        const serviceCharge = virtualUnits * 3;
+        const payableToClient = tariffReport.summary.totalRevenue - serviceCharge;
+
+        csvContent += `Service Charge,${formatCurrency(serviceCharge)}\n`;
+        csvContent += `Payable to Client,${formatCurrency(payableToClient)}\n\n`;
+
+        // Meter breakdown - Modified columns
+        if (tariffReport.meterBreakdown.length > 0) {
+            csvContent += 'Meter Breakdown\n';
+            csvContent += 'Meter Number,Opening Deficit,Transactions,Total Units,Total Revenue,Service Charge\n';
+            tariffReport.meterBreakdown.forEach(meter => {
+                // Calculate service charge for each meter
+                const meterVirtualUnits = meter.totalRevenue / tariffReport.tariff.ratePerUnit;
+                const meterServiceCharge = meterVirtualUnits * 3;
+
+                csvContent += `${meter.meterNumber},${formatCurrency(meter.openingDeficit)},${meter.transactionCount},${meter.totalUnits.toFixed(2)},${formatCurrency(meter.totalRevenue)},${formatCurrency(meterServiceCharge)}\n`;
+            });
+            csvContent += '\n';
+        }
+
+        // Create and download the file
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     const generateTariffReportPDF = (report: TariffReport) => {
@@ -785,6 +856,7 @@ export function ReportsPage() {
                                     </div>
 
                                     {/* Meter Breakdown */}
+                                    {/* Meter Breakdown */}
                                     {tariffReport.meterBreakdown.length > 0 && (
                                         <div>
                                             <h4 className="text-lg font-semibold text-gray-900 mb-4">Meter Breakdown</h4>
@@ -805,42 +877,40 @@ export function ReportsPage() {
                                                                 Total Units
                                                             </th>
                                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                Token Revenue
-                                                            </th>
-                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                                Deficit Paid
-                                                            </th>
-                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                                                 Total Revenue
+                                                            </th>
+                                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                                Service Charge
                                                             </th>
                                                         </tr>
                                                     </thead>
                                                     <tbody className="bg-white divide-y divide-gray-200">
-                                                        {tariffReport.meterBreakdown.map((meter) => (
-                                                            <tr key={meter.meterNumber}>
-                                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                                    {meter.meterNumber}
-                                                                </td>
-                                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                                    {formatCurrency(meter.openingDeficit)}
-                                                                </td>
-                                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                                    {meter.transactionCount}
-                                                                </td>
-                                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                                    {meter.totalUnits.toFixed(2)}
-                                                                </td>
-                                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                                    {formatCurrency(meter.totalTokenRevenue)}
-                                                                </td>
-                                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                                    {formatCurrency(meter.totalDeficitPaid)}
-                                                                </td>
-                                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                                    {formatCurrency(meter.totalRevenue)}
-                                                                </td>
-                                                            </tr>
-                                                        ))}
+                                                        {tariffReport.meterBreakdown.map((meter) => {
+                                                            const meterVirtualUnits = meter.totalRevenue / tariffReport.tariff.ratePerUnit;
+                                                            const meterServiceCharge = meterVirtualUnits * 3;
+                                                            return (
+                                                                <tr key={meter.meterNumber}>
+                                                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                                        {meter.meterNumber}
+                                                                    </td>
+                                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                                        {formatCurrency(meter.openingDeficit)}
+                                                                    </td>
+                                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                                        {meter.transactionCount}
+                                                                    </td>
+                                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                                        {meter.totalUnits.toFixed(2)}
+                                                                    </td>
+                                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                                        {formatCurrency(meter.totalRevenue)}
+                                                                    </td>
+                                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                                        {formatCurrency(meterServiceCharge)}
+                                                                    </td>
+                                                                </tr>
+                                                            );
+                                                        })}
                                                     </tbody>
                                                 </table>
                                             </div>
