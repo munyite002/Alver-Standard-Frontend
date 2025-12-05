@@ -328,13 +328,13 @@ export function TransactionTable({
                                                     <div className="flex-shrink-0">
                                                         <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
                                                             <span className="text-sm font-medium text-blue-600">
-                                                                {transaction.firstName.split(' ').map((n: string) => n[0]).join('').toUpperCase()}
+                                                                {transaction?.firstName?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'S'}
                                                             </span>
                                                         </div>
                                                     </div>
                                                     <div>
                                                         <div className="text-sm font-medium text-gray-900">
-                                                            {transaction.firstName}
+                                                            {transaction?.firstName || "SYSTEM"}
                                                         </div>
                                                     </div>
                                                 </div>
