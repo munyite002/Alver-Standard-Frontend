@@ -68,6 +68,18 @@ export function DashboardNav() {
         <Logs className={cn("h-4 w-4", pathname === "/logs" ? "text-blue-600" : "text-gray-500")} />
         Logs
       </Link>
+      <Link
+        to="/tickets"
+        className={cn(
+          "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+          pathname === "/tickets"
+            ? "bg-blue-50 text-blue-700 border border-blue-200"
+            : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+        )}
+      >
+        <Logs className={cn("h-4 w-4", pathname === "/tickets" ? "text-blue-600" : "text-gray-500")} />
+        Tickets
+      </Link>
     </nav>
   )
 }
