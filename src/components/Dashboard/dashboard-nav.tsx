@@ -1,4 +1,4 @@
-import { CreditCard, Settings, Gauge, Logs, FileBarChart } from "lucide-react"
+import { CreditCard, Settings, Gauge, Logs, FileBarChart, FileQuestionIcon} from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
 import { cn } from "@/lib/utils"
 
@@ -77,7 +77,7 @@ export function DashboardNav() {
             : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
         )}
       >
-        <Logs className={cn("h-4 w-4", pathname === "/tickets" ? "text-blue-600" : "text-gray-500")} />
+        <FileQuestionIcon className={cn("h-4 w-4", pathname === "/tickets" ? "text-blue-600" : "text-gray-500")} />
         Tickets
       </Link>
     </nav>
