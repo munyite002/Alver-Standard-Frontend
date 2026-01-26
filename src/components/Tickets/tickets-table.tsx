@@ -44,28 +44,28 @@ import { toast } from "sonner";
 
 const getStatusBadge = (status: any) => {
     const variants = {
-        OPEN: { 
-            className: "bg-blue-100 text-blue-800 hover:bg-blue-100", 
-            icon: <Clock className="h-3 w-3 mr-1" /> 
+        OPEN: {
+            className: "bg-blue-100 text-blue-800 hover:bg-blue-100",
+            icon: <Clock className="h-3 w-3 mr-1" />
         },
-        IN_PROGRESS: { 
-            className: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100", 
-            icon: <AlertCircle className="h-3 w-3 mr-1" /> 
+        IN_PROGRESS: {
+            className: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
+            icon: <AlertCircle className="h-3 w-3 mr-1" />
         },
-        RESOLVED: { 
-            className: "bg-green-100 text-green-800 hover:bg-green-100", 
-            icon: <CheckCircle className="h-3 w-3 mr-1" /> 
+        RESOLVED: {
+            className: "bg-green-100 text-green-800 hover:bg-green-100",
+            icon: <CheckCircle className="h-3 w-3 mr-1" />
         },
-        CLOSED: { 
-            className: "bg-gray-100 text-gray-800 hover:bg-gray-100", 
-            icon: <CheckCircle className="h-3 w-3 mr-1" /> 
+        CLOSED: {
+            className: "bg-gray-100 text-gray-800 hover:bg-gray-100",
+            icon: <CheckCircle className="h-3 w-3 mr-1" />
         },
-        CANCELLED: { 
-            className: "bg-red-100 text-red-800 hover:bg-red-100", 
-            icon: <XCircle className="h-3 w-3 mr-1" /> 
+        CANCELLED: {
+            className: "bg-red-100 text-red-800 hover:bg-red-100",
+            icon: <XCircle className="h-3 w-3 mr-1" />
         },
     };
-    
+
     const variant = variants[status] || variants.OPEN;
     return (
         <Badge className={`${variant.className} flex items-center gap-1`}>
@@ -82,18 +82,19 @@ const getPriorityBadge = (priority) => {
         HIGH: "bg-orange-100 text-orange-800 hover:bg-orange-100",
         URGENT: "bg-red-100 text-red-800 hover:bg-red-100",
     };
-    
+
     return <Badge className={variants[priority]}>{priority}</Badge>;
 };
 
-export const TicketsTable = ({ 
-    tickets, 
-    isLoading, 
-    onViewTicket, 
-    filters, 
+export const TicketsTable = ({
+    tickets,
+    isLoading,
+    onViewTicket,
+    filters,
     onFilterChange,
     onPageChange,
-    onRefresh 
+    onRefresh,
+    axiosInstance
 }) => {
     const [updatingTicketId, setUpdatingTicketId] = useState(null);
 
@@ -131,9 +132,9 @@ export const TicketsTable = ({
                     <div className="flex flex-col items-center gap-2">
                         <AlertCircle className="h-8 w-8 text-gray-400" />
                         <p className="text-gray-500">No tickets found</p>
-                        <Button 
-                            variant="outline" 
-                            size="sm" 
+                        <Button
+                            variant="outline"
+                            size="sm"
                             onClick={onRefresh}
                             className="mt-2"
                         >
@@ -171,7 +172,7 @@ export const TicketsTable = ({
                             <SelectValue placeholder="Status" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="">All Status</SelectItem>
+                            <SelectItem value="all">All Status</SelectItem>
                             <SelectItem value="OPEN">Open</SelectItem>
                             <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
                             <SelectItem value="RESOLVED">Resolved</SelectItem>
@@ -179,7 +180,7 @@ export const TicketsTable = ({
                             <SelectItem value="CANCELLED">Cancelled</SelectItem>
                         </SelectContent>
                     </Select>
-                    
+
                     <Select
                         value={filters.priority}
                         onValueChange={(value) => onFilterChange('priority', value)}
@@ -188,16 +189,16 @@ export const TicketsTable = ({
                             <SelectValue placeholder="Priority" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="">All Priority</SelectItem>
+                            <SelectItem value="all">All Priority</SelectItem>
                             <SelectItem value="LOW">Low</SelectItem>
                             <SelectItem value="MEDIUM">Medium</SelectItem>
                             <SelectItem value="HIGH">High</SelectItem>
                             <SelectItem value="URGENT">Urgent</SelectItem>
                         </SelectContent>
                     </Select>
-                    
-                    <Button 
-                        variant="outline" 
+
+                    <Button
+                        variant="outline"
                         onClick={onRefresh}
                     >
                         <RefreshCw className="h-4 w-4" />

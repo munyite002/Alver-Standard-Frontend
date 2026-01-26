@@ -14,15 +14,16 @@ export interface Meter {
   SGC: any;
   TI: any;
   KRN: any;
+  accountId?: string;
 }
 
 export const createMeter = async (axiosInstance: any, meterData: Omit<Meter, 'id' | 'createdAt' | 'updatedAt'>) => {
-  const response = await axiosInstance.post(`${import.meta.env.VITE_PUBLIC_STAGING_API}/meters`, meterData);
+  const response = await axiosInstance.post(`/meters`, meterData);
   return response.data;
 };
 
 export const getAllMeters = async (axiosInstance: any) => {
-  const response = await axiosInstance.get(`${import.meta.env.VITE_PUBLIC_STAGING_API}/meters`);
+  const response = await axiosInstance.get(`/meters`);
   return response.data;
 };
 
@@ -32,21 +33,21 @@ export const getMeterById = async (id: string) => {
 };
 
 export const updateMeter = async (axiosInstance: any, id: string, meterData: Partial<Meter>) => {
-  const response = await axiosInstance.put(`${import.meta.env.VITE_PUBLIC_STAGING_API}/meters/${id}`, meterData);
+  const response = await axiosInstance.put(`/meters/${id}`, meterData);
   return response.data;
 };
 
 export const deleteMeter = async (axiosInstance: any, id: string) => {
-  await axiosInstance.delete(`${import.meta.env.VITE_PUBLIC_STAGING_API}/meters/${id}`);
+  await axiosInstance.delete(`/meters/${id}`);
 }; 
 
 export const generateTamperCode = async (axiosInstance: any, data: any) => {
-  const response = await axiosInstance.post(`${import.meta.env.VITE_PUBLIC_STAGING_API}/meters/generate-tamper-code`, data);
+  const response = await axiosInstance.post(`/meters/generate-tamper-code`, data);
   return response.data;
 }
 
 export const generateMeterCredit = async (axiosInstance: any, data: any) => {
-  const response = await axiosInstance.post(`${import.meta.env.VITE_PUBLIC_STAGING_API}/meters/generate-credit`, data);
+  const response = await axiosInstance.post(`/meters/generate-credit`, data);
   return response.data;
 };
 

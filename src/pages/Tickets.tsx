@@ -23,8 +23,8 @@ export default function Tickets() {
     const [selectedTicket, setSelectedTicket] = useState<any | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [filters, setFilters] = useState({
-        status: '',
-        priority: '',
+        status: 'all',
+        priority: 'all',
         search: '',
         page: 1,
         limit: 10,
@@ -48,11 +48,11 @@ export default function Tickets() {
             setIsLoading(true);
             const params = new URLSearchParams();
             Object.entries(filters).forEach(([key, value]) => {
-                if (value) params.append(key, value);
+                if (value && value !== 'all') params.append(key, value);
             });
 
             const response = await getAllTickets(axiosInstance, params.toString());
-            setTickets(response.data);
+            setTickets(response);
         } catch (error) {
             console.error("Error fetching tickets:", error);
             toast.error("Failed to fetch tickets");
@@ -105,6 +105,7 @@ export default function Tickets() {
                 onFilterChange={handleFilterChange}
                 onPageChange={handlePageChange}
                 onRefresh={refreshData}
+                axiosInstance={axiosInstance}
             />
 
             <TicketModal
@@ -112,6 +113,7 @@ export default function Tickets() {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onTicketUpdated={refreshData}
+                axiosInstance={axiosInstance}
             />
         </div>
     );

@@ -53,3 +53,42 @@ export async function resetPasswordWithOTP(data: any) {
     );
     return response;
 }
+
+export async function getAllUsers(axiosInstance: any) {
+    const response = await axiosInstance.get(
+        `${import.meta.env.VITE_PUBLIC_STAGING_API}/users/all`
+    );
+    return response.data;
+}
+
+export async function createUserForAccount(axiosInstance: any, data: any) {
+    const response = await axiosInstance.post(
+        `${import.meta.env.VITE_PUBLIC_STAGING_API}/users/create-for-account`,
+        data
+    );
+    return response.data;
+}
+
+export async function adminUpdateUser(axiosInstance: any, data: any) {
+    const response = await axiosInstance.patch(
+        `${import.meta.env.VITE_PUBLIC_STAGING_API}/users/admin/update`,
+        data
+    );
+    return response.data;
+}
+
+export async function toggleUserStatus(axiosInstance: any, userId: string) {
+    const response = await axiosInstance.patch(
+        `${import.meta.env.VITE_PUBLIC_STAGING_API}/users/admin/toggle-status`,
+        { userId }
+    );
+    return response.data;
+}
+
+export async function adminDeleteUser(axiosInstance: any, userId: string) {
+    const response = await axiosInstance.patch(
+        `${import.meta.env.VITE_PUBLIC_STAGING_API}/users/admin/delete`,
+        { userId }
+    );
+    return response.data;
+}

@@ -1,4 +1,4 @@
-import { CreditCard, Settings, Gauge, Logs, FileBarChart, FileQuestionIcon} from "lucide-react"
+import { CreditCard, Settings, Gauge, Logs, FileBarChart, FileQuestionIcon, Users } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
 import { cn } from "@/lib/utils"
 
@@ -67,6 +67,30 @@ export function DashboardNav() {
       >
         <Logs className={cn("h-4 w-4", pathname === "/logs" ? "text-blue-600" : "text-gray-500")} />
         Logs
+      </Link>
+      <Link
+        to="/accounts"
+        className={cn(
+          "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+          pathname === "/accounts"
+            ? "bg-blue-50 text-blue-700 border border-blue-200"
+            : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+        )}
+      >
+        <Users className={cn("h-4 w-4", pathname === "/accounts" ? "text-blue-600" : "text-gray-500")} />
+        Accounts
+      </Link>
+      <Link
+        to="/users"
+        className={cn(
+          "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+          pathname === "/users"
+            ? "bg-blue-50 text-blue-700 border border-blue-200"
+            : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+        )}
+      >
+        <Users className={cn("h-4 w-4", pathname === "/users" ? "text-blue-600" : "text-gray-500")} />
+        Users
       </Link>
       <Link
         to="/tickets"

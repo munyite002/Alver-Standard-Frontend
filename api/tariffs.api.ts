@@ -8,6 +8,7 @@ export interface Tariff {
     ratePerUnit: number;
     createdAt: string;
     updatedAt: string;
+    accountId?: string;
 }
 
 export async function getTariffs(axiosInstance: any) {

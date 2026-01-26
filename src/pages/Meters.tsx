@@ -22,12 +22,14 @@ import {
   TableHeader,
   TableRow,
 } from "../components/ui/table";
-import { Pencil, Trash2, Plus, ChevronLeft, ChevronRight, Search, Filter, X, LoaderIcon, Eye } from "lucide-react";
 import { getAllMeters, createMeter, updateMeter, deleteMeter, generateMeterCredit, generateTamperCode } from '../api/meters.api';
-import type { Meter } from '../api/meters.api';
-import { getTariffs } from "../../api/tariffs.api"
+import type { Meter } from '../../api/meters.api';
+import { getAccounts } from '../../api/accounts.api';
+import type { Account } from '../../api/accounts.api';
+import { getTariffs } from '../../api/tariffs.api'
 import { toast, Toaster } from 'sonner';
 import useAxiosWithAuth from "@/../utils/axiosInterceptor";
+import { Plus, Search, Filter, ChevronRight, ChevronLeft, LoaderIcon, Pencil, Trash2, Eye, X  } from "lucide-react";
 
 const Meters: React.FC = () => {
   const axiosInstance = useAxiosWithAuth(import.meta.env.VITE_PUBLIC_STAGING_API)
@@ -45,6 +47,8 @@ const Meters: React.FC = () => {
   //@ts-ignore
   const [isLoadingTariffs, setIsLoadingTariffs] = useState(false);
   const [tariffs, setTariffs] = useState<any[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [isLoadingAccounts, setIsLoadingAccounts] = useState(false);
 
   const itemsPerPage = 10;
   const [formData, setFormData] = useState({
@@ -57,6 +61,7 @@ const Meters: React.FC = () => {
     SGC: '',
     TI: '',
     KRN: '',
+    accountId: '',
   });
   const [isSaving, setIsSaving] = useState(false);
 
@@ -88,9 +93,22 @@ const Meters: React.FC = () => {
     }
   };
 
+  const fetchAccounts = async () => {
+    try {
+      setIsLoadingAccounts(true);
+      const response = await getAccounts(axiosInstance);
+      setAccounts(response.data);
+    } catch (err) {
+      console.error("Error fetching accounts:", err);
+    } finally {
+      setIsLoadingAccounts(false);
+    }
+  };
+
   useEffect(() => {
     fetchMeters();
-    fetchTariffs()
+    fetchTariffs();
+    fetchAccounts();
   }, []);
 
   // Apply search and filters whenever they change
@@ -137,6 +155,7 @@ const Meters: React.FC = () => {
         TI: meter.TI || '',
         KRN: meter.KRN || '',
         make: meter.make || '',
+        accountId: meter.accountId || '',
       });
     } else {
       setEditingMeter(null);
@@ -150,6 +169,7 @@ const Meters: React.FC = () => {
         TI: '',
         KRN: '',
         make: '',
+        accountId: '',
       });
     }
     setOpen(true);
@@ -321,6 +341,7 @@ const Meters: React.FC = () => {
             <TableRow className="border-b border-gray-100">
               <TableHead className="py-4 px-6 text-sm font-semibold text-gray-700">Meter Number</TableHead>
               <TableHead className="py-4 px-6 text-sm font-semibold text-gray-700">Location</TableHead>
+              <TableHead className="py-4 px-6 text-sm font-semibold text-gray-700">Account</TableHead>
               <TableHead className="py-4 px-6 text-sm font-semibold text-gray-700">Deficit (Ksh)</TableHead>
               <TableHead className="py-4 px-6 text-sm font-semibold text-gray-700">Actions</TableHead>
             </TableRow>
@@ -353,6 +374,11 @@ const Meters: React.FC = () => {
                     </TableCell>
                     <TableCell className="py-4 px-6">
                       <span className="text-gray-700">{meter.location}</span>
+                    </TableCell>
+                    <TableCell className="py-4 px-6">
+                      <span className="text-gray-700">
+                        {accounts.find(a => a.id === meter.accountId)?.name || 'No Account'}
+                      </span>
                     </TableCell>
                     <TableCell className="py-4 px-6">
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${meter.openingDeficit > 0
@@ -395,7 +421,7 @@ const Meters: React.FC = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-12">
+                  <TableCell colSpan={5} className="text-center py-12">
                     <div className="flex flex-col items-center">
                       <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                         <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -534,6 +560,20 @@ const Meters: React.FC = () => {
                   <option value="">Select Tariff</option>
                   {tariffs.map(tariff => (
                     <option key={tariff.id} value={tariff.id}>{tariff.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid gap-2">
+                <label htmlFor="account">Account</label>
+                <select
+                  id="account"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  value={formData.accountId || ''}
+                  onChange={(e) => setFormData({ ...formData, accountId: e.target.value })}
+                >
+                  <option value="">Select Account</option>
+                  {accounts.map(account => (
+                    <option key={account.id} value={account.id}>{account.name}</option>
                   ))}
                 </select>
               </div>

@@ -37,6 +37,7 @@ import {
 import { format } from "date-fns";
 import { updateTicket } from "@/../api/tickets.api";
 import { toast } from "sonner";
+import { useEffect } from "react";
 
 const getStatusIcon = (status) => {
     switch (status) {
@@ -49,7 +50,7 @@ const getStatusIcon = (status) => {
     }
 };
 
-export const TicketModal = ({ ticket, isOpen, onClose, onTicketUpdated }) => {
+export const TicketModal = ({ ticket, isOpen, onClose, onTicketUpdated, axiosInstance }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({
         status: '',
@@ -61,7 +62,7 @@ export const TicketModal = ({ ticket, isOpen, onClose, onTicketUpdated }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Reset form when ticket changes
-    useState(() => {
+    useEffect(() => {
         if (ticket) {
             setFormData({
                 status: ticket.status,

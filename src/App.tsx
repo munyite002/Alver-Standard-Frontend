@@ -8,9 +8,11 @@ import RootLayout from "./pages/layout.js";
 import { DashboardPage } from "@/pages/Dashboard";
 import { SettingsPage } from "@/pages/Settings.js";
 import Meters from "@/pages/Meters";
+import Accounts from "@/pages/Accounts";
 import Logs from "@/pages/Logs.js";
 import { ReportsPage } from "@/pages/Reports";
 import Tickets from "@/pages/Tickets.js"
+import Users from "@/pages/Users";
 // import Configurations from "./pages/Configurations.js";
 import Unauthorized from "@/pages/Unauthorized.js";
 import NotFound from "@/pages/NotFound.js";
@@ -47,6 +49,8 @@ function App() {
                             <Route path="/logs" element={<Logs />} />
                             <Route path="/tickets" element={<Tickets />} />
                             <Route path="/settings" element={<SettingsPage />} />
+                            <Route path="/accounts" element={<Accounts />} />
+                            <Route path="/users" element={<Users />} />
                             {/* <Route
                                 path="/configurations"
                                 element={<Configurations />}
