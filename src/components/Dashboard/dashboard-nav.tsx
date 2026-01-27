@@ -6,6 +6,8 @@ export function DashboardNav() {
   const location = useLocation()
   const pathname = location.pathname
 
+  console.log("DashboardNav rendering, current pathname:", pathname);
+
   return (
     <nav className="space-y-2">
       <Link

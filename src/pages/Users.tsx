@@ -344,7 +344,7 @@ const UsersPage: React.FC = () => {
             </div>
 
             <Dialog open={open} onOpenChange={setOpen}>
-                <DialogContent className='bg-white'>
+                <DialogContent className='bg-white h-[80vh] overflow-y-auto'>
                     <DialogHeader>
                         <DialogTitle>{editingUser ? 'Edit User' : 'Add New User'}</DialogTitle>
                         <DialogDescription>
