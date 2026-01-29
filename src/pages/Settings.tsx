@@ -25,7 +25,7 @@ import { useGlobalContext } from "@/../context/GlobalContext.jsx";
 import { TariffConfiguration } from "@/components/Settings/tariff-configuration";
 
 export function SettingsPage() {
-    const { user } = useGlobalContext();
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
     const axiosInstance = useAxiosWithAuth(
         import.meta.env.VITE_PUBLIC_STAGING_API
     );
@@ -144,9 +144,9 @@ export function SettingsPage() {
                 <Tabs defaultValue="account" className="space-y-4">
                     <TabsList className="w-full">
                         <TabsTrigger value="account">Account</TabsTrigger>
-                        <TabsTrigger value="configurations">
+                        {user?.role == "admin" && (<TabsTrigger value="configurations">
                             Configurations
-                        </TabsTrigger>
+                        </TabsTrigger>)}
                         <TabsTrigger value="security">Security</TabsTrigger>
                     </TabsList>
                     <TabsContent value="account" className="space-y-4">
@@ -219,9 +219,9 @@ export function SettingsPage() {
                             </CardContent>
                         </Card>
                     </TabsContent>
-                    <TabsContent value="configurations" className="space-y-4">
+                    {user?.role == "admin" && (<TabsContent value="configurations" className="space-y-4">
                         <TariffConfiguration />
-                    </TabsContent>
+                    </TabsContent>)}
                     <TabsContent value="security" className="space-y-4">
                         <Card>
                             <CardHeader>

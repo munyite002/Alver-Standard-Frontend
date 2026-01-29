@@ -17,6 +17,7 @@ import { getTariffs } from "@/../api/tariffs.api";
 import * as XLSX from 'xlsx';
 
 export function ReportsPage() {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
     const axiosInstance = useAxiosWithAuth(import.meta.env.VITE_PUBLIC_STAGING_API);
 
     // State management
@@ -42,7 +43,15 @@ export function ReportsPage() {
         try {
             setIsLoadingTariffs(true);
             const response = await getTariffs(axiosInstance);
-            setTariffs(response.data);
+            if (user?.role === "manager" && user?.account?.tarrifId) {
+                const managerTariffs = response.data.filter((t: any) => t.id === user.account.tarrifId);
+                setTariffs(managerTariffs);
+                if (managerTariffs.length > 0) {
+                    setSelectedTariff(managerTariffs[0].id);
+                }
+            } else {
+                setTariffs(response.data);
+            }
         } catch (err) {
             console.error("Error fetching tariffs:", err);
         } finally {
@@ -400,23 +409,6 @@ export function ReportsPage() {
                     </div>
                 </div>
 
-                <div class="revenue-breakdown">
-                    <div class="revenue-card">
-                        <h3>Token Revenue</h3>
-                        <div class="value">${formatCurrency(report.summary.totalTokenRevenue)}</div>
-                        <div style="font-size: 12px; color: #4b5563; margin-top: 5px;">
-                            ${((report.summary.totalTokenRevenue / report.summary.totalRevenue) * 100).toFixed(1)}% of total
-                        </div>
-                    </div>
-                    <div class="deficit-card">
-                        <h3>Deficit Recovery</h3>
-                        <div class="value">${formatCurrency(report.summary.totalDeficitPaid)}</div>
-                        <div style="font-size: 12px; color: #4b5563; margin-top: 5px;">
-                            ${((report.summary.totalDeficitPaid / report.summary.totalRevenue) * 100).toFixed(1)}% of total
-                        </div>
-                    </div>
-                </div>
-
                 ${report.meterBreakdown.length > 0 ? `
                 <div class="section-title">Meter Breakdown</div>
                 <table>
@@ -426,8 +418,6 @@ export function ReportsPage() {
                             <th>Opening Deficit</th>
                             <th>Transactions</th>
                             <th>Total Units</th>
-                            <th>Token Revenue</th>
-                            <th>Deficit Paid</th>
                             <th>Total Revenue</th>
                         </tr>
                     </thead>
@@ -438,8 +428,6 @@ export function ReportsPage() {
                                 <td>${formatCurrency(meter.openingDeficit)}</td>
                                 <td>${meter.transactionCount}</td>
                                 <td>${meter.totalUnits.toFixed(2)}</td>
-                                <td>${formatCurrency(meter.totalTokenRevenue)}</td>
-                                <td>${formatCurrency(meter.totalDeficitPaid)}</td>
                                 <td>${formatCurrency(meter.totalRevenue)}</td>
                             </tr>
                         `).join('')}
@@ -508,13 +496,11 @@ export function ReportsPage() {
         csvContent += `Total Transactions,${report.summary.totalTransactions}\n`;
         csvContent += `Total Units,${report.summary.totalUnits.toFixed(2)}\n`;
         csvContent += `Total Revenue,${formatCurrency(report.summary.totalRevenue)}\n`;
-        csvContent += `Token Revenue,${formatCurrency(report.summary.totalTokenRevenue)}\n`;
-        csvContent += `Deficit Recovery,${formatCurrency(report.summary.totalDeficitPaid)}\n\n`;
-
+    
         // Meter breakdown
         if (report.meterBreakdown.length > 0) {
             csvContent += 'Meter Breakdown\n';
-            csvContent += 'Meter Number,Opening Deficit,Transactions,Total Units,Token Revenue,Deficit Paid,Total Revenue\n';
+            csvContent += 'Meter Number,Opening Deficit,Transactions,Total Units,Total Revenue\n';
             report.meterBreakdown.forEach(meter => {
                 csvContent += `${meter.meterNumber},${formatCurrency(meter.openingDeficit)},${meter.transactionCount},${meter.totalUnits.toFixed(2)},${formatCurrency(meter.totalTokenRevenue)},${formatCurrency(meter.totalDeficitPaid)},${formatCurrency(meter.totalRevenue)}\n`;
             });
@@ -524,7 +510,7 @@ export function ReportsPage() {
         // Recent transactions
         if (report.transactions.length > 0) {
             csvContent += 'Recent Transactions\n';
-            csvContent += 'Transaction ID,Date & Time,Meter Number,Amount,Token Revenue,Deficit Paid,Units,Phone\n';
+            csvContent += 'Transaction ID,Date & Time,Meter Number,Amount,Units,Phone\n';
             report.transactions.slice(0, 5).forEach(transaction => {
                 const tokenRevenue = (transaction as any).tokenRevenue || 0;
                 const deficitPaid = (transaction as any).deficitPaid || 0;
@@ -557,8 +543,6 @@ export function ReportsPage() {
                 'Date & Time': formatDate(transaction.transTime),
                 'Meter Number': transaction.meterNumber,
                 'Amount (KES)': transaction.transAmount,
-                'Token Revenue (KES)': transaction.tokenRevenue || 0,
-                'Deficit Paid (KES)': transaction.deficitPaid || 0,
                 'Units': transaction.units,
                 'Phone': transaction.msisdn,
                 'Rate (KES)': transaction.rate,
@@ -685,17 +669,20 @@ export function ReportsPage() {
                             {isLoadingReport ? "Generating..." : "Tariff Report"}
                         </button>
 
-                        <button
-                            onClick={handleGenerateRevenueSummary}
-                            disabled={isLoadingRevenue}
-                            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
-                        >
-                            <TrendingUp className="h-4 w-4" />
-                            {isLoadingRevenue ? "Generating..." : "Revenue Summary"}
-                        </button>
+                        {user?.role === "admin" && (
+                            <button
+                                onClick={handleGenerateRevenueSummary}
+                                disabled={isLoadingRevenue}
+                                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+                            >
+                                <TrendingUp className="h-4 w-4" />
+                                {isLoadingRevenue ? "Generating..." : "Revenue Summary"}
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
+
 
             {/* Tabs */}
             <div className="bg-white rounded-lg border border-gray-200">
@@ -710,15 +697,17 @@ export function ReportsPage() {
                         >
                             Tariff Report
                         </button>
-                        <button
-                            onClick={() => setActiveTab("revenue")}
-                            className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === "revenue"
-                                ? "border-blue-500 text-blue-600"
-                                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                                }`}
-                        >
-                            Revenue Summary
-                        </button>
+                        {user?.role === "admin" && (
+                            <button
+                                onClick={() => setActiveTab("revenue")}
+                                className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === "revenue"
+                                    ? "border-blue-500 text-blue-600"
+                                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                    }`}
+                            >
+                                Revenue Summary
+                            </button>
+                        )}
                     </nav>
                 </div>
 
@@ -816,39 +805,6 @@ export function ReportsPage() {
                                                     <p className="text-sm font-medium text-purple-600">Total Revenue</p>
                                                     <p className="text-2xl font-bold text-purple-900">
                                                         {formatCurrency(tariffReport.summary.totalRevenue)}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Revenue Breakdown */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="bg-emerald-50 rounded-lg p-4">
-                                            <div className="flex items-center">
-                                                <DollarSign className="h-8 w-8 text-emerald-600" />
-                                                <div className="ml-4">
-                                                    <p className="text-sm font-medium text-emerald-600">Token Revenue</p>
-                                                    <p className="text-2xl font-bold text-emerald-900">
-                                                        {formatCurrency(tariffReport.summary.totalTokenRevenue)}
-                                                    </p>
-                                                    <p className="text-sm text-emerald-700 mt-1">
-                                                        {((tariffReport.summary.totalTokenRevenue / tariffReport.summary.totalRevenue) * 100).toFixed(1)}% of total
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="bg-red-50 rounded-lg p-4">
-                                            <div className="flex items-center">
-                                                <CreditCard className="h-8 w-8 text-red-600" />
-                                                <div className="ml-4">
-                                                    <p className="text-sm font-medium text-red-600">Deficit Recovery</p>
-                                                    <p className="text-2xl font-bold text-red-900">
-                                                        {formatCurrency(tariffReport.summary.totalDeficitPaid)}
-                                                    </p>
-                                                    <p className="text-sm text-red-700 mt-1">
-                                                        {((tariffReport.summary.totalDeficitPaid / tariffReport.summary.totalRevenue) * 100).toFixed(1)}% of total
                                                     </p>
                                                 </div>
                                             </div>
@@ -965,6 +921,6 @@ export function ReportsPage() {
                     )}
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

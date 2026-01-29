@@ -29,7 +29,7 @@ import type { Account } from '../../api/accounts.api';
 import { getTariffs } from '../../api/tariffs.api'
 import { toast, Toaster } from 'sonner';
 import useAxiosWithAuth from "@/../utils/axiosInterceptor";
-import { Plus, Search, Filter, ChevronRight, ChevronLeft, LoaderIcon, Pencil, Trash2, Eye, X  } from "lucide-react";
+import { Plus, Search, Filter, ChevronRight, ChevronLeft, LoaderIcon, Pencil, Trash2, Eye, X } from "lucide-react";
 
 const Meters: React.FC = () => {
   const axiosInstance = useAxiosWithAuth(import.meta.env.VITE_PUBLIC_STAGING_API)
@@ -220,6 +220,8 @@ const Meters: React.FC = () => {
     setMaxDeficit('');
   };
 
+  const user = JSON.parse(localStorage.getItem("user") | "{}");
+
   // Calculate pagination values
   const totalPages = Math.ceil(filteredMeters.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -241,10 +243,10 @@ const Meters: React.FC = () => {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Meters</h1>
-        <Button onClick={() => handleOpen()}>
+        {user?.role == "admin" && (<Button onClick={() => handleOpen()}>
           <Plus className="mr-2 h-4 w-4" />
           Add Meter
-        </Button>
+        </Button>)}
       </div>
 
       {/* Search and Filter Bar */}
@@ -252,7 +254,7 @@ const Meters: React.FC = () => {
         <div className="relative">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search meters by number or location..."
+            placeholder="Search meters"
             className="pl-9"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -266,14 +268,14 @@ const Meters: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          <Button
+          {user?.role == "admin" && (<Button
             variant="outline"
             onClick={() => setShowFilters(!showFilters)}
             className="flex items-center gap-2"
           >
             <Filter className="h-4 w-4" />
             Filters
-          </Button>
+          </Button>)}
 
           {(locationFilter || minDeficit !== '' || maxDeficit !== '') && (
             <Button
@@ -343,7 +345,9 @@ const Meters: React.FC = () => {
               <TableHead className="py-4 px-6 text-sm font-semibold text-gray-700">Location</TableHead>
               <TableHead className="py-4 px-6 text-sm font-semibold text-gray-700">Account</TableHead>
               <TableHead className="py-4 px-6 text-sm font-semibold text-gray-700">Deficit (Ksh)</TableHead>
-              <TableHead className="py-4 px-6 text-sm font-semibold text-gray-700">Actions</TableHead>
+              {user.role === "admin" && (
+                <TableHead className="py-4 px-6 text-sm font-semibold text-gray-700">Actions</TableHead>
+              )}
             </TableRow>
           </TableHeader>
           {isLoading ? (
@@ -392,7 +396,7 @@ const Meters: React.FC = () => {
                         }).format(meter.openingDeficit)}
                       </span>
                     </TableCell>
-                    <TableCell className="py-4 px-6">
+                    {user?.role == "admin" && (<TableCell className="py-4 px-6">
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleOpen(meter)}
@@ -416,7 +420,7 @@ const Meters: React.FC = () => {
                           <Eye className="h-4 w-4" />
                         </button>
                       </div>
-                    </TableCell>
+                    </TableCell>)}
                   </TableRow>
                 ))
               ) : (

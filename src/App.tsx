@@ -18,6 +18,7 @@ import Unauthorized from "@/pages/Unauthorized.js";
 import NotFound from "@/pages/NotFound.js";
 import { ForgotPasswordPage } from "./pages/ForgotPassword.js";
 import { ResetPasswordPage } from "./pages/ResetPassword.js";
+import RoleRoute from "./components/RoleRoute";
 import "./App.css";
 
 function App() {
@@ -46,11 +47,15 @@ function App() {
                             />
                             <Route path="/meters" element={<Meters />} />
                             <Route path="/reports" element={<ReportsPage />} />
-                            <Route path="/logs" element={<Logs />} />
-                            <Route path="/tickets" element={<Tickets />} />
                             <Route path="/settings" element={<SettingsPage />} />
-                            <Route path="/accounts" element={<Accounts />} />
-                            <Route path="/users" element={<Users />} />
+
+                            {/* Admin only routes */}
+                            <Route element={<RoleRoute allowedRoles={["admin"]} />}>
+                                <Route path="/logs" element={<Logs />} />
+                                <Route path="/tickets" element={<Tickets />} />
+                                <Route path="/accounts" element={<Accounts />} />
+                                <Route path="/users" element={<Users />} />
+                            </Route>
                             {/* <Route
                                 path="/configurations"
                                 element={<Configurations />}

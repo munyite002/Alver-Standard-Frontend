@@ -44,20 +44,17 @@ export function DashboardStats({ metrics, isLoading = false }: any) {
             prefix: "Ksh "
         },
         {
-            title: "Average Amount",
+            title: "Total Units",
             icon: DollarSign,
-            value: metrics?.averageAmount?.amount,
-            change: metrics?.averageAmount?.percentageChange,
+            value: metrics?.totalUnits,
             color: "red",
-            prefix: "Ksh "
         },
         {
-            title: "Unique Customers",
-            icon: Users,
-            value: metrics?.uniqueCustomers?.count,
-            change: metrics?.uniqueCustomers?.percentageChange,
+            title: "Service Charge",
+            icon: DollarSign,
+            value: metrics?.serviceFee,
             color: "blue",
-            prefix: ""
+            prefix: "Ksh "
         }
     ];
 
@@ -115,7 +112,7 @@ export function DashboardStats({ metrics, isLoading = false }: any) {
                                     </div>
                                 ) : (
                                     <div className="text-3xl font-bold text-gray-900 tracking-tight">
-                                        {stat.prefix}{formatValue(stat.value)}
+                                        {stat.prefix}{formatValue(stat.value) || 0}
                                     </div>
                                 )}
                             </div>
@@ -134,7 +131,7 @@ export function DashboardStats({ metrics, isLoading = false }: any) {
                                             ) : (
                                                 <ArrowDown className="h-3 w-3 mr-1" />
                                             )}
-                                            {Math.abs(stat.change)}%
+                                            {Math.abs(stat.change) || 0}%
                                         </div>
                                         <span className="text-xs text-gray-500">
                                             vs last month

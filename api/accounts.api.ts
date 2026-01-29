@@ -5,6 +5,7 @@ export interface Account {
     name: string;
     email?: string;
     phone?: string;
+    tarrifId?: string;
     createdAt: string;
     updatedAt: string;
     _count?: {

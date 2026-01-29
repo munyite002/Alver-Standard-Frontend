@@ -10,7 +10,7 @@ const ProtectedRoute = () => {
         return <Navigate to="/login" />;
     }
 
-    if (user?.role !== "admin") {
+    if (user?.role !== "admin" && user?.role !== "manager") {
         return <Navigate to="/403" />;
     }
 

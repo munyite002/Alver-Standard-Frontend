@@ -22,6 +22,7 @@ import { Pencil, Trash2, Plus, ChevronLeft, ChevronRight, Search, X, LoaderIcon 
 import { getAccounts, createAccount, updateAccount, deleteAccount } from '../../api/accounts.api';
 import type { Account } from '../../api/accounts.api';
 import { toast, Toaster } from 'sonner';
+import { getTariffs } from '../../api/tariffs.api';
 import useAxiosWithAuth from "@/../utils/axiosInterceptor";
 
 const Accounts: React.FC = () => {
@@ -34,12 +35,15 @@ const Accounts: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [isLoadingTariffs, setIsLoadingTariffs] = useState(false);
+    const [tariffs, setTariffs] = useState<any[]>([]);
 
     const itemsPerPage = 10;
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         phone: '',
+        tarrifId: ''
     });
 
     const fetchAccounts = async () => {
@@ -53,6 +57,19 @@ const Accounts: React.FC = () => {
             toast.error('Failed to fetch accounts');
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const fetchTariffs = async () => {
+        try {
+            setIsLoadingTariffs(true);
+            const response = await getTariffs(axiosInstance);
+            setTariffs(response.data);
+        } catch (err) {
+            console.error("Error fetching tariffs:", err);
+            toast.error("Failed to fetch tariffs");
+        } finally {
+            setIsLoadingTariffs(false);
         }
     };
 
@@ -81,6 +98,7 @@ const Accounts: React.FC = () => {
                 name: account.name,
                 email: account.email || '',
                 phone: account.phone || '',
+                tarrifId: account.tarrifId || '',
             });
         } else {
             setEditingAccount(null);
@@ -88,6 +106,7 @@ const Accounts: React.FC = () => {
                 name: '',
                 email: '',
                 phone: '',
+                tarrifId: '',
             });
         }
         setOpen(true);
@@ -302,6 +321,20 @@ const Accounts: React.FC = () => {
                                     value={formData.phone}
                                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                 />
+                            </div>
+                            <div className="grid gap-2">
+                                <label htmlFor="tariff">Tariff</label>
+                                <select
+                                    id="tariff"
+                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    value={formData.tarrifId || ''}
+                                    onChange={(e) => setFormData({ ...formData, tarrifId: e.target.value })}
+                                >
+                                    <option value="">Select Tariff</option>
+                                    {tariffs.map(tariff => (
+                                        <option key={tariff.id} value={tariff.id}>{tariff.name}</option>
+                                    ))}
+                                </select>
                             </div>
                             <DialogFooter>
                                 <Button type="button" variant="outline" onClick={handleClose}>
