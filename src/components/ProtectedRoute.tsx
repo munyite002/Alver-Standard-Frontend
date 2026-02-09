@@ -1,6 +1,7 @@
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useOutletContext } from "react-router-dom";
 
 const ProtectedRoute = () => {
+    const context = useOutletContext();
     const token = localStorage.getItem("token");
     const user = localStorage.getItem("user")
         ? JSON.parse(localStorage.getItem("user") as string)
@@ -14,7 +15,7 @@ const ProtectedRoute = () => {
         return <Navigate to="/403" />;
     }
 
-    return <Outlet />;
+    return <Outlet context={context} />;
 };
 
 export default ProtectedRoute;
