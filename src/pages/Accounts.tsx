@@ -75,6 +75,7 @@ const Accounts: React.FC = () => {
 
     useEffect(() => {
         fetchAccounts();
+        fetchTariffs();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
