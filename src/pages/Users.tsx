@@ -25,12 +25,13 @@ import {
     SelectTrigger,
     SelectValue,
 } from "../components/ui/select";
-import { Pencil, Trash2, Plus, ChevronLeft, ChevronRight, Search, X, LoaderIcon, UserCheck, UserMinus } from "lucide-react";
+import { Pencil, Trash2, Plus, ChevronLeft, ChevronRight, LoaderIcon, UserCheck, UserMinus } from "lucide-react";
 import { getAllUsers, createUserForAccount, adminUpdateUser, toggleUserStatus, adminDeleteUser } from '../../api/users.api';
 import { getAccounts } from '../../api/accounts.api';
 import { toast, Toaster } from 'sonner';
 import useAxiosWithAuth from "@/../utils/axiosInterceptor";
 import { cn } from "@/lib/utils";
+import { useOutletContext } from 'react-router-dom';
 
 interface User {
     id: string;
@@ -59,7 +60,10 @@ const UsersPage: React.FC = () => {
     const [open, setOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
-    const [searchQuery, setSearchQuery] = useState('');
+    const { searchQuery, setSearchQuery } = useOutletContext<{
+        searchQuery: string;
+        setSearchQuery: (value: string) => void;
+    }>();
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
@@ -197,24 +201,6 @@ const UsersPage: React.FC = () => {
                     <Plus className="mr-2 h-4 w-4" />
                     Add User
                 </Button>
-            </div>
-
-            <div className="flex flex-col gap-4 mb-6">
-                <div className="relative">
-                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        placeholder="Search users by name, email, phone or account..."
-                        className="pl-9"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                    {searchQuery && (
-                        <X
-                            className="absolute right-3 top-3 h-4 w-4 text-muted-foreground cursor-pointer"
-                            onClick={() => setSearchQuery('')}
-                        />
-                    )}
-                </div>
             </div>
 
             <div className="rounded-md border">

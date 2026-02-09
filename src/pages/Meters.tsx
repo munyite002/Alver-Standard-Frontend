@@ -811,16 +811,20 @@ import type { Account } from '../../api/accounts.api';
 import { getTariffs } from '../../api/tariffs.api'
 import { toast, Toaster } from 'sonner';
 import useAxiosWithAuth from "@/../utils/axiosInterceptor";
+import { useOutletContext } from 'react-router-dom';
 import { Plus, Search, Filter, ChevronRight, ChevronLeft, LoaderIcon, Pencil, Trash2, Eye, X, Calendar } from "lucide-react";
 
 const Meters: React.FC = () => {
+  const { searchQuery, setSearchQuery } = useOutletContext<{
+    searchQuery: string;
+    setSearchQuery: (value: string) => void;
+  }>();
   const axiosInstance = useAxiosWithAuth(import.meta.env.VITE_PUBLIC_STAGING_API)
   const [meters, setMeters] = useState<Meter[]>([]);
   const [filteredMeters, setFilteredMeters] = useState<Meter[]>([]);
   const [open, setOpen] = useState(false);
   const [editingMeter, setEditingMeter] = useState<Meter | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState('');
   const [locationFilter, setLocationFilter] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [minDeficit, setMinDeficit] = useState<number | ''>('');
@@ -831,7 +835,7 @@ const Meters: React.FC = () => {
   const [tariffs, setTariffs] = useState<any[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [isLoadingAccounts, setIsLoadingAccounts] = useState(false);
-  
+
   // Date range state
   const [dateRange, setDateRange] = useState({
     startDate: '',
@@ -859,10 +863,10 @@ const Meters: React.FC = () => {
     try {
       setIsLoading(true);
       const params: Record<string, string> = {};
-      
+
       if (startDate) params.startDate = startDate;
       if (endDate) params.endDate = endDate;
-      
+
       const data = await getAllMeters(axiosInstance, params);
       setMeters(data);
       setFilteredMeters(data);
@@ -1087,7 +1091,7 @@ const Meters: React.FC = () => {
             </Button>
           )}
         </div>
-        
+
         <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
           <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="space-y-1">
@@ -1097,7 +1101,7 @@ const Meters: React.FC = () => {
                 <Input
                   type="date"
                   value={dateRange.startDate}
-                  onChange={(e) => setDateRange({...dateRange, startDate: e.target.value})}
+                  onChange={(e) => setDateRange({ ...dateRange, startDate: e.target.value })}
                   className="pl-10"
                 />
               </div>
@@ -1109,13 +1113,13 @@ const Meters: React.FC = () => {
                 <Input
                   type="date"
                   value={dateRange.endDate}
-                  onChange={(e) => setDateRange({...dateRange, endDate: e.target.value})}
+                  onChange={(e) => setDateRange({ ...dateRange, endDate: e.target.value })}
                   className="pl-10"
                 />
               </div>
             </div>
           </div>
-          
+
           <div className="text-sm text-gray-600 min-w-[200px]">
             <div className="font-medium mb-1">Current Range:</div>
             <div className="flex items-center gap-2">
@@ -1129,7 +1133,7 @@ const Meters: React.FC = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="mt-3 text-xs text-gray-500">
           {dateRange.startDate || dateRange.endDate ? (
             <p>Showing meter data filtered by the selected date range. The table shows aggregated totals within this period.</p>
@@ -1141,22 +1145,6 @@ const Meters: React.FC = () => {
 
       {/* Search and Filter Bar */}
       <div className="flex flex-col gap-4 mb-6">
-        <div className="relative">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search meters"
-            className="pl-9"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          {searchQuery && (
-            <X
-              className="absolute right-3 top-3 h-4 w-4 text-muted-foreground cursor-pointer"
-              onClick={() => setSearchQuery('')}
-            />
-          )}
-        </div>
-
         <div className="flex items-center gap-4">
           {user?.role == "admin" && (<Button
             variant="outline"

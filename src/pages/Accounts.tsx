@@ -18,21 +18,25 @@ import {
     TableHeader,
     TableRow,
 } from "../components/ui/table";
-import { Pencil, Trash2, Plus, ChevronLeft, ChevronRight, Search, X, LoaderIcon } from "lucide-react";
+import { Pencil, Trash2, Plus, ChevronLeft, ChevronRight, LoaderIcon } from "lucide-react";
 import { getAccounts, createAccount, updateAccount, deleteAccount } from '../../api/accounts.api';
 import type { Account } from '../../api/accounts.api';
 import { toast, Toaster } from 'sonner';
 import { getTariffs } from '../../api/tariffs.api';
 import useAxiosWithAuth from "@/../utils/axiosInterceptor";
+import { useOutletContext } from 'react-router-dom';
 
 const Accounts: React.FC = () => {
+    const { searchQuery, setSearchQuery } = useOutletContext<{
+        searchQuery: string;
+        setSearchQuery: (value: string) => void;
+    }>();
     const axiosInstance = useAxiosWithAuth(import.meta.env.VITE_PUBLIC_STAGING_API)
     const [accounts, setAccounts] = useState<Account[]>([]);
     const [filteredAccounts, setFilteredAccounts] = useState<Account[]>([]);
     const [open, setOpen] = useState(false);
     const [editingAccount, setEditingAccount] = useState<Account | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
-    const [searchQuery, setSearchQuery] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [isLoadingTariffs, setIsLoadingTariffs] = useState(false);
@@ -164,24 +168,6 @@ const Accounts: React.FC = () => {
                     <Plus className="mr-2 h-4 w-4" />
                     Add Account
                 </Button>
-            </div>
-
-            <div className="flex flex-col gap-4 mb-6">
-                <div className="relative">
-                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        placeholder="Search accounts by name, email or phone..."
-                        className="pl-9"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                    {searchQuery && (
-                        <X
-                            className="absolute right-3 top-3 h-4 w-4 text-muted-foreground cursor-pointer"
-                            onClick={() => setSearchQuery('')}
-                        />
-                    )}
-                </div>
             </div>
 
             <div className="rounded-md border">
