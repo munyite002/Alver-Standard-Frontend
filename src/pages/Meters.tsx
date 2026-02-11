@@ -29,20 +29,8 @@ import type { Account } from '../../api/accounts.api';
 import { getTariffs } from '../../api/tariffs.api'
 import { toast, Toaster } from 'sonner';
 import useAxiosWithAuth from "@/../utils/axiosInterceptor";
-import { Plus, Search, Filter, ChevronRight, ChevronLeft, LoaderIcon, Pencil, Trash2, Eye, X, Calendar } from "lucide-react";
+import { Plus, Search, ChevronRight, ChevronLeft, LoaderIcon, Pencil, Trash2, Eye, X } from "lucide-react";
 
-const getMonthDates = () => {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth(), 1);
-  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-
-  const formatDate = (date: Date) => date.toISOString().split('T')[0];
-
-  return {
-    startDate: formatDate(start),
-    endDate: formatDate(end)
-  };
-};
 
 const Meters: React.FC = () => {
   const axiosInstance = useAxiosWithAuth(import.meta.env.VITE_PUBLIC_STAGING_API)
@@ -61,13 +49,11 @@ const Meters: React.FC = () => {
   const [filters, setFilters] = useState({
     page: 1,
     limit: 10,
-    ...getMonthDates(),
-    search: "",
     sortField: "createdAt",
     sortOrder: "desc"
   });
 
-  const [showFilters, setShowFilters] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingTariffs, setIsLoadingTariffs] = useState(false);
   const [tariffs, setTariffs] = useState<any[]>([]);
@@ -151,7 +137,8 @@ const Meters: React.FC = () => {
   };
 
   const handleSearchChange = (value: string) => {
-    handleFilterChange({ search: value, page: 1 });
+    setSearchQuery(value);
+    handleFilterChange({ page: 1 });
   };
 
   const handleSortChange = (field: string) => {
@@ -242,19 +229,14 @@ const Meters: React.FC = () => {
   const [isTamperLoading, setIsTamperLoading] = useState(false);
   const [isCreditLoading, setIsCreditLoading] = useState(false);
 
-  const currentMeters = metersData.meters;
+  const currentMeters = metersData.meters.filter((meter: Meter) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      meter.meterNumber.toLowerCase().includes(query) ||
+      meter.location.toLowerCase().includes(query)
+    );
+  });
   const pagination = metersData.pagination;
-
-  const resetFilters = () => {
-    setFilters({
-      page: 1,
-      limit: 10,
-      ...getMonthDates(),
-      search: "",
-      sortField: "createdAt",
-      sortOrder: "desc"
-    });
-  };
 
   const activeMeter = selectedMeter || currentMeters[0];
 
@@ -271,7 +253,7 @@ const Meters: React.FC = () => {
       </div>
 
       {/* Filter Bar */}
-      <div className="bg-white p-4 rounded-lg border shadow-sm mb-6 space-y-4">
+      <div className="bg-white p-4 rounded-lg border shadow-sm mb-6">
         <div className="flex flex-col md:flex-row gap-4 items-end">
           <div className="flex-1 space-y-1">
             <label className="text-sm font-medium">Search</label>
@@ -280,10 +262,10 @@ const Meters: React.FC = () => {
               <Input
                 placeholder="Search meter number or location..."
                 className="pl-9"
-                value={filters.search}
+                value={searchQuery}
                 onChange={(e) => handleSearchChange(e.target.value)}
               />
-              {filters.search && (
+              {searchQuery && (
                 <X
                   className="absolute right-3 top-3 h-4 w-4 text-muted-foreground cursor-pointer"
                   onClick={() => handleSearchChange('')}
@@ -291,82 +273,7 @@ const Meters: React.FC = () => {
               )}
             </div>
           </div>
-
-          <div className="flex-1 space-y-1">
-            <label className="text-sm font-medium">Date Range</label>
-            <div className="flex items-center gap-2">
-              <div className="relative flex-1">
-                <Calendar className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  type="date"
-                  value={filters.startDate}
-                  onChange={(e) => handleFilterChange({ startDate: e.target.value, page: 1 })}
-                  className="pl-10"
-                />
-              </div>
-              <span className="text-gray-400">至</span>
-              <div className="relative flex-1">
-                <Calendar className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  type="date"
-                  value={filters.endDate}
-                  onChange={(e) => handleFilterChange({ endDate: e.target.value, page: 1 })}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2"
-            >
-              <Filter className="h-4 w-4" />
-              {showFilters ? 'Hide Filters' : 'More Filters'}
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={resetFilters}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              Reset
-            </Button>
-          </div>
         </div>
-
-        {showFilters && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
-            <div className="space-y-1">
-              <label className="text-sm font-medium">Quick Date Range</label>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleFilterChange({ ...getMonthDates(), page: 1 })}
-                  className="text-xs"
-                >
-                  This Month
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    const now = new Date();
-                    const start = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().split('T')[0];
-                    const end = new Date(now.getFullYear(), now.getMonth(), 0).toISOString().split('T')[0];
-                    handleFilterChange({ startDate: start, endDate: end, page: 1 });
-                  }}
-                  className="text-xs"
-                >
-                  Last Month
-                </Button>
-              </div>
-            </div>
-            {/* Add more filters here if needed (e.g. location, tariff) */}
-          </div>
-        )}
       </div>
 
       <div className="rounded-md border">
