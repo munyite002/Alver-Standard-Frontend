@@ -11,8 +11,8 @@ export async function getDashboardMetrics(axiosInstance: any) {
     return response;
 }
 
-export async function getAllTransactions(axiosInstance: any) {
-    const response = axiosInstance.get("/payments/transactions");
+export async function getAllTransactions(axiosInstance: any, params?: any) {
+    const response = axiosInstance.get("/payments/transactions", { params });
 
     return response;
 }

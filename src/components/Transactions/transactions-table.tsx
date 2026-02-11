@@ -34,65 +34,33 @@ import type { Payment } from "@/lib/types";
 interface TransactionTableProps {
     onViewTransaction: (transaction: Payment) => void;
     transactions: any;
-    isLoading: boolean
+    isLoading: boolean;
+    pagination: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+        hasNextPage: boolean;
+        hasPrevPage: boolean;
+    };
+    filters: {
+        page: number;
+        limit: number;
+        startDate: string;
+        endDate: string;
+        sort: string;
+    };
+    onFilterChange: (newFilters: any) => void;
 }
 
 export function TransactionTable({
     onViewTransaction,
     transactions,
-    isLoading
+    isLoading,
+    pagination,
+    filters,
+    onFilterChange
 }: TransactionTableProps) {
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 8;
-    const [sort, setSort] = useState<{
-        key?: string;
-        direction?: "asc" | "desc";
-    }>({});
-    const [startDate, setStartDate] = useState<string>("");
-    const [endDate, setEndDate] = useState<string>("");
-
-    // Filter transactions by date range
-    const filteredTransactions = (transactions || []).filter((t: any) => {
-        if (!startDate && !endDate) return true;
-        const txDate = new Date(t.createdAt);
-        const start = startDate ? new Date(startDate) : null;
-        const end = endDate ? new Date(endDate) : null;
-        if (start && end) {
-            return txDate >= start && txDate <= end;
-        } else if (start) {
-            return txDate >= start;
-        } else if (end) {
-            return txDate <= end;
-        }
-        return true;
-    });
-
-    const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    // Sort transactions based on sort value
-    const sortedTransactions = [...filteredTransactions].sort((a, b) => {
-        if (!sort.key || !sort.direction) return 0;
-        const { key, direction } = sort;
-        let aValue = a[key];
-        let bValue = b[key];
-
-        // Handle date sorting
-        if (key === "createdAt") {
-            aValue = new Date(aValue).getTime();
-            bValue = new Date(bValue).getTime();
-        }
-
-        if (aValue < bValue) return direction === "asc" ? -1 : 1;
-        if (aValue > bValue) return direction === "asc" ? 1 : -1;
-        return 0;
-    });
-
-    const currentTransactions = sortedTransactions.slice(startIndex, endIndex);
-
-    // Calculate total amount for filtered transactions
-    const totalAmount = filteredTransactions.reduce((sum: number, t: any) => sum + (t.transAmount || 0), 0);
-
     // Helper to format date as 'Aug 1st 2025'
     function formatFancyDate(dateStr: string) {
         if (!dateStr) return "";
@@ -100,8 +68,8 @@ export function TransactionTable({
         const day = date.getDate();
         const daySuffix =
             day % 10 === 1 && day !== 11 ? "st" :
-            day % 10 === 2 && day !== 12 ? "nd" :
-            day % 10 === 3 && day !== 13 ? "rd" : "th";
+                day % 10 === 2 && day !== 12 ? "nd" :
+                    day % 10 === 3 && day !== 13 ? "rd" : "th";
         return `${date.toLocaleString('en-US', { month: 'short' })} ${day}${daySuffix} ${date.getFullYear()}`;
     }
 
@@ -120,6 +88,32 @@ export function TransactionTable({
         };
     };
 
+    const handleSortChange = (sortValue: string) => {
+        onFilterChange({ sort: sortValue, page: 1 });
+    };
+
+    const handleDateChange = (type: 'startDate' | 'endDate', value: string) => {
+        onFilterChange({ [type]: value, page: 1 });
+    };
+
+    const handlePageChange = (newPage: number) => {
+        onFilterChange({ page: newPage });
+    };
+
+    const handleLimitChange = (newLimit: number) => {
+        onFilterChange({ limit: newLimit, page: 1 });
+    };
+
+    const currentSortLabel = () => {
+        switch (filters.sort) {
+            case 'latest': return "Date (Newest)";
+            case 'earliest': return "Date (Oldest)";
+            case 'highest': return "Amount (High to Low)";
+            case 'lowest': return "Amount (Low to High)";
+            default: return "Sort";
+        }
+    };
+
     return (
         <Card>
             <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -129,29 +123,21 @@ export function TransactionTable({
                         <label className="text-sm text-gray-700">Start Date:</label>
                         <input
                             type="date"
-                            value={startDate}
-                            onChange={e => {
-                                setStartDate(e.target.value);
-                                setCurrentPage(1);
-                            }}
+                            value={filters.startDate}
+                            onChange={e => handleDateChange('startDate', e.target.value)}
                             className="border rounded px-2 py-1 text-sm"
                         />
                         <label className="text-sm text-gray-700">End Date:</label>
                         <input
                             type="date"
-                            value={endDate}
-                            onChange={e => {
-                                setEndDate(e.target.value);
-                                setCurrentPage(1);
-                            }}
+                            value={filters.endDate}
+                            onChange={e => handleDateChange('endDate', e.target.value)}
                             className="border rounded px-2 py-1 text-sm"
                         />
                         <button
                             type="button"
                             onClick={() => {
-                                setStartDate("");
-                                setEndDate("");
-                                setCurrentPage(1);
+                                onFilterChange({ startDate: "", endDate: "", page: 1 });
                             }}
                             className="ml-2 px-3 py-1 rounded bg-gray-200 text-gray-700 text-sm hover:bg-gray-300 border"
                         >
@@ -160,66 +146,41 @@ export function TransactionTable({
                     </div>
                 </div>
                 <div className="flex gap-4 items-center">
+                    <div className="flex items-center gap-2">
+                        <label className="text-sm text-gray-700">Rows:</label>
+                        <select
+                            value={filters.limit}
+                            onChange={(e) => handleLimitChange(Number(e.target.value))}
+                            className="border rounded px-2 py-1 text-sm bg-white"
+                        >
+                            <option value={5}>5</option>
+                            <option value={10}>10</option>
+                            <option value={20}>20</option>
+                            <option value={50}>50</option>
+                        </select>
+                    </div>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button
-                                variant={sort.key ? "default" : "outline"}
+                                variant={filters.sort ? "default" : "outline"}
                                 size="sm"
                                 className="h-8 gap-1"
                             >
                                 <ArrowDownUp className="h-3.5 w-3.5" />
-                                {sort.key
-                                    ? sort.key === "createdAt"
-                                        ? sort.direction === "asc"
-                                            ? "Date (Oldest)"
-                                            : "Date (Newest)"
-                                        : sort.key === "transAmount"
-                                            ? sort.direction === "asc"
-                                                ? "Amount (Low to High)"
-                                                : "Amount (High to Low)"
-                                            : "Sort"
-                                    : "Sort"}
+                                {currentSortLabel()}
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                                onClick={() =>
-                                    setSort({
-                                        key: "createdAt",
-                                        direction: "desc"
-                                    })
-                                }
-                            >
+                            <DropdownMenuItem onClick={() => handleSortChange('latest')}>
                                 Date (Newest)
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                                onClick={() =>
-                                    setSort({
-                                        key: "createdAt",
-                                        direction: "asc"
-                                    })
-                                }
-                            >
+                            <DropdownMenuItem onClick={() => handleSortChange('earliest')}>
                                 Date (Oldest)
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                                onClick={() =>
-                                    setSort({
-                                        key: "transAmount",
-                                        direction: "desc"
-                                    })
-                                }
-                            >
+                            <DropdownMenuItem onClick={() => handleSortChange('highest')}>
                                 Amount (High to Low)
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                                onClick={() =>
-                                    setSort({
-                                        key: "transAmount",
-                                        direction: "asc"
-                                    })
-                                }
-                            >
+                            <DropdownMenuItem onClick={() => handleSortChange('lowest')}>
                                 Amount (Low to High)
                             </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -228,18 +189,17 @@ export function TransactionTable({
             </CardHeader>
             <CardContent>
                 <div className="mb-4 flex items-center justify-between">
-                    {(startDate || endDate) && (
+                    {(filters.startDate || filters.endDate) && (
                         <div className="text-sm font-medium text-gray-700">
-                            Transaction total
-                            {startDate && endDate
-                                ? ` between ${formatFancyDate(startDate)} and ${formatFancyDate(endDate)}`
-                                : startDate
-                                    ? ` from ${formatFancyDate(startDate)}`
-                                    : endDate
-                                        ? ` up to ${formatFancyDate(endDate)}`
+                            Transaction activity
+                            {filters.startDate && filters.endDate
+                                ? ` between ${formatFancyDate(filters.startDate)} and ${formatFancyDate(filters.endDate)}`
+                                : filters.startDate
+                                    ? ` from ${formatFancyDate(filters.startDate)}`
+                                    : filters.endDate
+                                        ? ` up to ${formatFancyDate(filters.endDate)}`
                                         : ''
                             }
-                            : <span className="text-blue-600">Ksh {totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>
                     )}
                 </div>
@@ -290,13 +250,13 @@ export function TransactionTable({
                                         </div>
                                     </TableCell>
                                 </TableRow>
-                            ) : currentTransactions.length > 0 ? (
-                                currentTransactions.map((transaction, index) => {
+                            ) : transactions.length > 0 ? (
+                                transactions.map((transaction: any, index: number) => {
                                     const { date, time } = formatDate(transaction.createdAt);
                                     return (
                                         <TableRow
                                             key={transaction.id}
-                                            className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${index === currentTransactions.length - 1 ? 'border-b-0' : ''
+                                            className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${index === transactions.length - 1 ? 'border-b-0' : ''
                                                 }`}
                                         >
                                             <TableCell className="py-4 px-6">
@@ -339,7 +299,7 @@ export function TransactionTable({
                                                     </div>
                                                 </div>
                                             </TableCell>
-                                           <TableCell className="py-4 px-6">
+                                            <TableCell className="py-4 px-6">
                                                 <div className="flex items-center space-x-3">
                                                     <div>
                                                         <div className="text-sm font-medium text-blue-400">
@@ -347,7 +307,7 @@ export function TransactionTable({
                                                         </div>
                                                     </div>
                                                 </div>
-                                           </TableCell>
+                                            </TableCell>
                                             <TableCell className="py-4 px-6 text-center">
                                                 <button
                                                     onClick={() => onViewTransaction(transaction)}
@@ -381,13 +341,15 @@ export function TransactionTable({
                 <div className="flex items-center justify-between mt-4">
                     <div className="text-sm text-muted-foreground">
                         Showing{" "}
-                        <span className="font-medium">{filteredTransactions.length === 0 ? 0 : startIndex + 1}</span> to{" "}
                         <span className="font-medium">
-                            {Math.min(endIndex, filteredTransactions.length)}
+                            {pagination.total === 0 ? 0 : (pagination.page - 1) * pagination.limit + 1}
+                        </span> to{" "}
+                        <span className="font-medium">
+                            {Math.min(pagination.page * pagination.limit, pagination.total)}
                         </span>{" "}
                         of{" "}
                         <span className="font-medium">
-                            {filteredTransactions.length}
+                            {pagination.total}
                         </span>{" "}
                         transactions
                     </div>
@@ -395,8 +357,8 @@ export function TransactionTable({
                         <Button
                             variant="outline"
                             size="icon"
-                            onClick={() => setCurrentPage(1)}
-                            disabled={currentPage === 1}
+                            onClick={() => handlePageChange(1)}
+                            disabled={!pagination.hasPrevPage}
                         >
                             <ChevronsLeft className="h-4 w-4" />
                             <span className="sr-only">First page</span>
@@ -404,17 +366,20 @@ export function TransactionTable({
                         <Button
                             variant="outline"
                             size="icon"
-                            onClick={() => setCurrentPage(currentPage - 1)}
-                            disabled={currentPage === 1}
+                            onClick={() => handlePageChange(pagination.page - 1)}
+                            disabled={!pagination.hasPrevPage}
                         >
                             <ChevronLeft className="h-4 w-4" />
                             <span className="sr-only">Previous page</span>
                         </Button>
+                        <div className="text-sm font-medium">
+                            Page {pagination.page} of {pagination.totalPages || 1}
+                        </div>
                         <Button
                             variant="outline"
                             size="icon"
-                            onClick={() => setCurrentPage(currentPage + 1)}
-                            disabled={currentPage === totalPages}
+                            onClick={() => handlePageChange(pagination.page + 1)}
+                            disabled={!pagination.hasNextPage}
                         >
                             <ChevronRight className="h-4 w-4" />
                             <span className="sr-only">Next page</span>
@@ -422,8 +387,8 @@ export function TransactionTable({
                         <Button
                             variant="outline"
                             size="icon"
-                            onClick={() => setCurrentPage(totalPages)}
-                            disabled={currentPage === totalPages}
+                            onClick={() => handlePageChange(pagination.totalPages)}
+                            disabled={!pagination.hasNextPage}
                         >
                             <ChevronsRight className="h-4 w-4" />
                             <span className="sr-only">Last page</span>

@@ -28,7 +28,25 @@ export function DashboardPage() {
 
     const [metrics, setMetrics] = useState<any>(null);
 
-    const [transactions, setTransactions] = useState<any>(null);
+    const [transactionsData, setTransactionsData] = useState<any>({
+        transactions: [],
+        pagination: {
+            total: 0,
+            page: 1,
+            limit: 10,
+            totalPages: 0,
+            hasNextPage: false,
+            hasPrevPage: false
+        }
+    });
+
+    const [filters, setFilters] = useState({
+        page: 1,
+        limit: 10,
+        startDate: "",
+        endDate: "",
+        sort: "latest"
+    });
 
     const handleViewTransaction = (transaction: Payment) => {
         setSelectedTransaction(transaction);
@@ -51,11 +69,10 @@ export function DashboardPage() {
     async function fetchTransactions() {
         try {
             setIsLoadingTransactions(true);
-            const response = await getAllTransactions(axiosInstance);
-            setTransactions(response.data);
+            const response = await getAllTransactions(axiosInstance, filters);
+            setTransactionsData(response.data);
         } catch (error) {
             console.error("Error: ", error);
-            setMetrics(null);
         } finally {
             setIsLoadingTransactions(false);
         }
@@ -63,8 +80,13 @@ export function DashboardPage() {
 
     useEffect(() => {
         fetchDashboardMetrics();
-        fetchTransactions();
     }, []);
+
+    useEffect(() => {
+        fetchTransactions();
+    }, [filters]);
+
+    const transactions = transactionsData.transactions;
 
     const filteredTransactions = transactions
         ? transactions.filter((transaction: Payment) => {
@@ -87,6 +109,9 @@ export function DashboardPage() {
                 onViewTransaction={handleViewTransaction}
                 transactions={filteredTransactions}
                 isLoading={isLoadingTransactions}
+                pagination={transactionsData.pagination}
+                filters={filters}
+                onFilterChange={(newFilters: any) => setFilters(prev => ({ ...prev, ...newFilters }))}
             />
             {isModalOpen && (
                 <TransactionModal
