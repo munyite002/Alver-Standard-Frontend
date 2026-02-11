@@ -22,6 +22,14 @@ import {
   TableHeader,
   TableRow,
 } from "../components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../components/ui/dropdown-menu";
 import { getAllMeters, createMeter, updateMeter, deleteMeter, generateMeterCredit, generateTamperCode } from '../api/meters.api';
 import type { Meter } from '../../api/meters.api';
 import { getAccounts } from '../../api/accounts.api';
@@ -29,7 +37,7 @@ import type { Account } from '../../api/accounts.api';
 import { getTariffs } from '../../api/tariffs.api'
 import { toast, Toaster } from 'sonner';
 import useAxiosWithAuth from "@/../utils/axiosInterceptor";
-import { Plus, Search, ChevronRight, ChevronLeft, LoaderIcon, Pencil, Trash2, Eye, X } from "lucide-react";
+import { Plus, Search, ChevronRight, ChevronLeft, LoaderIcon, Pencil, Trash2, Eye, X, MoreHorizontal } from "lucide-react";
 
 
 const Meters: React.FC = () => {
@@ -391,31 +399,43 @@ const Meters: React.FC = () => {
                         {meter.totalUnits ? meter.totalUnits.toFixed(2) : '0.00'}
                       </span>
                     </TableCell>
-                    {user?.role == "admin" && (<TableCell className="py-4 px-6">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleOpen(meter)}
-                          className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 hover:text-blue-700 transition-all duration-150"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(meter.id)}
-                          className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 transition-all duration-150"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => (
-                            setActionDialogOpen(true),
-                            setSelectedMeter(meter)
-                          )}
-                          className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-cyan-50 hover:bg-cyan-100 text-cyan-600 hover:text-cyan-700 transition-all duration-150"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </TableCell>)}
+                    {user?.role == "admin" && (
+                      <TableCell className="py-4 px-6 text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <span className="sr-only">Open menu</span>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="bg-white">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => handleOpen(meter)}>
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Edit Meter
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => (
+                                setActionDialogOpen(true),
+                                setSelectedMeter(meter)
+                              )}
+                            >
+                              <Eye className="mr-2 h-4 w-4" />
+                              View Actions
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => handleDelete(meter.id)}
+                              className="text-red-600 focus:text-red-600"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete Meter
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))
               ) : (
