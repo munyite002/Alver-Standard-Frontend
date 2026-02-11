@@ -12,6 +12,19 @@ import {
 import useAxiosWithAuth from "@/../utils/axiosInterceptor";
 import { useOutletContext } from "react-router-dom";
 
+const getMonthDates = () => {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+    const formatDate = (date: Date) => date.toISOString().split('T')[0];
+
+    return {
+        startDate: formatDate(start),
+        endDate: formatDate(end)
+    };
+};
+
 export function DashboardPage() {
     const { searchQuery } = useOutletContext<{ searchQuery: string }>();
     const axiosInstance = useAxiosWithAuth(
@@ -43,8 +56,7 @@ export function DashboardPage() {
     const [filters, setFilters] = useState({
         page: 1,
         limit: 10,
-        startDate: "",
-        endDate: "",
+        ...getMonthDates(),
         sort: "latest"
     });
 

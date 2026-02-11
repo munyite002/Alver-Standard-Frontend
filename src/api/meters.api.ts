@@ -22,8 +22,8 @@ export const createMeter = async (axiosInstance: any, meterData: Omit<Meter, 'id
   return response.data;
 };
 
-export const getAllMeters = async (axiosInstance: any) => {
-  const response = await axiosInstance.get(`/meters`);
+export const getAllMeters = async (axiosInstance: any, params?: any) => {
+  const response = await axiosInstance.get(`/meters`, { params });
   return response.data;
 };
 

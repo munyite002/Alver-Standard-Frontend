@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
+import React from "react";
 import {
     ChevronLeft,
     ChevronRight,
