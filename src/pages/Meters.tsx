@@ -73,8 +73,8 @@ const Meters: React.FC = () => {
   const [tariffs, setTariffs] = useState<any[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [isLoadingAccounts, setIsLoadingAccounts] = useState(false);
-
-  const itemsPerPage = 10;
+  const [open, setOpen] = useState(false);
+  const [editingMeter, setEditingMeter] = useState<Meter | null>(null);
   const [formData, setFormData] = useState({
     meterNumber: '',
     location: '',
@@ -341,17 +341,17 @@ const Meters: React.FC = () => {
             <div className="space-y-1">
               <label className="text-sm font-medium">Quick Date Range</label>
               <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => handleFilterChange({ ...getMonthDates(), page: 1 })}
                   className="text-xs"
                 >
                   This Month
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => {
                     const now = new Date();
                     const start = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().split('T')[0];
@@ -373,7 +373,7 @@ const Meters: React.FC = () => {
         <Table>
           <TableHeader>
             <TableRow className="border-b border-gray-100">
-              <TableHead 
+              <TableHead
                 className="py-4 px-6 text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-50"
                 onClick={() => handleSortChange('meterNumber')}
               >
@@ -386,7 +386,7 @@ const Meters: React.FC = () => {
               </TableHead>
               <TableHead className="py-4 px-6 text-sm font-semibold text-gray-700">Location</TableHead>
               <TableHead className="py-4 px-6 text-sm font-semibold text-gray-700">Account</TableHead>
-              <TableHead 
+              <TableHead
                 className="py-4 px-6 text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-50"
                 onClick={() => handleSortChange('openingDeficit')}
               >
@@ -397,7 +397,7 @@ const Meters: React.FC = () => {
                   )}
                 </div>
               </TableHead>
-              <TableHead 
+              <TableHead
                 className="py-4 px-6 text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-50"
                 onClick={() => handleSortChange('totalAmount')}
               >
@@ -408,7 +408,7 @@ const Meters: React.FC = () => {
                   )}
                 </div>
               </TableHead>
-              <TableHead 
+              <TableHead
                 className="py-4 px-6 text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-50"
                 onClick={() => handleSortChange('totalUnits')}
               >
