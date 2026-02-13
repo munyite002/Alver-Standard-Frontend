@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { DashboardNav } from "@/components/Dashboard/dashboard-nav";
 import { UserNav } from "@/components/User/user-nav";
+import { useLocation } from "react-router-dom";
 
 export function DashboardHeader({
     searchQuery,
@@ -13,7 +14,8 @@ export function DashboardHeader({
     searchQuery?: string;
     setSearchQuery?: (value: string) => void;
 }) {
-    console.log("Search Query: ", searchQuery);
+    const location = useLocation();
+    const pathname = location.pathname;
     return (
         <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-6">
             <Sheet>
@@ -29,7 +31,7 @@ export function DashboardHeader({
             </Sheet>
 
             <div className="flex-1 md:grow-0 md:w-[300px]">
-                <div className="relative">
+                {(pathname === "/" || pathname === "/dashboard") && (<div className="relative">
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
                         type="search"
@@ -42,7 +44,7 @@ export function DashboardHeader({
                         }}
                     />
 
-                </div>
+                </div>)}
             </div>
             <div className="flex items-center gap-2 ml-auto">
                 <div className="text-lg font-semibold text-blue-600 bg-gray-100 px-4 py-2 rounded-md inline-block">
