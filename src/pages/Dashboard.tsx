@@ -18,9 +18,17 @@ import type { Payment } from "@/lib/types";
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const fmt = (n: number) => new Intl.NumberFormat("en-KE", { style: "currency", currency: "KES", maximumFractionDigits: 0 }).format(n);
 const fmtNum = (n: number) => new Intl.NumberFormat("en-KE").format(n);
+
 const fmtDate = (s: string | Date) => {
     if (!s) return "—";
-    return new Date(s).toLocaleDateString("en-KE", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+
+    return new Date(s).toLocaleString("en-KE", {
+        timeZone: "Africa/Nairobi",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+    });
 };
 
 const getMonthDates = () => {
@@ -107,7 +115,7 @@ function TransactionModal({ tx, onClose }: { tx: Payment | null; onClose: () => 
         ["Meter Number", tx.billRefNumber],
         ["Reference", tx.billRefNumber],
         ["Customer", `${tx.firstName || ''} ${tx.lastName || ''}`.trim() || '—'],
-        ["Phone", tx.msisdn],
+        ["Token", `${tx.token || 'N/A'}`],
         ["Amount", fmt(tx.transAmount)],
         ["Units", `${tx.units} kWh`],
         ["Date & Time", fmtDate(tx.transTime)],
@@ -487,7 +495,7 @@ export function DashboardPage() {
                                             <td className="px-5 py-3.5 whitespace-nowrap">
                                                 <div className="flex items-center gap-1">
                                                     <Zap className="w-3 h-3 text-amber-400" />
-                                                    <span className="text-sm text-gray-700">{tx.units}</span>
+                                                    <span className="text-sm text-gray-700">{tx.units || 'N/A'}</span>
                                                 </div>
                                             </td>
 
