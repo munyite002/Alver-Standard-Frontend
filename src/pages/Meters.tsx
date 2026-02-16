@@ -9,6 +9,13 @@ import {
   Copy, Check, Calendar, SlidersHorizontal, RefreshCw
 } from "lucide-react";
 import { toast, Toaster } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import useAxiosWithAuth from "@/../utils/axiosInterceptor";
 import {
   getAllMeters,
@@ -471,49 +478,46 @@ function DeleteDialog({ meter, onConfirm, onClose }: any) {
 }
 
 // ─── Row Action Menu ──────────────────────────────────────────────────────────
-function RowMenu({ meter, onEdit, onView, onDelete }: any) {
-  const [open, setOpen] = useState(false);
+interface RowMenuProps {
+  meter: Meter;
+  onEdit: (meter: Meter) => void;
+  onView: (meter: Meter) => void;
+  onDelete: (meter: Meter) => void;
+}
+
+function RowMenu({ meter, onEdit, onView, onDelete }: RowMenuProps) {
   return (
-    <div className="relative">
-      <button
-        onClick={(e) => { e.stopPropagation(); setOpen(!open); }}
-        className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-      >
-        <MoreHorizontal className="w-4 h-4" />
-      </button>
-      {open && (
-        <>
-          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-8 z-20 w-44 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden animate-in">
-            <div className="p-1">
-              <button
-                onClick={() => { setOpen(false); onEdit(meter); }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-              >
-                <Pencil className="w-3.5 h-3.5 text-gray-400" />
-                Edit Meter
-              </button>
-              <button
-                onClick={() => { setOpen(false); onView(meter); }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-              >
-                <Eye className="w-3.5 h-3.5 text-gray-400" />
-                View Actions
-              </button>
-            </div>
-            <div className="border-t border-gray-100 p-1">
-              <button
-                onClick={() => { setOpen(false); onDelete(meter); }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                Delete Meter
-              </button>
-            </div>
-          </div>
-        </>
-      )}
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all focus:outline-none">
+          <MoreHorizontal className="w-5 h-5" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-48 p-1.5">
+        <DropdownMenuItem
+          onClick={() => onEdit(meter)}
+          className="flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 cursor-pointer rounded-md"
+        >
+          <Pencil className="w-4 h-4 text-gray-400" />
+          Edit Meter
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => onView(meter)}
+          className="flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 cursor-pointer rounded-md"
+        >
+          <Eye className="w-4 h-4 text-gray-400" />
+          View Actions
+        </DropdownMenuItem>
+        <DropdownMenuSeparator className="my-1" />
+        <DropdownMenuItem
+          onClick={() => onDelete(meter)}
+          className="flex items-center gap-2.5 px-3 py-2 text-sm text-rose-600 focus:text-rose-600 focus:bg-rose-50 cursor-pointer rounded-md"
+        >
+          <Trash2 className="w-4 h-4" />
+          Delete Meter
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
