@@ -14,7 +14,7 @@ import {
   getAllMeters,
   createMeter,
   updateMeter,
-  deleteMeter,
+  deleteMeterApi,
   generateMeterCredit,
   generateTamperCode
 } from "../api/meters.api";
@@ -531,6 +531,7 @@ export function MetersPage() {
   const [filters, setFilters] = useState<any>({
     page: 1,
     limit: 10,
+    meterNumber: '',
     sortField: "createdAt",
     sortOrder: "desc",
     ...getMonthDates()
@@ -596,6 +597,7 @@ export function MetersPage() {
     const isAsc = filters.sortField === field && filters.sortOrder === 'asc';
     setFilters((prev: any) => ({
       ...prev,
+      meterNumber: '',
       sortField: field,
       sortOrder: isAsc ? 'desc' : 'asc',
       page: 1
@@ -611,6 +613,10 @@ export function MetersPage() {
     setFilters((prev: any) => ({ ...prev, limit: newLimit, page: 1 }));
   };
 
+  const handleMeterNumberChange = (newMeterNumber: string) => {
+    setSearchQuery(newMeterNumber);
+    setFilters((prev: any) => ({ ...prev, meterNumber: newMeterNumber, page: 1 }));
+  };
 
 
   const handleSubmit = async (form: any) => {
@@ -636,7 +642,7 @@ export function MetersPage() {
 
   const handleConfirmDelete = async (id: string) => {
     try {
-      await deleteMeter(axiosInstance, id);
+      await deleteMeterApi(axiosInstance, id);
       toast.success("Meter deleted successfully");
       setDeleteMeter(null);
       fetchMeters();
@@ -715,7 +721,7 @@ export function MetersPage() {
                 <input
                   type="text"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => handleMeterNumberChange(e.target.value)}
                   placeholder="Search meter or location…"
                   className="w-full pl-9 pr-8 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all placeholder:text-gray-400"
                 />

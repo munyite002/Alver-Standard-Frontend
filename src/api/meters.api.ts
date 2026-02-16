@@ -15,6 +15,8 @@ export interface Meter {
   TI: any;
   KRN: any;
   accountId?: string;
+  totalUnits: any;
+  totalAmount: any;
 }
 
 export const createMeter = async (axiosInstance: any, meterData: Omit<Meter, 'id' | 'createdAt' | 'updatedAt'>) => {
@@ -37,7 +39,7 @@ export const updateMeter = async (axiosInstance: any, id: string, meterData: Par
   return response.data;
 };
 
-export const deleteMeter = async (axiosInstance: any, id: string) => {
+export const deleteMeterApi = async (axiosInstance: any, id: string) => {
   await axiosInstance.delete(`/meters/${id}`);
 }; 
 

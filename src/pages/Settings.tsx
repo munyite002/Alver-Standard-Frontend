@@ -3,298 +3,517 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { updatePassword, updateUser } from "@/../api/users.api";
 import { getTariffs, type Tariff } from "@/../api/tariffs.api";
 import { toast, Toaster } from "sonner";
-import { ArrowLeft } from "lucide-react";
 import useAxiosWithAuth from "@/../utils/axiosInterceptor";
 //@ts-ignore
 import { useGlobalContext } from "@/../context/GlobalContext.jsx";
 import { TariffConfiguration } from "@/components/Settings/tariff-configuration";
+import {
+  User, Lock, Settings2, ArrowLeft, Loader2,
+  Mail, Phone, KeyRound, Eye, EyeOff, ShieldCheck,
+  CheckCircle2, AlertCircle
+} from "lucide-react";
 
-export function SettingsPage() {
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    const axiosInstance = useAxiosWithAuth(
-        import.meta.env.VITE_PUBLIC_STAGING_API
-    );
-    const navigate = useNavigate();
-    const [isSaving, setIsSaving] = useState(false);
-    //@ts-ignore
-    const [tariffs, setTariffs] = useState<Tariff[]>([]);
-    //@ts-ignore
-    const [isLoadingTariffs, setIsLoadingTariffs] = useState(true);
+// ─── Reusable Field components (shared design system) ────────────────────────
+function Field({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{label}</label>
+      {children}
+      {hint && <p className="text-xs text-gray-400">{hint}</p>}
+    </div>
+  );
+}
 
-    const [passwordData, setPasswordData] = useState({
-        oldPassword: "",
-        newPassword: "",
-        confirmNewPassword: ""
-    });
+function TextInput({
+  value, onChange, placeholder = "", type = "text", prefix, disabled = false, ...rest
+}: {
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+  type?: string;
+  prefix?: string;
+  disabled?: boolean;
+  [key: string]: any;
+}) {
+  const [show, setShow] = useState(false);
+  const isPassword = type === "password";
+  const resolvedType = isPassword ? (show ? "text" : "password") : type;
 
-    const [userData, setUserData] = useState({
-        name: user?.name || "",
-        email: user?.email || "",
-        phone: user?.phone.slice(3,) || "",
-    });
+  return (
+    <div className="relative flex items-center">
+      {prefix && (
+        <span className="absolute left-3 text-sm text-gray-400 font-medium select-none pointer-events-none">
+          {prefix}
+        </span>
+      )}
+      <input
+        type={resolvedType}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        disabled={disabled}
+        className={`
+          w-full py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50
+          focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400
+          disabled:opacity-50 disabled:cursor-not-allowed
+          transition-all placeholder:text-gray-400
+          ${prefix ? "pl-12" : "pl-3"}
+          ${isPassword ? "pr-10" : "pr-3"}
+        `}
+        {...rest}
+      />
+      {isPassword && (
+        <button
+          type="button"
+          onClick={() => setShow(!show)}
+          className="absolute right-3 text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+        </button>
+      )}
+    </div>
+  );
+}
 
-    //@ts-ignore
-    const [newTariffData, setNewTariffData] = useState<{
-        name: string;
-        provider: "KPLC" | "ALVER_POWER";
-        ratePerUnit: number;
-    }>({
-        name: "",
-        provider: "KPLC",
-        ratePerUnit: 0
-    });
+// ─── Password strength indicator ─────────────────────────────────────────────
+function PasswordStrength({ password }: { password: string }) {
+  if (!password) return null;
+  const checks = [
+    { label: "8+ characters", ok: password.length >= 8 },
+    { label: "Uppercase letter", ok: /[A-Z]/.test(password) },
+    { label: "Number", ok: /\d/.test(password) },
+    { label: "Special character", ok: /[^A-Za-z0-9]/.test(password) },
+  ];
+  const score = checks.filter((c) => c.ok).length;
+  const strengthMap = [
+    { label: "Too weak",  color: "bg-rose-500",   text: "text-rose-600"   },
+    { label: "Weak",      color: "bg-orange-400",  text: "text-orange-600" },
+    { label: "Fair",      color: "bg-amber-400",   text: "text-amber-600"  },
+    { label: "Good",      color: "bg-blue-500",    text: "text-blue-600"   },
+    { label: "Strong",    color: "bg-emerald-500", text: "text-emerald-600"},
+  ];
+  const s = strengthMap[score];
 
-    useEffect(() => {
-        fetchTariffs();
-    }, []);
+  return (
+    <div className="space-y-2">
+      <div className="flex gap-1">
+        {[0, 1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className={`h-1 flex-1 rounded-full transition-all duration-300 ${i < score ? s.color : "bg-gray-200"}`}
+          />
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {checks.map((c) => (
+          <span
+            key={c.label}
+            className={`inline-flex items-center gap-1 text-xs font-medium ${c.ok ? "text-emerald-600" : "text-gray-400"}`}
+          >
+            {c.ok
+              ? <CheckCircle2 className="w-3 h-3" />
+              : <AlertCircle className="w-3 h-3" />
+            }
+            {c.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
 
-    const fetchTariffs = async () => {
-        try {
-            setIsLoadingTariffs(true);
-            const response = await getTariffs(axiosInstance);
-            setTariffs(response.data);
-        } catch (err) {
-            console.error("Error fetching tariffs:", err);
-        } finally {
-            setIsLoadingTariffs(false);
-        }
-    };
-
-    const handleSave = async () => {
-        try {
-            setIsSaving(true);
-            const data = {
-                name: userData.name,
-                email: userData?.email,
-                phone: `254${userData?.phone}`
-            };
-            await updateUser(axiosInstance, data);
-            toast.success("User Updated Successfully");
-        } catch (err) {
-            console.log(`Error updating User: ${err}`);
-            toast.error(
-                //@ts-ignore
-                `Error Updating User: ${err?.response?.data?.error}`
-            );
-        } finally {
-            setIsSaving(false);
-        }
-    };
-
-    const handleUpdateUserPassword = async () => {
-        if (passwordData.newPassword !== passwordData.confirmNewPassword) {
-            toast.error("Password doesn't match");
-            return;
-        }
-        try {
-            setIsSaving(true);
-            const data = {
-                newPassword: passwordData.newPassword,
-                oldPassword: passwordData.oldPassword
-            };
-            await updatePassword(axiosInstance, data);
-            toast.success("Password Updated Successfully");
-        } catch (err) {
-            console.log(`Error updating password: ${err}`);
-            toast.error(
-                //@ts-ignore
-                `Error Updating User Password: ${err?.response?.data?.error}`
-            );
-        } finally {
-            setIsSaving(false);
-        }
-    };
-
-
-
-    return (
-        <div className="space-y-4 p-6 pt-4 md:p-8 md:pt-6">
-            <Toaster position="top-right" richColors />
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => navigate("/")}
-                    >
-                        <ArrowLeft className="h-4 w-4" />
-                    </Button>
-                    <h2 className="text-2xl font-bold tracking-tight">
-                        Settings
-                    </h2>
-                </div>
-            </div>
-            <Tabs defaultValue="account" className="space-y-4">
-                <TabsList className="w-full">
-                    <TabsTrigger value="account">Account</TabsTrigger>
-                    {user?.role == "admin" && (<TabsTrigger value="configurations">
-                        Configurations
-                    </TabsTrigger>)}
-                    <TabsTrigger value="security">Security</TabsTrigger>
-                </TabsList>
-                <TabsContent value="account" className="space-y-4">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Profile</CardTitle>
-                            <CardDescription>
-                                Update your personal information. This
-                                information will be displayed publicly.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                <div className="space-y-2">
-                                    <Label htmlFor="first-name">
-                                        UserName
-                                    </Label>
-                                    <Input
-                                        id="userName"
-                                        placeholder="Enter your Name"
-                                        value={userData?.name}
-                                        onChange={(e) =>
-                                            setUserData((prev) => ({
-                                                ...prev,
-                                                name: e.target.value
-                                            }))
-                                        }
-                                    />
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="email">Email</Label>
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    placeholder="Enter your email"
-                                    value={userData?.email}
-                                    onChange={(e) =>
-                                        setUserData((prev) => ({
-                                            ...prev,
-                                            email: e.target.value
-                                        }))
-                                    }
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="email">Phone</Label>
-                                <div className="flex items-center space-x-2">
-                                    <span>+254</span>
-                                    <Input
-                                        id="phone"
-                                        type="text"
-                                        placeholder="Enter your phone number"
-                                        value={userData?.phone}
-                                        onChange={(e) =>
-                                            setUserData((prev) => ({
-                                                ...prev,
-                                                phone: e.target.value
-                                            }))
-                                        }
-                                    />
-                                </div>
-                            </div>
-                            <Button
-                                onClick={handleSave}
-                                disabled={isSaving}
-                            >
-                                {isSaving ? "Saving..." : "Save changes"}
-                            </Button>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-                {user?.role == "admin" && (<TabsContent value="configurations" className="space-y-4">
-                    <TariffConfiguration />
-                </TabsContent>)}
-                <TabsContent value="security" className="space-y-4">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Password</CardTitle>
-                            <CardDescription>
-                                Change your password here. After saving,
-                                you'll be logged out.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="current-password">
-                                    Current password
-                                </Label>
-                                <Input
-                                    id="current-password"
-                                    type="password"
-                                    value={passwordData.oldPassword}
-                                    onChange={(e) =>
-                                        setPasswordData((prev) => ({
-                                            ...prev,
-                                            oldPassword: e.target.value
-                                        }))
-                                    }
-                                />
-                            </div>
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                <div className="space-y-2">
-                                    <Label htmlFor="new-password">
-                                        New password
-                                    </Label>
-                                    <Input
-                                        id="new-password"
-                                        type="password"
-                                        value={passwordData.newPassword}
-                                        onChange={(e) =>
-                                            setPasswordData((prev) => ({
-                                                ...prev,
-                                                newPassword: e.target.value
-                                            }))
-                                        }
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="confirm-password">
-                                        Confirm password
-                                    </Label>
-                                    <Input
-                                        id="confirm-password"
-                                        type="password"
-                                        value={
-                                            passwordData.confirmNewPassword
-                                        }
-                                        onChange={(e) =>
-                                            setPasswordData((prev) => ({
-                                                ...prev,
-                                                confirmNewPassword:
-                                                    e.target.value
-                                            }))
-                                        }
-                                    />
-                                </div>
-                            </div>
-                        </CardContent>
-                        <Button
-                            onClick={handleUpdateUserPassword}
-                            disabled={isSaving}
-                            className="mx-4 max-w-[150px]"
-                        >
-                            {isSaving ? "Saving..." : "Save changes"}
-                        </Button>
-                    </Card>
-                </TabsContent>
-            </Tabs>
+// ─── Section card wrapper ─────────────────────────────────────────────────────
+function SectionCard({
+  title, description, icon: Icon, children, footer
+}: {
+  title: string;
+  description: string;
+  icon: React.ElementType;
+  children: React.ReactNode;
+  footer?: React.ReactNode;
+}) {
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      {/* Card header */}
+      <div className="px-6 py-5 border-b border-gray-100 flex items-start gap-4">
+        <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center flex-shrink-0">
+          <Icon className="w-4 h-4 text-blue-600" />
         </div>
-    );
+        <div>
+          <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
+          <p className="text-xs text-gray-400 mt-0.5">{description}</p>
+        </div>
+      </div>
+
+      {/* Card body */}
+      <div className="px-6 py-5">
+        {children}
+      </div>
+
+      {/* Card footer */}
+      {footer && (
+        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/60 flex items-center justify-end">
+          {footer}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Tab button ───────────────────────────────────────────────────────────────
+function TabBtn({
+  active, onClick, icon: Icon, label
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: React.ElementType;
+  label: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`
+        flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-t-lg transition-all relative
+        ${active
+          ? "text-blue-600 bg-blue-50/60 border-b-2 border-blue-500"
+          : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+        }
+      `}
+    >
+      <Icon className={`w-4 h-4 ${active ? "text-blue-500" : "text-gray-400"}`} />
+      {label}
+    </button>
+  );
+}
+
+// ─── Save button ──────────────────────────────────────────────────────────────
+function SaveButton({ isSaving, onClick, label = "Save changes" }: { isSaving: boolean; onClick?: () => void; label?: string }) {
+  return (
+    <button
+      type={onClick ? "button" : "submit"}
+      onClick={onClick}
+      disabled={isSaving}
+      className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg
+                 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed
+                 transition-all shadow-sm shadow-blue-200"
+    >
+      {isSaving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+      {isSaving ? "Saving…" : label}
+    </button>
+  );
+}
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
+export function SettingsPage() {
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const axiosInstance = useAxiosWithAuth(import.meta.env.VITE_PUBLIC_STAGING_API);
+  const navigate = useNavigate();
+  const isAdmin = user?.role === "admin";
+
+  type TabId = "account" | "configurations" | "security";
+  const [activeTab, setActiveTab] = useState<TabId>("account");
+  const [isSaving, setIsSaving] = useState(false);
+
+  const [userData, setUserData] = useState({
+    name:  user?.name  || "",
+    email: user?.email || "",
+    phone: user?.phone?.slice(3) || "",
+  });
+
+  const [passwordData, setPasswordData] = useState({
+    oldPassword:        "",
+    newPassword:        "",
+    confirmNewPassword: "",
+  });
+
+  //@ts-ignore
+  const [tariffs, setTariffs] = useState<Tariff[]>([]);
+  const [isLoadingTariffs, setIsLoadingTariffs] = useState(true);
+
+  useEffect(() => {
+    const fetchTariffs = async () => {
+      try {
+        setIsLoadingTariffs(true);
+        const response = await getTariffs(axiosInstance);
+        setTariffs(response.data);
+      } catch (err) {
+        console.error("Error fetching tariffs:", err);
+      } finally {
+        setIsLoadingTariffs(false);
+      }
+    };
+    fetchTariffs();
+  }, []);
+
+  const handleSave = async () => {
+    try {
+      setIsSaving(true);
+      await updateUser(axiosInstance, {
+        name:  userData.name,
+        email: userData.email,
+        phone: `254${userData.phone}`,
+      });
+      toast.success("Profile updated successfully");
+    } catch (err) {
+      //@ts-ignore
+      toast.error(`Failed to update profile: ${err?.response?.data?.error}`);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    if (passwordData.newPassword !== passwordData.confirmNewPassword) {
+      toast.error("Passwords don't match");
+      return;
+    }
+    try {
+      setIsSaving(true);
+      await updatePassword(axiosInstance, {
+        newPassword: passwordData.newPassword,
+        oldPassword: passwordData.oldPassword,
+      });
+      toast.success("Password updated — please sign in again");
+      setPasswordData({ oldPassword: "", newPassword: "", confirmNewPassword: "" });
+    } catch (err) {
+      //@ts-ignore
+      toast.error(`Failed to update password: ${err?.response?.data?.error}`);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const tabs: { id: TabId; label: string; icon: React.ElementType; adminOnly?: boolean }[] = [
+    { id: "account",        label: "Account",        icon: User     },
+    { id: "configurations", label: "Configurations", icon: Settings2, adminOnly: true },
+    { id: "security",       label: "Security",       icon: Lock     },
+  ];
+
+  return (
+    <div className="min-h-screen bg-gray-50/60 font-sans">
+      <Toaster position="top-right" richColors />
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+        * { font-family: 'DM Sans', sans-serif; }
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(8px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .animate-in { animation: fadeInUp 0.3s ease both; }
+      `}</style>
+
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+
+        {/* ── Page Header ── */}
+        <div className="flex items-center gap-4 animate-in">
+          <button
+            onClick={() => navigate("/")}
+            className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-blue-500 mb-0.5">System</p>
+            <h1 className="text-2xl font-bold text-gray-900 leading-tight">Settings</h1>
+          </div>
+        </div>
+
+        {/* ── Tabs + Content ── */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden animate-in" style={{ animationDelay: "80ms" }}>
+
+          {/* Tab bar */}
+          <div className="flex border-b border-gray-100 px-2 pt-1">
+            {tabs
+              .filter((t) => !t.adminOnly || isAdmin)
+              .map((tab) => (
+                <TabBtn
+                  key={tab.id}
+                  active={activeTab === tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  icon={tab.icon}
+                  label={tab.label}
+                />
+              ))}
+          </div>
+
+          {/* Tab content */}
+          <div className="p-6">
+
+            {/* ── Account tab ── */}
+            {activeTab === "account" && (
+              <div className="space-y-5 animate-in">
+                {/* User identity header */}
+                <div className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 border border-gray-100">
+                  <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center shadow-md shadow-blue-200 flex-shrink-0">
+                    <span className="text-lg font-bold text-white">
+                      {(user?.name || user?.email || "U").charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900 text-sm">{user?.name || "—"}</p>
+                    <p className="text-xs text-gray-400">{user?.email}</p>
+                    <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-full bg-blue-50 border border-blue-100 text-xs font-medium text-blue-600">
+                      <ShieldCheck className="w-2.5 h-2.5" />
+                      {user?.role || "member"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-100" />
+
+                {/* Profile fields */}
+                <div>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Profile Information</p>
+                  <div className="space-y-4">
+                    <Field label="Display Name">
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                        <input
+                          type="text"
+                          value={userData.name}
+                          onChange={(e) => setUserData((p) => ({ ...p, name: e.target.value }))}
+                          placeholder="Your full name"
+                          className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all placeholder:text-gray-400"
+                        />
+                      </div>
+                    </Field>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <Field label="Email Address">
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                          <input
+                            type="email"
+                            value={userData.email}
+                            onChange={(e) => setUserData((p) => ({ ...p, email: e.target.value }))}
+                            placeholder="you@example.com"
+                            className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all placeholder:text-gray-400"
+                          />
+                        </div>
+                      </Field>
+
+                      <Field label="Phone Number">
+                        <div className="flex items-center gap-0">
+                          <span className="flex-shrink-0 px-3 py-2.5 text-sm font-medium text-gray-500 bg-gray-100 border border-gray-200 border-r-0 rounded-l-lg leading-none">
+                            +254
+                          </span>
+                          <div className="relative flex-1">
+                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                            <input
+                              type="text"
+                              value={userData.phone}
+                              onChange={(e) => setUserData((p) => ({ ...p, phone: e.target.value }))}
+                              placeholder="7XXXXXXXX"
+                              className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-l-none rounded-r-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all placeholder:text-gray-400"
+                            />
+                          </div>
+                        </div>
+                      </Field>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <SaveButton isSaving={isSaving} onClick={handleSave} />
+                </div>
+              </div>
+            )}
+
+            {/* ── Configurations tab ── */}
+            {activeTab === "configurations" && isAdmin && (
+              <div className="animate-in">
+                <TariffConfiguration />
+              </div>
+            )}
+
+            {/* ── Security tab ── */}
+            {activeTab === "security" && (
+              <div className="space-y-5 animate-in">
+                <div>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Change Password</p>
+                  <p className="text-xs text-gray-400">After saving, you'll be signed out and need to sign in again.</p>
+                </div>
+
+                <div className="border-t border-gray-100" />
+
+                <div className="space-y-4">
+                  <Field label="Current Password">
+                    <TextInput
+                      type="password"
+                      value={passwordData.oldPassword}
+                      onChange={(e) => setPasswordData((p) => ({ ...p, oldPassword: e.target.value }))}
+                      placeholder="Enter your current password"
+                    />
+                  </Field>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Field label="New Password">
+                        <TextInput
+                          type="password"
+                          value={passwordData.newPassword}
+                          onChange={(e) => setPasswordData((p) => ({ ...p, newPassword: e.target.value }))}
+                          placeholder="New password"
+                        />
+                      </Field>
+                      {passwordData.newPassword && (
+                        <PasswordStrength password={passwordData.newPassword} />
+                      )}
+                    </div>
+
+                    <Field label="Confirm New Password">
+                      <TextInput
+                        type="password"
+                        value={passwordData.confirmNewPassword}
+                        onChange={(e) => setPasswordData((p) => ({ ...p, confirmNewPassword: e.target.value }))}
+                        placeholder="Confirm new password"
+                      />
+                      {/* Match indicator */}
+                      {passwordData.confirmNewPassword && (
+                        <p className={`text-xs mt-1 font-medium flex items-center gap-1 ${
+                          passwordData.newPassword === passwordData.confirmNewPassword
+                            ? "text-emerald-600"
+                            : "text-rose-500"
+                        }`}>
+                          {passwordData.newPassword === passwordData.confirmNewPassword
+                            ? <><CheckCircle2 className="w-3 h-3" />Passwords match</>
+                            : <><AlertCircle className="w-3 h-3" />Passwords don't match</>
+                          }
+                        </p>
+                      )}
+                    </Field>
+                  </div>
+                </div>
+
+                {/* Security notice */}
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-50 border border-amber-100">
+                  <KeyRound className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-xs font-semibold text-amber-700">Before you save</p>
+                    <p className="text-xs text-amber-600 mt-0.5">
+                      Changing your password will end your current session. Make sure you have access to your email in case you need to recover your account.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex justify-end">
+                  <SaveButton
+                    isSaving={isSaving}
+                    onClick={handleUpdatePassword}
+                    label="Update Password"
+                  />
+                </div>
+              </div>
+            )}
+
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default SettingsPage;

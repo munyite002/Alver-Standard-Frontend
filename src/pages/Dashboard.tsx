@@ -88,7 +88,6 @@ function StatCard({ label, value, change, icon: Icon, color, prefix = "", suffix
         </div>
     );
 }
-
 // ─── Status Badge ─────────────────────────────────────────────────────────────
 function StatusBadge({ status }: { status?: string }) {
     const map: any = {
@@ -115,7 +114,7 @@ function TransactionModal({ tx, onClose }: { tx: Payment | null; onClose: () => 
         ["Meter Number", tx.billRefNumber],
         ["Reference", tx.billRefNumber],
         ["Customer", `${tx.firstName || ''} ${tx.lastName || ''}`.trim() || '—'],
-        ["Token", `${tx.token || 'N/A'}`],
+        ["Phone", tx.msisdn],
         ["Amount", fmt(tx.transAmount)],
         ["Units", `${tx.units} kWh`],
         ["Date & Time", fmtDate(tx.transTime)],
@@ -168,7 +167,7 @@ function TransactionModal({ tx, onClose }: { tx: Payment | null; onClose: () => 
 
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 export function DashboardPage() {
-    const { searchQuery } = useOutletContext<{ searchQuery: string }>();
+    const { searchQuery, setSearchQuery } = useOutletContext<{ searchQuery: string, setSearchQuery: (query: string) => void }>();
     const axiosInstance = useAxiosWithAuth(import.meta.env.VITE_PUBLIC_STAGING_API);
 
     // State
@@ -183,6 +182,7 @@ export function DashboardPage() {
     const [filters, setFilters] = useState<any>({
         page: 1,
         limit: 8,
+        meterNumber: '',
         ...getMonthDates(),
         sort: "latest"
     });
@@ -226,6 +226,10 @@ export function DashboardPage() {
     const handlePageChange = (newPage: number) => {
         if (newPage < 1 || newPage > transactionsData.pagination.totalPages) return;
         setFilters((prev: any) => ({ ...prev, page: newPage }));
+    };
+
+    const handleFilterChange = (newFilters: any) => {
+        setFilters((prev: any) => ({ ...prev, ...newFilters, page: 1 }));
     };
 
     const handleSortChange = (val: string) => {
@@ -359,7 +363,7 @@ export function DashboardPage() {
                                         type="text"
                                         placeholder="Search transactions…"
                                         value={searchQuery}
-                                        readOnly
+                                        onChange={(e) => setSearchQuery(e.target.value)}
                                         className="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all w-52 cursor-not-allowed"
                                         title="Use global search in header"
                                     />
