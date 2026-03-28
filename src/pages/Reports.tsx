@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { 
-  FileText, TrendingUp, Users, Zap, Filter, 
-  Download, ChevronDown, BarChart3, ArrowUpRight, 
-  Calendar, Layers, RefreshCw, Table2 
+import {
+    FileText, TrendingUp, Users, Zap, Filter,
+    Download, ChevronDown, BarChart3, ArrowUpRight,
+    Calendar, Layers, RefreshCw, Table2
 } from "lucide-react";
 import useAxiosWithAuth from "@/../utils/axiosInterceptor";
 import {
@@ -16,7 +16,11 @@ import type {
     RevenueSummary,
     MeterBreakdown
 } from "@/../api/reports.api";
-import * as XLSX from 'xlsx';
+import {
+    generateTariffReportPDF,
+    generateTariffReportExcel,
+    generateTariffReportCSV,
+} from '../components/Reports/ReportExports';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const formatCurrency = (amount: number) => {
@@ -73,12 +77,16 @@ function MetricCard({ label, value, icon: Icon, color, sub }: MetricCardProps) {
 }
 
 function RevenueBreakdown({ report }: { report: TariffReport }) {
+    const basePrice = 28;
     const rate = report.tariff.ratePerUnit;
-    const virtualUnits = report.summary.totalRevenue / rate;
-    const serviceCharge = virtualUnits * 3;
+
+    const servicePercent = (rate - basePrice) / basePrice; // 0.08
+    const servicePercentDisplay = servicePercent * 100;    // 8
+
+    const serviceCharge = servicePercent * report.summary.totalRevenue;
     const payable = report.summary.totalRevenue - serviceCharge;
 
-    const pct = (v: number) => report.summary.totalRevenue > 0 
+    const pct = (v: number) => report.summary.totalRevenue > 0
         ? ((v / report.summary.totalRevenue) * 100).toFixed(1)
         : "0.0";
 
@@ -121,7 +129,6 @@ function MeterTable({ report }: { report: TariffReport }) {
         { key: "transactionCount", label: "Txns", sortable: true },
         { key: "totalUnits", label: "Units", sortable: true },
         { key: "totalRevenue", label: "Revenue", sortable: true },
-        { key: "serviceCharge", label: "Service Charge", sortable: false },
     ];
 
     return (
@@ -172,7 +179,6 @@ function MeterTable({ report }: { report: TariffReport }) {
                                     <td className="px-6 py-3.5 text-gray-600 whitespace-nowrap">{fmtNum(meter.transactionCount)}</td>
                                     <td className="px-6 py-3.5 text-gray-600 whitespace-nowrap">{meter.totalUnits.toFixed(2)}</td>
                                     <td className="px-6 py-3.5 font-medium text-gray-800 whitespace-nowrap">{fmt(meter.totalRevenue)}</td>
-                                    <td className="px-6 py-3.5 text-gray-500 whitespace-nowrap">{fmt(svc)}</td>
                                 </tr>
                             );
                         })}
@@ -188,9 +194,6 @@ function MeterTable({ report }: { report: TariffReport }) {
                             </td>
                             <td className="px-6 py-3 text-xs font-bold text-gray-800">
                                 {fmt(sorted.reduce((s, m) => s + m.totalRevenue, 0))}
-                            </td>
-                            <td className="px-6 py-3 text-xs font-bold text-gray-600">
-                                {fmt(sorted.reduce((s, m) => s + (m.totalRevenue / rate) * 3, 0))}
                             </td>
                         </tr>
                     </tfoot>
@@ -289,7 +292,7 @@ export function ReportsPage() {
 
     const handleDownloadTariffReport = () => {
         if (!tariffReport) {
-            alert("Please generate a tariff report first");
+            alert('Please generate a tariff report first');
             return;
         }
         generateTariffReportPDF(tariffReport);
@@ -297,209 +300,25 @@ export function ReportsPage() {
 
     const handleDownloadTariffReportCSV = () => {
         if (!tariffReport) {
-            alert("Please generate a tariff report first");
+            alert('Please generate a tariff report first');
             return;
         }
-
-        const dateRange = tariffReport.dateRange.startDate && tariffReport.dateRange.endDate
-            ? `${tariffReport.dateRange.startDate} to ${tariffReport.dateRange.endDate}`
-            : tariffReport.dateRange.startDate
-                ? `from ${tariffReport.dateRange.startDate}`
-                : tariffReport.dateRange.endDate
-                    ? `until ${tariffReport.dateRange.endDate}`
-                    : 'All Time';
-
-        const filename = `Tariff_Report_${tariffReport.tariff.name.replace(/[^a-zA-Z0-9]/g, '_')}_${dateRange.replace(/[^a-zA-Z0-9]/g, '_')}.csv`;
-
-        let csvContent = 'Alver Power Systems - Tariff Report\n';
-        csvContent += `Generated on: ${new Date().toLocaleDateString('en-KE', {
-            year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
-        })}\n\n`;
-
-        csvContent += 'Report Information\n';
-        csvContent += `Tariff Name,${tariffReport.tariff.name}\n`;
-        csvContent += `Provider,${tariffReport.tariff.provider}\n`;
-        csvContent += `Rate per Unit,${formatCurrency(tariffReport.tariff.ratePerUnit)}\n`;
-        csvContent += `Report Period,${dateRange}\n\n`;
-
-        csvContent += 'Summary\n';
-        csvContent += `Total Meters,${tariffReport.summary.totalMeters}\n`;
-        csvContent += `Total Transactions,${tariffReport.summary.totalTransactions}\n`;
-        csvContent += `Total Units,${tariffReport.summary.totalUnits.toFixed(2)}\n`;
-        csvContent += `Total Revenue,${formatCurrency(tariffReport.summary.totalRevenue)}\n`;
-
-        const virtualUnits = tariffReport.summary.totalRevenue / tariffReport.tariff.ratePerUnit;
-        const serviceCharge = virtualUnits * 3;
-        const payableToClient = tariffReport.summary.totalRevenue - serviceCharge;
-
-        csvContent += `Service Charge,${formatCurrency(serviceCharge)}\n`;
-        csvContent += `Payable to Client,${formatCurrency(payableToClient)}\n\n`;
-
-        if (tariffReport.meterBreakdown.length > 0) {
-            csvContent += 'Meter Breakdown\n';
-            csvContent += 'Meter Number,Transactions,Total Units,Total Revenue,Service Charge\n';
-            tariffReport.meterBreakdown.forEach((meter: MeterBreakdown) => {
-                const meterVirtualUnits = meter.totalRevenue / tariffReport.tariff.ratePerUnit;
-                const meterServiceCharge = meterVirtualUnits * 3;
-                csvContent += `${meter.meterNumber},${meter.transactionCount},${meter.totalUnits.toFixed(2)},${formatCurrency(meter.totalRevenue)},${formatCurrency(meterServiceCharge)}\n`;
-            });
-        }
-
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', filename);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        generateTariffReportCSV(tariffReport);
     };
 
-    const generateTariffReportPDF = (report: TariffReport) => {
-        const printWindow = window.open('', '_blank');
-        if (!printWindow) {
-            alert('Please allow popups to download the PDF');
+    const handleDownloadTransactionsExcel = (_transactions: any[]) => {
+        // The new Excel export includes ALL three sheets (Summary, Meter Breakdown, Transactions)
+        // in one beautiful workbook — so we just pass the full report.
+        if (!tariffReport) {
+            alert('Please generate a tariff report first');
             return;
         }
-
-        const dateRange = report.dateRange.startDate && report.dateRange.endDate
-            ? `${report.dateRange.startDate} to ${report.dateRange.endDate}`
-            : report.dateRange.startDate
-                ? `from ${report.dateRange.startDate}`
-                : report.dateRange.endDate
-                    ? `until ${report.dateRange.endDate}`
-                    : 'All Time';
-
-        const htmlContent = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Tariff Report - ${report.tariff.name}</title>
-                <style>
-                    body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
-                    .header { text-align: center; border-bottom: 2px solid #2563eb; padding-bottom: 20px; margin-bottom: 30px; }
-                    .company-name { font-size: 24px; font-weight: bold; color: #2563eb; margin-bottom: 5px; }
-                    .report-title { font-size: 20px; font-weight: bold; margin-bottom: 10px; }
-                    .report-info { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; background: #f8fafc; padding: 20px; border-radius: 8px; }
-                    .info-item { margin-bottom: 10px; }
-                    .info-label { font-weight: bold; color: #64748b; }
-                    .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
-                    .summary-card { background: #f1f5f9; padding: 20px; border-radius: 8px; text-align: center; border-left: 4px solid #2563eb; }
-                    .summary-card h3 { margin: 0 0 10px 0; color: #2563eb; font-size: 14px; text-transform: uppercase; }
-                    .summary-card .value { font-size: 24px; font-weight: bold; color: #1e293b; }
-                    table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 12px; }
-                    th, td { border: 1px solid #e2e8f0; padding: 8px; text-align: left; }
-                    th { background-color: #f1f5f9; font-weight: bold; color: #475569; }
-                    .section-title { font-size: 18px; font-weight: bold; margin: 30px 0 15px 0; color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; }
-                    .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 20px; }
-                </style>
-            </head>
-            <body>
-                <div class="header">
-                    <div class="company-name">Alver Power Systems</div>
-                    <div class="report-title">Tariff Report</div>
-                    <div style="color: #64748b; font-size: 14px;">Generated on ${new Date().toLocaleDateString('en-KE', {
-                        year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
-                    })}</div>
-                </div>
-                <div class="report-info">
-                    <div>
-                        <div class="info-item"><span class="info-label">Tariff Name:</span> ${report.tariff.name}</div>
-                        <div class="info-item"><span class="info-label">Provider:</span> ${report.tariff.provider}</div>
-                        <div class="info-item"><span class="info-label">Rate per Unit:</span> ${formatCurrency(report.tariff.ratePerUnit)}</div>
-                    </div>
-                    <div>
-                        <div class="info-item"><span class="info-label">Report Period:</span> ${dateRange}</div>
-                    </div>
-                </div>
-                <div class="summary-cards">
-                    <div class="summary-card"><h3>Total Meters</h3><div class="value">${report.summary.totalMeters}</div></div>
-                    <div class="summary-card"><h3>Transactions</h3><div class="value">${report.summary.totalTransactions}</div></div>
-                    <div class="summary-card"><h3>Total Units</h3><div class="value">${report.summary.totalUnits.toFixed(2)}</div></div>
-                    <div class="summary-card"><h3>Total Revenue</h3><div class="value">${formatCurrency(report.summary.totalRevenue)}</div></div>
-                </div>
-                ${report.meterBreakdown.length > 0 ? `
-                <div class="section-title">Meter Breakdown</div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Meter Number</th>
-                            <th>Transactions</th>
-                            <th>Total Units</th>
-                            <th>Total Revenue</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${report.meterBreakdown.map((meter: MeterBreakdown) => `
-                            <tr>
-                                <td>${meter.meterNumber}</td>
-                                <td>${meter.transactionCount}</td>
-                                <td>${meter.totalUnits.toFixed(2)}</td>
-                                <td>${formatCurrency(meter.totalRevenue)}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-                ` : ''}
-                <div class="footer">
-                    <div>Alver Power Systems Admin Panel - Tariff Report</div>
-                </div>
-                <script>
-                    window.onload = function() { window.print(); window.onafterprint = function() { window.close(); }; };
-                </script>
-            </body>
-            </html>
-        `;
-
-        printWindow.document.write(htmlContent);
-        printWindow.document.close();
-    };
-
-    const handleDownloadTransactionsExcel = (transactions: any[]) => {
-        if (!transactions || transactions.length === 0) {
-            alert("No transactions available to download");
-            return;
-        }
-
-        try {
-            const excelData = transactions.map(transaction => ({
-                'Transaction ID': transaction.transId,
-                'Date & Time': formatDate(transaction.transTime),
-                'Meter Number': transaction.meterNumber,
-                'Amount (KES)': transaction.transAmount,
-                'Units': transaction.units,
-                'Phone': transaction.msisdn,
-                'Rate (KES)': transaction.rate,
-                'Token': transaction.token,
-                'Transaction Type': transaction.transactionType
-            }));
-
-            const worksheet = XLSX.utils.json_to_sheet(excelData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, 'Transactions');
-
-            const dateRange = tariffReport?.dateRange.startDate && tariffReport?.dateRange.endDate
-                ? `${tariffReport.dateRange.startDate}_to_${tariffReport.dateRange.endDate}`
-                : tariffReport?.dateRange.startDate
-                    ? `from_${tariffReport.dateRange.startDate}`
-                    : tariffReport?.dateRange.endDate
-                        ? `until_${tariffReport.dateRange.endDate}`
-                        : 'All_Time';
-
-            const tariffName = tariffReport?.tariff.name.replace(/[^a-zA-Z0-9]/g, '_') || 'Unknown_Tariff';
-            const filename = `Transactions_${tariffName}_${dateRange}.xlsx`;
-
-            XLSX.writeFile(workbook, filename);
-        } catch (error) {
-            console.error('Error generating Excel file:', error);
-            alert('Failed to download Excel file');
-        }
+        generateTariffReportExcel(tariffReport);
     };
 
     const tabs = [
         { id: "tariff", label: "Tariff Report", icon: FileText },
-        { id: "revenue", label: "Revenue Summary", icon: TrendingUp },
+        // { id: "revenue", label: "Revenue Summary", icon: TrendingUp },
     ];
 
     const selectedTariffObj = tariffs.find((t) => t.id === selectedTariff);
@@ -645,7 +464,7 @@ export function ReportsPage() {
                                         )}
                                         {isLoadingReport ? "Generating…" : "Generate Report"}
                                     </button>
-                                    {user?.role === "admin" && (
+                                    {/* {user?.role === "admin" && (
                                         <button
                                             onClick={handleGenerateRevenueSummary}
                                             disabled={isLoadingReport || isLoadingRevenue}
@@ -658,7 +477,7 @@ export function ReportsPage() {
                                             )}
                                             {isLoadingRevenue ? "Calculating…" : "Revenue Summary"}
                                         </button>
-                                    )}
+                                    )} */}
                                 </div>
                             </div>
                         </div>
@@ -744,7 +563,7 @@ export function ReportsPage() {
                                                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
                                             >
                                                 <Download className="w-4 h-4 text-emerald-500" />
-                                                Download Excel
+                                                Download Full Report (.xlsx)
                                             </button>
                                         </div>
                                     </div>

@@ -56,10 +56,15 @@ export function generateTariffReportPDF(report: TariffReport): void {
   }
 
   const dateRange = getDateRange(report);
-  const rate = report.tariff.ratePerUnit;
-  const virtualUnits = report.summary.totalRevenue / rate;
-  const serviceCharge = virtualUnits * 3;
-  const payable = report.summary.totalRevenue - serviceCharge;
+  const basePrice = 28;
+    const rate = report.tariff.ratePerUnit;
+
+    const servicePercent = (rate - basePrice) / basePrice; // 0.08
+    const servicePercentDisplay = servicePercent * 100;    // 8
+
+    const serviceCharge = servicePercent * report.summary.totalRevenue;
+    const payable = report.summary.totalRevenue - serviceCharge;
+
   const generatedOn = new Date().toLocaleDateString('en-KE', {
     year: 'numeric', month: 'long', day: 'numeric',
     hour: '2-digit', minute: '2-digit',
@@ -68,7 +73,6 @@ export function generateTariffReportPDF(report: TariffReport): void {
   const meterRows = report.meterBreakdown
     .sort((a, b) => b.totalRevenue - a.totalRevenue)
     .map((m: MeterBreakdown, i: number) => {
-      const svc = (m.totalRevenue / rate) * 3;
       const bg = i % 2 === 0 ? '#ffffff' : '#f8fafc';
       return `
         <tr style="background:${bg};">
@@ -76,7 +80,6 @@ export function generateTariffReportPDF(report: TariffReport): void {
           <td style="padding:10px 14px; text-align:right; font-size:11px; color:#64748b; border-bottom:1px solid #f1f5f9;">${fmtNum(m.transactionCount)}</td>
           <td style="padding:10px 14px; text-align:right; font-size:11px; color:#64748b; border-bottom:1px solid #f1f5f9;">${m.totalUnits.toFixed(2)}</td>
           <td style="padding:10px 14px; text-align:right; font-size:11px; font-weight:600; color:#0f172a; border-bottom:1px solid #f1f5f9;">${fmt(m.totalRevenue)}</td>
-          <td style="padding:10px 14px; text-align:right; font-size:11px; color:#64748b; border-bottom:1px solid #f1f5f9;">${fmt(svc)}</td>
         </tr>`;
     })
     .join('');
@@ -85,7 +88,6 @@ export function generateTariffReportPDF(report: TariffReport): void {
     txns: report.meterBreakdown.reduce((s, m) => s + m.transactionCount, 0),
     units: report.meterBreakdown.reduce((s, m) => s + m.totalUnits, 0),
     revenue: report.meterBreakdown.reduce((s, m) => s + m.totalRevenue, 0),
-    svc: report.meterBreakdown.reduce((s, m) => s + (m.totalRevenue / rate) * 3, 0),
   };
 
   const html = `<!DOCTYPE html>
@@ -659,7 +661,6 @@ export function generateTariffReportPDF(report: TariffReport): void {
               <th class="right">Transactions</th>
               <th class="right">Units (kWh)</th>
               <th class="right">Revenue</th>
-              <th class="right">Service Charge</th>
             </tr>
           </thead>
           <tbody>
@@ -671,7 +672,6 @@ export function generateTariffReportPDF(report: TariffReport): void {
               <td class="right">${fmtNum(totals.txns)}</td>
               <td class="right">${totals.units.toFixed(2)}</td>
               <td class="right">${fmt(totals.revenue)}</td>
-              <td class="right">${fmt(totals.svc)}</td>
             </tr>
           </tfoot>
         </table>
@@ -971,7 +971,6 @@ export function generateTariffReportExcel(report: TariffReport): void {
     ['Total Meters', String(report.summary.totalMeters)],
     ['Total Transactions', String(report.summary.totalTransactions)],
     ['Total Units Dispensed', `${report.summary.totalUnits.toFixed(2)} kWh`],
-    ['Service Charge Rate', '3 × virtual units'],
     ['Generated', generatedOn],
   ];
 
@@ -998,7 +997,6 @@ export function generateTariffReportExcel(report: TariffReport): void {
     { wpx: 100 }, // Transactions
     { wpx: 110 }, // Total Units
     { wpx: 130 }, // Revenue
-    { wpx: 130 }, // Service Charge
   ];
 
   ws2['!rows'] = [];
@@ -1023,7 +1021,7 @@ export function generateTariffReportExcel(report: TariffReport): void {
 
   // Table Header
   setRow2H(3, 24);
-  const h2Cols = ['METER NUMBER', 'TRANSACTIONS', 'UNITS (kWh)', 'REVENUE (KES)', 'SERVICE CHARGE (KES)'];
+  const h2Cols = ['METER NUMBER', 'TRANSACTIONS', 'UNITS (kWh)', 'REVENUE (KES)'];
   h2Cols.forEach((label, i) => {
     const style = i === 0 ? S.tableHeader : S.tableHeaderRight;
     setCell(ws2, `${String.fromCharCode(65+i)}4`, label, style);
@@ -1036,14 +1034,12 @@ export function generateTariffReportExcel(report: TariffReport): void {
   sorted.forEach((m, i) => {
     const r = 5 + i;
     const even = i % 2 === 0;
-    const svc = (m.totalRevenue / rate) * 3;
 
     setRow2H(r - 1, 20);
     setCell(ws2, `A${r}`, m.meterNumber, even ? S.rowEvenMono : S.rowOddMono);
     setNum(ws2, `B${r}`, m.transactionCount, { ...(even ? S.rowEvenRight : S.rowOddRight), numFmt: '#,##0' });
     setNum(ws2, `C${r}`, m.totalUnits, { ...(even ? S.rowEvenRight : S.rowOddRight), numFmt: '#,##0.00' });
     setNum(ws2, `D${r}`, m.totalRevenue, even ? S.rowEvenKES : S.rowOddKES);
-    setNum(ws2, `E${r}`, svc, even ? S.rowEvenKES : S.rowOddKES);
   });
 
   // Totals
@@ -1052,13 +1048,11 @@ export function generateTariffReportExcel(report: TariffReport): void {
   const totalTxns = sorted.reduce((s, m) => s + m.transactionCount, 0);
   const totalUnits = sorted.reduce((s, m) => s + m.totalUnits, 0);
   const totalRev = sorted.reduce((s, m) => s + m.totalRevenue, 0);
-  const totalSvc = sorted.reduce((s, m) => s + (m.totalRevenue / rate) * 3, 0);
 
   setCell(ws2, `A${totRow}`, 'TOTALS', S.totalLabel);
   setNum(ws2, `B${totRow}`, totalTxns, { ...S.totalNum, numFmt: '#,##0' });
   setNum(ws2, `C${totRow}`, totalUnits, { ...S.totalNum, numFmt: '#,##0.00' });
   setNum(ws2, `D${totRow}`, totalRev, S.totalKES);
-  setNum(ws2, `E${totRow}`, totalSvc, S.totalKES);
 
   ws2['!ref'] = `A1:E${totRow}`;
   XLSX.utils.book_append_sheet(wb, ws2, 'Meter Breakdown');
@@ -1148,8 +1142,9 @@ export function generateTariffReportExcel(report: TariffReport): void {
 // ─── CSV Export (unchanged, kept as utility) ──────────────────────────────────
 export function generateTariffReportCSV(report: TariffReport): void {
   const rate = report.tariff.ratePerUnit;
-  const virtualUnits = report.summary.totalRevenue / rate;
-  const serviceCharge = virtualUnits * 3;
+  const basePrice = 28;
+  const servicePercent = (rate - basePrice) / basePrice; // 0.08
+  const serviceCharge = servicePercent * report.summary.totalRevenue;
   const payable = report.summary.totalRevenue - serviceCharge;
   const dateRange = getDateRange(report);
 
@@ -1162,10 +1157,9 @@ export function generateTariffReportCSV(report: TariffReport): void {
   csv += `Gross Revenue,${fmt(report.summary.totalRevenue)}\nService Charge,${fmt(serviceCharge)}\nPayable to Client,${fmt(payable)}\n\n`;
 
   if (report.meterBreakdown.length > 0) {
-    csv += `METER BREAKDOWN\nMeter Number,Transactions,Units,Revenue,Service Charge\n`;
+    csv += `METER BREAKDOWN\nMeter Number,Transactions,Units,Revenue\n`;
     report.meterBreakdown.forEach((m: MeterBreakdown) => {
-      const svc = (m.totalRevenue / rate) * 3;
-      csv += `${m.meterNumber},${m.transactionCount},${m.totalUnits.toFixed(2)},${fmt(m.totalRevenue)},${fmt(svc)}\n`;
+      csv += `${m.meterNumber},${m.transactionCount},${m.totalUnits.toFixed(2)},${fmt(m.totalRevenue)}\n`;
     });
   }
 

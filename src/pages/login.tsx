@@ -54,7 +54,7 @@ export default function LoginPage() {
                         <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4 p-2">
                             <img src="/icon.png" alt="Alver Logo" />
                         </div>
-                        <h1 className="text-2xl font-bold text-gray-900 mb-2">Alver Stron Admin Panel</h1>
+                        <h1 className="text-2xl font-bold text-gray-900 mb-2">Alver Power Admin Panel</h1>
                         <p className="text-gray-600">Welcome back! Please sign in to your account</p>
                     </div>
 
@@ -146,7 +146,7 @@ export default function LoginPage() {
                 {/* Footer */}
                 <div className="text-center mt-8">
                     <p className="text-sm text-gray-500">
-                        © 2024 Alver Stron. All rights reserved.
+                        © {new Date().getFullYear()} Alver Power. All rights reserved.
                     </p>
                 </div>
             </div>

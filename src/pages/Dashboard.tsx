@@ -36,11 +36,16 @@ const getMonthDates = () => {
     const start = new Date(now.getFullYear(), now.getMonth(), 1);
     const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
-    const formatDate = (date: Date) => date.toISOString().split('T')[0];
+    const formatDate = (date: Date) => {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    };
 
     return {
         startDate: formatDate(start),
-        endDate: formatDate(end)
+        endDate: formatDate(end),
     };
 };
 
@@ -114,7 +119,7 @@ function TransactionModal({ tx, onClose }: { tx: Payment | null; onClose: () => 
         ["Meter Number", tx.billRefNumber],
         ["Reference", tx.billRefNumber],
         ["Customer", `${tx.firstName || ''} ${tx.lastName || ''}`.trim() || '—'],
-        ["Phone", tx.msisdn],
+        ["Token", `${tx.token || 'N/A'}`],
         ["Amount", fmt(tx.transAmount)],
         ["Units", `${tx.units} kWh`],
         ["Date & Time", fmtDate(tx.transTime)],
@@ -327,9 +332,9 @@ export function DashboardPage() {
                                 suffix=" kWh"
                             />
                             <StatCard
-                                label="Service Fee"
-                                value={fmt(metrics?.serviceFee)}
-                                change={0}
+                                label="Average Amount"
+                                value={fmt(metrics?.averageAmount?.amount)}
+                                change={metrics?.averageAmount?.percentageChange}
                                 icon={CreditCard}
                                 color="slate"
                                 delay={180}

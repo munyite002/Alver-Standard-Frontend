@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import {
     Plus, Search, ChevronLeft, ChevronRight, MoreHorizontal,
     Pencil, Trash2, Building2, User, Mail, Phone,
@@ -182,9 +183,37 @@ function DeleteDialog({ account, onConfirm, onClose }: any) {
 // ─── Row Action Menu ──────────────────────────────────────────────────────────
 function RowMenu({ account, onEdit, onDelete }: any) {
     const [open, setOpen] = useState(false);
+    const buttonRef = useRef<HTMLButtonElement>(null);
+    const [position, setPosition] = useState({ top: 0, left: 0 });
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (open && buttonRef.current) {
+            const rect = buttonRef.current.getBoundingClientRect();
+            const dropdownWidth = 160; // w-40 = 160px
+            const dropdownHeight = 120; // Approximate height of dropdown
+            
+            let left = rect.left + window.scrollX - (dropdownWidth - rect.width);
+            let top = rect.bottom + window.scrollY;
+            
+            // Check if dropdown would go off the right edge
+            if (left + dropdownWidth > window.innerWidth + window.scrollX) {
+                left = window.innerWidth + window.scrollX - dropdownWidth - 8;
+            }
+            
+            // Check if dropdown would go off the bottom edge
+            if (top + dropdownHeight > window.innerHeight + window.scrollY) {
+                top = rect.top + window.scrollY - dropdownHeight - 4;
+            }
+            
+            setPosition({ top, left });
+        }
+    }, [open]);
+
     return (
         <div className="relative">
             <button
+                ref={buttonRef}
                 onClick={(e) => { e.stopPropagation(); setOpen(!open); }}
                 className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
             >
@@ -192,27 +221,37 @@ function RowMenu({ account, onEdit, onDelete }: any) {
             </button>
             {open && (
                 <>
-                    <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-                    <div className="absolute right-0 top-8 z-20 w-40 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden animate-in">
-                        <div className="p-1">
-                            <button
-                                onClick={() => { setOpen(false); onEdit(account); }}
-                                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                            >
-                                <Pencil className="w-3.5 h-3.5 text-gray-400" />
-                                Edit Account
-                            </button>
-                        </div>
-                        <div className="border-t border-gray-100 p-1">
-                            <button
-                                onClick={() => { setOpen(false); onDelete(account); }}
-                                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                            >
-                                <Trash2 className="w-3.5 h-3.5" />
-                                Delete
-                            </button>
-                        </div>
-                    </div>
+                    <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+                    {ReactDOM.createPortal(
+                        <div 
+                            ref={dropdownRef}
+                            className="fixed z-50 w-40 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden animate-in"
+                            style={{
+                                top: position.top,
+                                left: position.left,
+                            }}
+                        >
+                            <div className="p-1">
+                                <button
+                                    onClick={() => { setOpen(false); onEdit(account); }}
+                                    className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                                >
+                                    <Pencil className="w-3.5 h-3.5 text-gray-400" />
+                                    Edit Account
+                                </button>
+                            </div>
+                            <div className="border-t border-gray-100 p-1">
+                                <button
+                                    onClick={() => { setOpen(false); onDelete(account); }}
+                                    className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                                >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                    Delete
+                                </button>
+                            </div>
+                        </div>,
+                        document.body
+                    )}
                 </>
             )}
         </div>

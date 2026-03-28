@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import ReactDOM from 'react-dom';
 import {
     Plus, Search, ChevronLeft, ChevronRight, MoreHorizontal,
     Pencil, Trash2, User, Mail, Phone, Shield, Building2,
@@ -220,9 +221,23 @@ function DeleteDialog({ user, onConfirm, onClose }: any) {
 // ─── Row Action Menu ──────────────────────────────────────────────────────────
 function RowMenu({ user, onEdit, onToggle, onDelete }: any) {
     const [open, setOpen] = useState(false);
+    const buttonRef = useRef<HTMLButtonElement>(null);
+    const [position, setPosition] = useState({ top: 0, left: 0 });
+
+    useEffect(() => {
+        if (open && buttonRef.current) {
+            const rect = buttonRef.current.getBoundingClientRect();
+            setPosition({
+                top: rect.bottom + window.scrollY,
+                left: rect.left + window.scrollX - 160, // Adjust based on dropdown width
+            });
+        }
+    }, [open]);
+
     return (
         <div className="relative">
             <button
+                ref={buttonRef}
                 onClick={(e) => { e.stopPropagation(); setOpen(!open); }}
                 className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
             >
@@ -230,42 +245,51 @@ function RowMenu({ user, onEdit, onToggle, onDelete }: any) {
             </button>
             {open && (
                 <>
-                    <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-                    <div className="absolute right-0 top-8 z-20 w-44 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden animate-in">
-                        <div className="p-1">
-                            <button
-                                onClick={() => { setOpen(false); onEdit(user); }}
-                                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                            >
-                                <Pencil className="w-3.5 h-3.5 text-gray-400" />
-                                Edit Profile
-                            </button>
-                            <button
-                                onClick={() => { setOpen(false); onToggle(user); }}
-                                className={cn(
-                                    "w-full flex items-center gap-2.5 px-3 py-2 text-sm rounded-lg transition-colors",
-                                    user.isActive ? "text-amber-600 hover:bg-amber-50" : "text-emerald-600 hover:bg-emerald-50"
-                                )}
-                            >
-                                {user.isActive ? <UserMinus className="w-3.5 h-3.5" /> : <UserCheck className="w-3.5 h-3.5" />}
-                                {user.isActive ? "Suspend Access" : "Restore Access"}
-                            </button>
-                        </div>
-                        <div className="border-t border-gray-100 p-1">
-                            <button
-                                onClick={() => { setOpen(false); onDelete(user); }}
-                                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                            >
-                                <Trash2 className="w-3.5 h-3.5" />
-                                Permanent Delete
-                            </button>
-                        </div>
-                    </div>
+                    <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+                    {ReactDOM.createPortal(
+                        <div 
+                            className="fixed z-50 w-44 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden animate-in"
+                            style={{
+                                top: position.top,
+                                left: position.left,
+                            }}
+                        >
+                            <div className="p-1">
+                                <button
+                                    onClick={() => { setOpen(false); onEdit(user); }}
+                                    className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                                >
+                                    <Pencil className="w-3.5 h-3.5 text-gray-400" />
+                                    Edit Profile
+                                </button>
+                                <button
+                                    onClick={() => { setOpen(false); onToggle(user); }}
+                                    className={cn(
+                                        "w-full flex items-center gap-2.5 px-3 py-2 text-sm rounded-lg transition-colors",
+                                        user.isActive ? "text-amber-600 hover:bg-amber-50" : "text-emerald-600 hover:bg-emerald-50"
+                                    )}
+                                >
+                                    {user.isActive ? <UserMinus className="w-3.5 h-3.5" /> : <UserCheck className="w-3.5 h-3.5" />}
+                                    {user.isActive ? "Suspend Access" : "Restore Access"}
+                                </button>
+                            </div>
+                            <div className="border-t border-gray-100 p-1">
+                                <button
+                                    onClick={() => { setOpen(false); onDelete(user); }}
+                                    className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                                >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                    Permanent Delete
+                                </button>
+                            </div>
+                        </div>,
+                        document.body
+                    )}
                 </>
             )}
         </div>
     );
-}
+}                     
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 const UsersPage: React.FC = () => {
