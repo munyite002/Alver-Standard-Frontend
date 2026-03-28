@@ -1,7 +1,7 @@
 import {
   CreditCard, Settings, Gauge, Logs, FileBarChart,
   FileQuestionIcon, Users, Zap, ChevronRight, ShieldCheck,
-  LayoutDashboard
+  LayoutDashboard, ListOrdered
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -21,6 +21,7 @@ const ADMIN_NAV = [
   { to: "/accounts", label: "Accounts", icon: Users, match: ["/accounts"] },
   { to: "/users", label: "Users", icon: Users, match: ["/users"] },
   { to: "/tickets", label: "Tickets", icon: FileQuestionIcon, match: ["/tickets"] },
+  { to: "/queue", label: "Payment Queue", icon: ListOrdered, match: ["/queue"] },
 ];
 
 // ─── Single nav link ──────────────────────────────────────────────────────────

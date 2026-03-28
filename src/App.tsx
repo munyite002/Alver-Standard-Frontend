@@ -13,6 +13,7 @@ import Logs from "@/pages/Logs.js";
 import { ReportsPage } from "@/pages/Reports";
 import Tickets from "@/pages/Tickets.js"
 import Users from "@/pages/Users";
+import { PaymentQueuePage } from "@/pages/PaymentQueue";
 // import Configurations from "./pages/Configurations.js";
 import Unauthorized from "@/pages/Unauthorized.js";
 import NotFound from "@/pages/NotFound.js";
@@ -55,6 +56,7 @@ function App() {
                                 <Route path="/tickets" element={<Tickets />} />
                                 <Route path="/accounts" element={<Accounts />} />
                                 <Route path="/users" element={<Users />} />
+                                <Route path="/queue" element={<PaymentQueuePage />} />
                             </Route>
                             {/* <Route
                                 path="/configurations"
