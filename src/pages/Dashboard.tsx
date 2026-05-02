@@ -5,7 +5,7 @@ import {
     ArrowDownRight, Eye, ChevronLeft, ChevronRight,
     Calendar, SlidersHorizontal, Search, ArrowUpDown,
     CheckCircle2, Clock, XCircle, Receipt, ChevronDown,
-    Minus, RefreshCw
+    Minus, RefreshCw, MailCheck
 } from "lucide-react";
 import { useOutletContext } from "react-router-dom";
 import useAxiosWithAuth from "@/../utils/axiosInterceptor";
@@ -13,7 +13,9 @@ import {
     getDashboardMetrics,
     getAllTransactions
 } from "@/../api/transactions.api";
+import { resendSms } from "@/../api/users.api";
 import type { Payment } from "@/lib/types";
+import { Toaster, toast } from "sonner";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const fmt = (n: number) => new Intl.NumberFormat("en-KE", { style: "currency", currency: "KES", maximumFractionDigits: 0 }).format(n);
@@ -22,13 +24,28 @@ const fmtNum = (n: number) => new Intl.NumberFormat("en-KE").format(n);
 const fmtDate = (s: string | Date) => {
     if (!s) return "—";
 
-    return new Date(s).toLocaleString("en-KE", {
-        timeZone: "Africa/Nairobi",
+    const date = new Date(s);
+    if (isNaN(date.getTime())) return "—";
+
+    const parts = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "UTC", // display in UTC, then add 2 hours manually
+        day: "2-digit",
         month: "short",
-        day: "numeric",
         hour: "2-digit",
         minute: "2-digit",
+        hour12: false,
+    }).formatToParts(date);
+
+    const map: Record<string, string> = {};
+    parts.forEach(p => {
+        if (p.type !== "literal") map[p.type] = p.value;
     });
+
+    // Add 2 hours to UTC display
+    let hour = (parseInt(map.hour) + 2) % 24;
+    const minute = map.minute;
+    
+    return `${map.day} ${map.month}, ${hour.toString().padStart(2, '0')}:${minute}`;
 };
 
 const getMonthDates = () => {
@@ -113,7 +130,54 @@ function StatusBadge({ status }: { status?: string }) {
 
 // ─── Transaction Modal ────────────────────────────────────────────────────────
 function TransactionModal({ tx, onClose }: { tx: Payment | null; onClose: () => void }) {
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const axiosInstance = useAxiosWithAuth(import.meta.env.VITE_STAGING_API);
+
     if (!tx) return null;
+
+    const fmt = (amount: number) => {
+        return new Intl.NumberFormat("en-KE", {
+            style: "currency",
+            currency: "KES",
+            minimumFractionDigits: 2
+        }).format(amount);
+    };
+
+    const fmtDate = (s: string | Date) => {
+        if (!s) return "—";
+        const date = new Date(s);
+        if (isNaN(date.getTime())) return "—";
+        
+        // Add 2 hours to the API time
+        const adjustedDate = new Date(date.getTime() + (2 * 60 * 60 * 1000));
+        
+        return new Intl.DateTimeFormat("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false
+        }).format(adjustedDate);
+    };
+
+    const handleResendSms = async () => {
+        try {
+            setIsSubmitting(true);
+            const data = {
+                phone: tx.msisdn,
+                token: tx.token || tx.transactionType
+            };
+            await resendSms(axiosInstance, data);
+            toast.success("Successfully resent token SMS to user");
+        } catch (err) {
+            console.log("Error: ", err);
+            toast.error("An error occurred, please try again later");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     const fields = [
         ["Transaction ID", tx.transId],
         ["Meter Number", tx.billRefNumber],
@@ -124,49 +188,77 @@ function TransactionModal({ tx, onClose }: { tx: Payment | null; onClose: () => 
         ["Units", `${tx.units} kWh`],
         ["Date & Time", fmtDate(tx.transTime)],
     ];
+
+    const StatusBadge = () => {
+        const status = tx.status || "completed";
+        const statusConfig = {
+            completed: { bg: "bg-green-50", text: "text-green-700", label: "Completed" },
+            pending: { bg: "bg-yellow-50", text: "text-yellow-700", label: "Pending" },
+            failed: { bg: "bg-red-50", text: "text-red-700", label: "Failed" }
+        };
+        const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.completed;
+        
+        return (
+            <span className={`px-2 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
+                {config.label}
+            </span>
+        );
+    };
+
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm" onClick={onClose}>
-            <div
-                className="bg-white rounded-2xl border border-gray-200 shadow-2xl w-full max-w-md animate-in"
-                onClick={(e) => e.stopPropagation()}
-            >
-                <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-md shadow-blue-200">
-                            <Receipt className="w-4 h-4 text-white" />
+        <>
+            <Toaster richColors position="top-right" />
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm" onClick={onClose}>
+                <div
+                    className="bg-white rounded-2xl border border-gray-200 shadow-2xl w-full max-w-md animate-in"
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+                        <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-md shadow-blue-200">
+                                <Receipt className="w-4 h-4 text-white" />
+                            </div>
+                            <div>
+                                <h3 className="font-semibold text-gray-900 text-sm leading-tight">Transaction Detail</h3>
+                                <p className="text-xs text-gray-400 font-mono-custom">{tx.transId}</p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 className="font-semibold text-gray-900 text-sm leading-tight">Transaction Detail</h3>
-                            <p className="text-xs text-gray-400 font-mono-custom">{tx.transId}</p>
+                        <div className="flex items-center gap-2">
+                            <StatusBadge />
+                            <button onClick={onClose} className="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
+                                <Minus className="w-3.5 h-3.5 text-gray-500" />
+                            </button>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <StatusBadge />
-                        <button onClick={onClose} className="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
-                            <Minus className="w-3.5 h-3.5 text-gray-500" />
+
+                    <div className="p-6 grid grid-cols-2 gap-x-6 gap-y-4">
+                        {fields.map(([label, val]: any) => (
+                            <div key={label}>
+                                <p className="text-xs text-gray-400 uppercase tracking-wide font-semibold mb-0.5">{label}</p>
+                                <p className="text-sm font-medium text-gray-800 break-all">{val}</p>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="px-6 py-4 border-t border-gray-100 flex justify-between gap-3">
+                        <button
+                            onClick={handleResendSms}
+                            disabled={isSubmitting}
+                            className="px-4 py-2 text-sm font-medium bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <MailCheck className="w-4 h-4" />
+                            {isSubmitting ? "Sending..." : "Re-Send SMS"}
+                        </button>
+                        <button
+                            onClick={onClose}
+                            className="px-4 py-2 text-sm font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                        >
+                            Close
                         </button>
                     </div>
                 </div>
-
-                <div className="p-6 grid grid-cols-2 gap-x-6 gap-y-4">
-                    {fields.map(([label, val]: any) => (
-                        <div key={label}>
-                            <p className="text-xs text-gray-400 uppercase tracking-wide font-semibold mb-0.5">{label}</p>
-                            <p className="text-sm font-medium text-gray-800 break-all">{val}</p>
-                        </div>
-                    ))}
-                </div>
-
-                <div className="px-6 py-4 border-t border-gray-100 flex justify-end">
-                    <button
-                        onClick={onClose}
-                        className="px-4 py-2 text-sm font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-                    >
-                        Close
-                    </button>
-                </div>
             </div>
-        </div>
+        </>
     );
 }
 

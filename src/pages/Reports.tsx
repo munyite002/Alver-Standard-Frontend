@@ -177,7 +177,7 @@ function MeterTable({ report }: { report: TariffReport }) {
                                         {meter.meterNumber}
                                     </td>
                                     <td className="px-6 py-3.5 text-gray-600 whitespace-nowrap">{fmtNum(meter.transactionCount)}</td>
-                                    <td className="px-6 py-3.5 text-gray-600 whitespace-nowrap">{meter.totalUnits.toFixed(2)}</td>
+                                    <td className="px-6 py-3.5 text-gray-600 whitespace-nowrap">{meter?.totalUnits?.toFixed(2)}</td>
                                     <td className="px-6 py-3.5 font-medium text-gray-800 whitespace-nowrap">{fmt(meter.totalRevenue)}</td>
                                 </tr>
                             );
