@@ -1,7 +1,7 @@
 import {
-  CreditCard, Settings, Gauge, Logs, FileBarChart,
-  FileQuestionIcon, Users, Zap, ChevronRight, ShieldCheck,
-  LayoutDashboard, ListOrdered
+  Settings, Gauge, Logs, FileBarChart,
+  FileQuestionIcon, Users, ChevronRight, ShieldCheck,
+  LayoutDashboard, ListOrdered, MessageSquareText
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -22,6 +22,7 @@ const ADMIN_NAV = [
   { to: "/users", label: "Users", icon: Users, match: ["/users"] },
   { to: "/tickets", label: "Tickets", icon: FileQuestionIcon, match: ["/tickets"] },
   { to: "/queue", label: "Payment Queue", icon: ListOrdered, match: ["/queue"] },
+  { to: "/sms-delivery-reports", label: "SMS Delivery Reports", icon: MessageSquareText, match: ["/sms-delivery-reports"] },
 ];
 
 // ─── Single nav link ──────────────────────────────────────────────────────────

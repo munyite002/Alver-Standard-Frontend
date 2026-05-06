@@ -85,3 +85,30 @@ export interface QueueStats {
     } | null;
     totalToday: number;
 }
+
+export interface SmsMessage {
+    id: string;
+    advantaMessageId?: string | null;
+    recipient: string;
+    message: string;
+}
+
+export interface SmsDeliveryReport {
+    id: string;
+    messageId: string;
+    description: string;
+    timeTaken: string;
+    timestamp: string;
+    reportTimestamp: string | Date;
+    rawPayload: Record<string, unknown>;
+    smsMessageId?: string | null;
+    smsMessage?: SmsMessage | null;
+    createdAt: string | Date;
+    updatedAt: string | Date;
+}
+
+export interface SmsDeliveryReportStats {
+    total: number;
+    unmatched: number;
+    byDescription: Record<string, number>;
+}
