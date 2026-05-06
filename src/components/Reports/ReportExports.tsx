@@ -76,10 +76,10 @@ export function generateTariffReportPDF(report: TariffReport): void {
       const bg = i % 2 === 0 ? '#ffffff' : '#f8fafc';
       return `
         <tr style="background:${bg};">
-          <td style="padding:10px 14px; font-family:'DM Mono',monospace; font-size:11px; color:#334155; border-bottom:1px solid #f1f5f9;">${m.meterNumber}</td>
-          <td style="padding:10px 14px; text-align:right; font-size:11px; color:#64748b; border-bottom:1px solid #f1f5f9;">${fmtNum(m.transactionCount)}</td>
-          <td style="padding:10px 14px; text-align:right; font-size:11px; color:#64748b; border-bottom:1px solid #f1f5f9;">${m.totalUnits.toFixed(2)}</td>
-          <td style="padding:10px 14px; text-align:right; font-size:11px; font-weight:600; color:#0f172a; border-bottom:1px solid #f1f5f9;">${fmt(m.totalRevenue)}</td>
+          <td style="padding:10px 14px; font-family:'DM Mono',monospace; font-size:11px; color:#334155; border-bottom:1px solid #f1f5f9;">${m?.meterNumber}</td>
+          <td style="padding:10px 14px; text-align:right; font-size:11px; color:#64748b; border-bottom:1px solid #f1f5f9;">${fmtNum(m?.transactionCount)}</td>
+          <td style="padding:10px 14px; text-align:right; font-size:11px; color:#64748b; border-bottom:1px solid #f1f5f9;">${m?.totalUnits?.toFixed(2)}</td>
+          <td style="padding:10px 14px; text-align:right; font-size:11px; font-weight:600; color:#0f172a; border-bottom:1px solid #f1f5f9;">${fmt(m?.totalRevenue)}</td>
         </tr>`;
     })
     .join('');

@@ -174,11 +174,11 @@ function MeterTable({ report }: { report: TariffReport }) {
                             return (
                                 <tr key={meter.meterNumber} className={`${idx % 2 === 0 ? "bg-white" : "bg-gray-50/40"} hover:bg-blue-50/30 transition-colors`}>
                                     <td className="px-6 py-3.5 font-mono text-xs text-gray-700 font-medium whitespace-nowrap">
-                                        {meter.meterNumber}
+                                        {meter?.meterNumber}
                                     </td>
-                                    <td className="px-6 py-3.5 text-gray-600 whitespace-nowrap">{fmtNum(meter.transactionCount)}</td>
+                                    <td className="px-6 py-3.5 text-gray-600 whitespace-nowrap">{fmtNum(meter?.transactionCount)}</td>
                                     <td className="px-6 py-3.5 text-gray-600 whitespace-nowrap">{meter?.totalUnits?.toFixed(2)}</td>
-                                    <td className="px-6 py-3.5 font-medium text-gray-800 whitespace-nowrap">{fmt(meter.totalRevenue)}</td>
+                                    <td className="px-6 py-3.5 font-medium text-gray-800 whitespace-nowrap">{fmt(meter?.totalRevenue)}</td>
                                 </tr>
                             );
                         })}
