@@ -19,10 +19,10 @@ export default function LoginPage() {
         password: ""
     });
 
-    const handleLogin = async () => {
+    const handleLogin = async (credentials = formData) => {
         try {
             setIsLoading(true);
-            const response = await login(formData);
+            const response = await login(credentials);
             const { token, user } = response;
             localStorage.setItem("token", token);
             localStorage.setItem("user", JSON.stringify(user));
@@ -42,6 +42,12 @@ export default function LoginPage() {
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleDemoLogin = () => {
+        const demoCredentials = { email: "demo@admin", password: "12345678" };
+        setFormData(demoCredentials);
+        handleLogin(demoCredentials);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -278,7 +284,7 @@ export default function LoginPage() {
                         <button
                             type="button"
                             disabled={isLoading}
-                            onClick={handleLogin}
+                            onClick={() => handleLogin()}
                             className="av-btn av-fade-up av-fade-up-4 relative overflow-hidden w-full bg-[#FE0100] hover:bg-[#E00100] disabled:bg-[#FE0100]/50 disabled:cursor-not-allowed text-white av-font-body font-semibold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center mt-2 shadow-[0_1px_2px_rgba(16,24,40,0.05)]"
                         >
                             <span className="av-shimmer absolute inset-y-0 left-0 w-1/3 bg-white/25 -skew-x-12" />
@@ -290,6 +296,24 @@ export default function LoginPage() {
                             ) : (
                                 "Sign in"
                             )}
+                        </button>
+
+                        {/* Divider */}
+                        <div className="av-fade-up av-fade-up-4 flex items-center gap-3 py-1">
+                            <span className="h-px flex-1 bg-[#E4E7EC]" />
+                            <span className="av-font-mono text-[10px] tracking-[0.14em] text-[#98A2B3] uppercase">or</span>
+                            <span className="h-px flex-1 bg-[#E4E7EC]" />
+                        </div>
+
+                        {/* Demo Account Button */}
+                        <button
+                            type="button"
+                            disabled={isLoading}
+                            onClick={handleDemoLogin}
+                            className="av-fade-up av-fade-up-4 w-full bg-white hover:bg-[#F9FAFB] disabled:cursor-not-allowed border border-[#E4E7EC] hover:border-[#155DFC]/40 text-[#155DFC] av-font-body font-semibold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+                        >
+                            <Radio className="w-4 h-4" strokeWidth={2.25} />
+                            Try demo account
                         </button>
                     </div>
 
