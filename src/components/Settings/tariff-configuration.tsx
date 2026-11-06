@@ -27,11 +27,11 @@ function Field({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+      <label className="av-label text-[10.5px] text-muted-foreground">
         {label}
       </label>
       {children}
-      {hint && <p className="text-xs text-gray-400">{hint}</p>}
+      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
     </div>
   );
 }
@@ -53,9 +53,9 @@ function StyledInput({
       onChange={onChange}
       placeholder={placeholder}
       required={required}
-      className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50
-                 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400
-                 transition-all placeholder:text-gray-400"
+      className="w-full px-3 py-2.5 text-sm border border-border rounded-lg bg-muted
+                 focus:bg-card focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-signal-edge
+                 transition-all placeholder:text-muted-foreground"
       {...rest}
     />
   );
@@ -81,17 +81,17 @@ function TariffRow({
   };
 
   return (
-    <div className="flex items-center justify-between gap-4 px-4 py-4 rounded-xl border border-gray-100 bg-gray-50/60 hover:bg-white hover:border-gray-200 hover:shadow-sm transition-all group">
+    <div className="flex items-center justify-between gap-4 px-4 py-4 rounded-xl border border-border bg-muted/60 hover:bg-card hover:border-border hover:shadow-sm transition-all group">
       {/* Left — tariff identity */}
       <div className="flex items-center gap-3 min-w-0">
-        <div className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center flex-shrink-0 shadow-sm">
-          <Zap className="w-4 h-4 text-amber-500" />
+        <div className="av-panel w-9 h-9 flex items-center justify-center flex-shrink-0">
+          <Zap className="w-4 h-4 text-warn-text" />
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-gray-900 leading-tight truncate">{tariff.name}</p>
+          <p className="text-sm font-semibold text-foreground leading-tight truncate">{tariff.name}</p>
           <div className="flex items-center gap-1.5 mt-0.5">
-            <Building2 className="w-3 h-3 text-gray-400 flex-shrink-0" />
-            <span className="text-xs text-gray-400">{tariff.provider}</span>
+            <Building2 className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+            <span className="text-xs text-muted-foreground">{tariff.provider}</span>
           </div>
         </div>
       </div>
@@ -101,7 +101,7 @@ function TariffRow({
         {editing ? (
           <>
             <div className="relative w-32">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-gray-400 pointer-events-none select-none">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-muted-foreground pointer-events-none select-none">
                 KES
               </span>
               <input
@@ -111,15 +111,15 @@ function TariffRow({
                 value={rate}
                 onChange={(e) => setRate(parseFloat(e.target.value))}
                 autoFocus
-                className="w-full pl-10 pr-3 py-2 text-sm border border-blue-400 rounded-lg bg-white
-                           focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                className="w-full pl-10 pr-3 py-2 text-sm border border-signal-edge rounded-lg bg-card
+                           focus:outline-none focus:ring-2 focus:ring-ring/20 transition-all"
               />
             </div>
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-white bg-blue-600
-                         rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-sm shadow-blue-200"
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-white bg-primary
+                         rounded-lg hover:bg-primary-hover disabled:opacity-50 transition-colors shadow-sm shadow-black/10"
             >
               {saving
                 ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -129,7 +129,7 @@ function TariffRow({
             </button>
             <button
               onClick={() => { setEditing(false); setRate(tariff.ratePerUnit); }}
-              className="px-3 py-2 text-xs font-medium text-gray-500 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              className="px-3 py-2 text-xs font-medium text-muted-foreground bg-card border border-border rounded-lg hover:bg-muted transition-colors"
             >
               Cancel
             </button>
@@ -137,13 +137,13 @@ function TariffRow({
         ) : (
           <>
             <div className="text-right">
-              <p className="text-sm font-bold text-gray-900">{fmt(tariff.ratePerUnit)}</p>
-              <p className="text-xs text-gray-400">per kWh</p>
+              <p className="text-sm font-bold text-foreground">{fmt(tariff.ratePerUnit)}</p>
+              <p className="text-xs text-muted-foreground">per kWh</p>
             </div>
             <button
               onClick={() => setEditing(true)}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-gray-600 bg-white
-                         border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-text-secondary bg-card
+                         border border-border rounded-lg hover:bg-muted hover:border-border-strong
                          opacity-0 group-hover:opacity-100 transition-all"
             >
               <Pencil className="w-3 h-3" />
@@ -217,13 +217,13 @@ export function TariffConfiguration() {
       <div>
         <div className="flex items-center justify-between mb-3">
           <div>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Active Tariffs</p>
-            <p className="text-xs text-gray-400 mt-0.5">Click Edit on any tariff to update its rate</p>
+            <p className="av-label text-[10.5px] text-muted-foreground">Active Tariffs</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Click Edit on any tariff to update its rate</p>
           </div>
           <button
             onClick={fetchTariffs}
             disabled={isLoadingTariffs}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-500 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground bg-card border border-border rounded-lg hover:bg-muted transition-colors"
           >
             <RefreshCw className={`w-3 h-3 ${isLoadingTariffs ? "animate-spin" : ""}`} />
             Refresh
@@ -235,7 +235,7 @@ export function TariffConfiguration() {
             {[...Array(3)].map((_, i) => (
               <div
                 key={i}
-                className="h-16 rounded-xl bg-gray-100 animate-pulse"
+                className="h-16 rounded-xl bg-accent animate-pulse"
                 style={{ animationDelay: `${i * 80}ms` }}
               />
             ))}
@@ -252,58 +252,58 @@ export function TariffConfiguration() {
             ))}
           </div>
         ) : (
-          <div className="py-10 text-center rounded-xl border border-dashed border-gray-200 bg-gray-50">
-            <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center mx-auto mb-3">
-              <Zap className="w-5 h-5 text-gray-400" />
+          <div className="py-10 text-center rounded-xl border border-dashed border-border bg-muted">
+            <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center mx-auto mb-3">
+              <Zap className="w-5 h-5 text-muted-foreground" />
             </div>
-            <p className="text-sm font-medium text-gray-600">No tariffs yet</p>
-            <p className="text-xs text-gray-400 mt-1">Create your first tariff below</p>
+            <p className="text-sm font-medium text-text-secondary">No tariffs yet</p>
+            <p className="text-xs text-muted-foreground mt-1">Create your first tariff below</p>
           </div>
         )}
       </div>
 
-      <div className="border-t border-gray-100" />
+      <div className="border-t border-border" />
 
       {/* ── Create New Tariff ── */}
       <div>
-        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Create New Tariff</p>
+        <p className="av-label text-[10.5px] text-muted-foreground mb-4">Create New Tariff</p>
         <form onSubmit={handleCreate} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Field label="Tariff Name">
               <div className="relative">
-                <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
                 <input
                   type="text"
                   value={newTariff.name}
                   onChange={(e) => setNewTariff((p) => ({ ...p, name: e.target.value }))}
                   placeholder="e.g. Standard Plan"
                   required
-                  className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50
-                             focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400
-                             transition-all placeholder:text-gray-400"
+                  className="w-full pl-9 pr-3 py-2.5 text-sm border border-border rounded-lg bg-muted
+                             focus:bg-card focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-signal-edge
+                             transition-all placeholder:text-muted-foreground"
                 />
               </div>
             </Field>
 
             <Field label="Provider">
               <div className="relative">
-                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
                 <input
                   type="text"
                   value={newTariff.provider}
                   onChange={(e) => setNewTariff((p) => ({ ...p, provider: e.target.value }))}
                   placeholder="e.g. KPLC"
                   required
-                  className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50
-                             focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400
-                             transition-all placeholder:text-gray-400"
+                  className="w-full pl-9 pr-3 py-2.5 text-sm border border-border rounded-lg bg-muted
+                             focus:bg-card focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-signal-edge
+                             transition-all placeholder:text-muted-foreground"
                 />
               </div>
             </Field>
 
             <Field label="Rate per Unit (KES/kWh)">
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-gray-400 select-none pointer-events-none">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-muted-foreground select-none pointer-events-none">
                   KES
                 </span>
                 <input
@@ -313,8 +313,8 @@ export function TariffConfiguration() {
                   value={newTariff.ratePerUnit}
                   onChange={(e) => setNewTariff((p) => ({ ...p, ratePerUnit: parseFloat(e.target.value) }))}
                   required
-                  className="w-full pl-11 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50
-                             focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400
+                  className="w-full pl-11 pr-3 py-2.5 text-sm border border-border rounded-lg bg-muted
+                             focus:bg-card focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-signal-edge
                              transition-all"
                 />
               </div>
@@ -323,9 +323,9 @@ export function TariffConfiguration() {
 
           {/* Inline preview */}
           {newTariff.name && newTariff.provider && newTariff.ratePerUnit > 0 && (
-            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-50 border border-blue-100">
-              <AlertCircle className="w-4 h-4 text-blue-500 flex-shrink-0" />
-              <p className="text-xs text-blue-700">
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-info-soft border border-info-edge">
+              <AlertCircle className="w-4 h-4 text-info-text flex-shrink-0" />
+              <p className="text-xs text-info-text">
                 Creating <span className="font-semibold">{newTariff.name}</span> via{" "}
                 <span className="font-semibold">{newTariff.provider}</span> at{" "}
                 <span className="font-semibold">{fmt(newTariff.ratePerUnit)}/kWh</span>
@@ -337,9 +337,9 @@ export function TariffConfiguration() {
             <button
               type="submit"
               disabled={isSaving}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600
-                         rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed
-                         transition-all shadow-sm shadow-blue-200"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-primary
+                         rounded-lg hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed
+                         transition-all shadow-sm shadow-black/10"
             >
               {isSaving
                 ? <Loader2 className="w-3.5 h-3.5 animate-spin" />

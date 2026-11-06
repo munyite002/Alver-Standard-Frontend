@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { Menu, Search, Bell, X } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Menu, Moon, Search, Sun, X } from "lucide-react";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { DashboardNav } from "@/components/Dashboard/dashboard-nav";
 import { UserNav } from "@/components/User/user-nav";
 import { useLocation } from "react-router-dom";
+import { useTheme } from "@/lib/theme";
 // Routes where the global search bar is visible
 const SEARCH_ROUTES = ["/", "/dashboard"];
 
@@ -18,6 +19,8 @@ export function DashboardHeader({
   const location = useLocation();
   const pathname = location.pathname;
   const showSearch = SEARCH_ROUTES.includes(pathname);
+  const { mode, toggleMode } = useTheme();
+  const toLight = mode === "dark";
 
   const today = new Date().toLocaleDateString("en-KE", {
     weekday: "short",
@@ -27,44 +30,45 @@ export function DashboardHeader({
   });
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-gray-100 bg-white/95 backdrop-blur-sm px-4 sm:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background/90 px-4 backdrop-blur-sm sm:px-6">
 
       {/* ── Mobile menu trigger ── */}
       <Sheet>
         <SheetTrigger asChild>
-          <button className="flex md:hidden items-center justify-center w-8 h-8 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors flex-shrink-0">
-            <Menu className="h-4 w-4" />
+          <button className="av-focus flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-accent hover:text-foreground md:hidden">
+            <Menu className="h-5 w-5" aria-hidden />
             <span className="sr-only">Toggle Menu</span>
           </button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-56 p-0 border-r border-gray-100">
+        <SheetContent side="left" className="w-64 border-r border-sidebar-border bg-sidebar p-0">
+          <SheetTitle className="sr-only">Main menu</SheetTitle>
           <DashboardNav />
         </SheetContent>
       </Sheet>
 
       {/* ── Search (dashboard routes only) ── */}
-      <div className="flex-1 md:flex-none md:w-64">
+      <div className="min-w-0 flex-1 md:w-72 md:flex-none">
         {showSearch && (
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+            <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
             <input
               type="search"
+              aria-label="Search transactions"
               placeholder="Search transactions…"
               value={searchQuery ?? ""}
               onChange={(e) => {
                 // @ts-ignore
                 setSearchQuery?.(e.target.value);
               }}
-              className="w-full pl-9 pr-8 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50
-                         focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400
-                         transition-all placeholder:text-gray-400"
+              className="h-10 w-full rounded-lg border border-input bg-card pr-9 pl-9 text-sm text-foreground transition-[border-color,box-shadow] outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-[3px] focus:ring-ring/15 [&::-webkit-search-cancel-button]:hidden"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery?.("")}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2"
+                aria-label="Clear search"
+                className="av-focus absolute top-1/2 right-1.5 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
               >
-                <X className="w-3.5 h-3.5 text-gray-400 hover:text-gray-600 transition-colors" />
+                <X className="h-3.5 w-3.5" aria-hidden />
               </button>
             )}
           </div>
@@ -72,24 +76,22 @@ export function DashboardHeader({
       </div>
 
       {/* ── Right cluster ── */}
-      <div className="ml-auto flex items-center gap-2">
+      <div className="ml-auto flex flex-shrink-0 items-center gap-1 sm:gap-2">
 
-        {/* Date chip — desktop only */}
-        <div className="hidden lg:flex items-center px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-100">
-          <span className="text-xs font-medium text-gray-400">{today}</span>
-        </div>
+        {/* Date: desktop only */}
+        <span className="av-label hidden px-2 text-[10.5px] text-muted-foreground lg:block">{today}</span>
 
-        {/* Notification bell */}
-        <button className="relative w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
-          <Bell className="w-4 h-4" />
-          {/* Unread dot */}
-          <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-blue-500" />
+        <button
+          type="button"
+          onClick={(e) => toggleMode(e.currentTarget)}
+          aria-label={toLight ? "Switch to light theme" : "Switch to dark theme"}
+          className="av-focus flex h-10 w-10 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-accent hover:text-foreground"
+        >
+          {toLight ? <Sun className="h-4 w-4" aria-hidden /> : <Moon className="h-4 w-4" aria-hidden />}
         </button>
 
-        {/* Divider */}
-        <div className="w-px h-5 bg-gray-200 mx-1" />
+        <div className="mx-1 h-5 w-px bg-border" />
 
-        {/* User nav — unchanged component */}
         <UserNav />
       </div>
     </header>

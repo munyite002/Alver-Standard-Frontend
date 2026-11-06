@@ -54,23 +54,23 @@ interface MetricCardProps {
 
 function MetricCard({ label, value, icon: Icon, color, sub }: MetricCardProps) {
     const colors = {
-        blue: { bg: "bg-blue-50", text: "text-blue-700", icon: "text-blue-500", border: "border-blue-100" },
-        green: { bg: "bg-emerald-50", text: "text-emerald-700", icon: "text-emerald-500", border: "border-emerald-100" },
-        amber: { bg: "bg-amber-50", text: "text-amber-700", icon: "text-amber-500", border: "border-amber-100" },
-        violet: { bg: "bg-violet-50", text: "text-violet-700", icon: "text-violet-500", border: "border-violet-100" },
+        blue: { bg: "bg-card", text: "text-foreground", icon: "text-muted-foreground", border: "border-border" },
+        green: { bg: "bg-card", text: "text-foreground", icon: "text-muted-foreground", border: "border-border" },
+        amber: { bg: "bg-card", text: "text-foreground", icon: "text-muted-foreground", border: "border-border" },
+        violet: { bg: "bg-card", text: "text-foreground", icon: "text-muted-foreground", border: "border-border" },
     };
     const c = colors[color] || colors.blue;
     return (
         <div className={`rounded-xl border ${c.border} ${c.bg} p-5 flex flex-col gap-3`}>
             <div className="flex items-center justify-between">
-                <span className={`text-xs font-semibold uppercase tracking-widest ${c.text} opacity-70`}>{label}</span>
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-white shadow-sm`}>
+                <span className={`av-label text-[10.5px] ${c.text} opacity-70`}>{label}</span>
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-card shadow-sm`}>
                     <Icon className={`w-4 h-4 ${c.icon}`} />
                 </div>
             </div>
             <div>
                 <p className={`text-2xl font-bold ${c.text} leading-none`}>{value}</p>
-                {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
+                {sub && <p className="text-xs text-muted-foreground mt-1">{sub}</p>}
             </div>
         </div>
     );
@@ -91,27 +91,27 @@ function RevenueBreakdown({ report }: { report: TariffReport }) {
         : "0.0";
 
     return (
-        <div className="rounded-xl border border-gray-100 bg-white overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
-                <BarChart3 className="w-4 h-4 text-gray-400" />
-                <h4 className="text-sm font-semibold text-gray-800">Revenue Breakdown</h4>
+        <div className="av-panel overflow-hidden">
+            <div className="px-6 py-4 border-b border-border flex items-center gap-2">
+                <BarChart3 className="w-4 h-4 text-muted-foreground" />
+                <h4 className="text-sm font-semibold text-foreground">Revenue Breakdown</h4>
             </div>
             <div className="p-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {[
-                    { label: "Gross Revenue", value: report.summary.totalRevenue, pct: "100%", color: "bg-violet-500" },
-                    { label: "Service Charge", value: serviceCharge, pct: `${pct(serviceCharge)}%`, color: "bg-rose-400" },
-                    { label: "Payable to Client", value: payable, pct: `${pct(payable)}%`, color: "bg-emerald-500" },
+                    { label: "Gross Revenue", value: report.summary.totalRevenue, pct: "100%", color: "bg-info" },
+                    { label: "Service Charge", value: serviceCharge, pct: `${pct(serviceCharge)}%`, color: "bg-muted-foreground" },
+                    { label: "Payable to Client", value: payable, pct: `${pct(payable)}%`, color: "bg-ok" },
                 ].map((item) => (
                     <div key={item.label} className="flex flex-col gap-2">
                         <div className="flex items-center gap-2">
                             <span className={`w-2.5 h-2.5 rounded-full ${item.color}`} />
-                            <span className="text-xs text-gray-500 font-medium">{item.label}</span>
+                            <span className="text-xs text-muted-foreground font-medium">{item.label}</span>
                         </div>
-                        <p className="text-lg font-bold text-gray-900">{fmt(item.value)}</p>
-                        <div className="h-1.5 rounded-full bg-gray-100 overflow-hidden">
+                        <p className="text-lg font-bold text-foreground">{fmt(item.value)}</p>
+                        <div className="h-1.5 rounded-full bg-accent overflow-hidden">
                             <div className={`h-full rounded-full ${item.color} transition-all duration-700`} style={{ width: item.pct }} />
                         </div>
-                        <span className="text-xs text-gray-400">{item.pct} of gross</span>
+                        <span className="text-xs text-muted-foreground">{item.pct} of gross</span>
                     </div>
                 ))}
             </div>
@@ -132,21 +132,21 @@ function MeterTable({ report }: { report: TariffReport }) {
     ];
 
     return (
-        <div className="rounded-xl border border-gray-100 bg-white overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <div className="av-panel overflow-hidden">
+            <div className="px-6 py-4 border-b border-border flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                    <Table2 className="w-4 h-4 text-gray-400" />
-                    <h4 className="text-sm font-semibold text-gray-800">Meter Breakdown</h4>
-                    <span className="ml-1 px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 text-xs font-medium">
+                    <Table2 className="w-4 h-4 text-muted-foreground" />
+                    <h4 className="text-sm font-semibold text-foreground">Meter Breakdown</h4>
+                    <span className="ml-1 px-2 py-0.5 rounded-md bg-accent text-muted-foreground text-xs font-medium">
                         {report.meterBreakdown.length} meters
                     </span>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-gray-400">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <span>Sort by:</span>
                     <select
                         value={sortField}
                         onChange={(e) => setSortField(e.target.value)}
-                        className="text-xs text-gray-600 border border-gray-200 rounded-md px-2 py-1 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="text-xs text-text-secondary border border-border rounded-md px-2 py-1 bg-card focus:outline-none focus:ring-1 focus:ring-ring"
                     >
                         <option value="totalRevenue">Revenue</option>
                         <option value="totalUnits">Units</option>
@@ -157,42 +157,42 @@ function MeterTable({ report }: { report: TariffReport }) {
             <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                     <thead>
-                        <tr className="bg-gray-50 border-b border-gray-100">
+                        <tr className="border-b border-border">
                             {cols.map((col) => (
                                 <th
                                     key={col.key}
-                                    className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap"
+                                    className="av-th px-6 py-3 text-left"
                                 >
                                     {col.label}
                                 </th>
                             ))}
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-50">
-                        {sorted.map((meter, idx) => {
+                    <tbody className="divide-y divide-border">
+                        {sorted.map((meter) => {
                             const svc = (meter.totalRevenue / rate) * 3;
                             return (
-                                <tr key={meter.meterNumber} className={`${idx % 2 === 0 ? "bg-white" : "bg-gray-50/40"} hover:bg-blue-50/30 transition-colors`}>
-                                    <td className="px-6 py-3.5 font-mono text-xs text-gray-700 font-medium whitespace-nowrap">
+                                <tr key={meter.meterNumber} className={`av-row`}>
+                                    <td className="px-6 py-3.5 font-mono text-xs text-text-secondary font-medium whitespace-nowrap">
                                         {meter?.meterNumber}
                                     </td>
-                                    <td className="px-6 py-3.5 text-gray-600 whitespace-nowrap">{fmtNum(meter?.transactionCount)}</td>
-                                    <td className="px-6 py-3.5 text-gray-600 whitespace-nowrap">{meter?.totalUnits?.toFixed(2)}</td>
-                                    <td className="px-6 py-3.5 font-medium text-gray-800 whitespace-nowrap">{fmt(meter?.totalRevenue)}</td>
+                                    <td className="px-6 py-3.5 text-text-secondary whitespace-nowrap">{fmtNum(meter?.transactionCount)}</td>
+                                    <td className="px-6 py-3.5 text-text-secondary whitespace-nowrap">{meter?.totalUnits?.toFixed(2)}</td>
+                                    <td className="px-6 py-3.5 font-medium text-foreground whitespace-nowrap">{fmt(meter?.totalRevenue)}</td>
                                 </tr>
                             );
                         })}
                     </tbody>
                     <tfoot>
-                        <tr className="border-t-2 border-gray-200 bg-gray-50">
-                            <td className="px-6 py-3 text-xs font-bold text-gray-600 uppercase tracking-wide">Totals</td>
-                            <td className="px-6 py-3 text-xs font-bold text-gray-600">
+                        <tr className="border-t-2 border-border bg-muted">
+                            <td className="av-label text-[10.5px] px-6 py-3 text-text-secondary">Totals</td>
+                            <td className="px-6 py-3 text-xs font-bold text-text-secondary">
                                 {fmtNum(sorted.reduce((s, m) => s + m.transactionCount, 0))}
                             </td>
-                            <td className="px-6 py-3 text-xs font-bold text-gray-600">
+                            <td className="px-6 py-3 text-xs font-bold text-text-secondary">
                                 {sorted.reduce((s, m) => s + m.totalUnits, 0).toFixed(2)}
                             </td>
-                            <td className="px-6 py-3 text-xs font-bold text-gray-800">
+                            <td className="px-6 py-3 text-xs font-bold text-foreground">
                                 {fmt(sorted.reduce((s, m) => s + m.totalRevenue, 0))}
                             </td>
                         </tr>
@@ -324,45 +324,28 @@ export function ReportsPage() {
     const selectedTariffObj = tariffs.find((t) => t.id === selectedTariff);
 
     return (
-        <div className="min-h-screen bg-gray-50/60 font-sans">
-            <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
-        * { font-family: 'DM Sans', sans-serif; }
-        .font-mono-custom { font-family: 'DM Mono', monospace; }
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-in { animation: fadeInUp 0.35s ease both; }
-        .animate-delay-1 { animation-delay: 0.05s; }
-        .animate-delay-2 { animation-delay: 0.1s; }
-        .animate-delay-3 { animation-delay: 0.15s; }
-        .animate-delay-4 { animation-delay: 0.2s; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .spin { animation: spin 0.8s linear infinite; }
-      `}</style>
-
+        <div className="min-h-full">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
                 {/* ── Page Header ── */}
                 <div className="flex items-start justify-between animate-in">
                     <div>
-                        <p className="text-xs font-semibold uppercase tracking-widest text-blue-500 mb-1">Analytics</p>
-                        <h1 className="text-2xl font-bold text-gray-900 leading-tight">Reports</h1>
-                        <p className="text-sm text-gray-400 mt-0.5">Generate detailed reports across tariffs and revenue</p>
+                        <p className="av-label text-[10.5px] text-accent-text mb-1">Analytics</p>
+                        <h1 className="av-display text-[28px] leading-tight font-bold tracking-[-0.03em] text-foreground sm:text-[32px]">Reports<span className="text-signal">.</span></h1>
+                        <p className="text-sm text-muted-foreground mt-0.5">Generate detailed reports across tariffs and revenue</p>
                     </div>
                     {tariffReport && (
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={handleDownloadTariffReport}
-                                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 transition-colors shadow-sm"
+                                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-text-secondary border border-border rounded-lg bg-card hover:bg-muted transition-colors shadow-sm"
                             >
                                 <Download className="w-3.5 h-3.5" />
                                 PDF
                             </button>
                             <button
                                 onClick={handleDownloadTariffReportCSV}
-                                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-hover transition-colors shadow-sm"
                             >
                                 <Download className="w-3.5 h-3.5" />
                                 CSV
@@ -372,81 +355,81 @@ export function ReportsPage() {
                 </div>
 
                 {/* ── Filters Panel ── */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden animate-in animate-delay-1">
+                <div className="av-panel overflow-hidden animate-in animate-delay-1">
                     <button
                         onClick={() => setFiltersOpen(!filtersOpen)}
-                        className="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50/60 transition-colors"
+                        className="w-full flex items-center justify-between px-6 py-4 hover:bg-muted/60 transition-colors"
                     >
                         <div className="flex items-center gap-2.5">
-                            <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center">
-                                <Filter className="w-3.5 h-3.5 text-blue-500" />
+                            <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center">
+                                <Filter className="w-3.5 h-3.5 text-muted-foreground" />
                             </div>
-                            <span className="text-sm font-semibold text-gray-800">Filters</span>
+                            <span className="text-sm font-semibold text-foreground">Filters</span>
                             {selectedTariffObj && (
-                                <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 text-xs font-medium border border-blue-100">
+                                <span className="px-2 py-0.5 rounded-md bg-accent text-text-secondary text-xs font-medium border border-border">
                                     {selectedTariffObj.name}
                                 </span>
                             )}
                             {(startDate || endDate) && (
-                                <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 text-xs font-medium flex items-center gap-1">
+                                <span className="px-2 py-0.5 rounded-md bg-accent text-muted-foreground text-xs font-medium flex items-center gap-1">
                                     <Calendar className="w-3 h-3" />
                                     {startDate || "…"} → {endDate || "…"}
                                 </span>
                             )}
                         </div>
                         <ChevronDown
-                            className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${filtersOpen ? "rotate-180" : ""}`}
+                            className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${filtersOpen ? "rotate-180" : ""}`}
                         />
                     </button>
 
                     {filtersOpen && (
-                        <div className="px-6 pb-5 border-t border-gray-100">
+                        <div className="px-6 pb-5 border-t border-border">
                             <div className="pt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
 
                                 {/* Start Date */}
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Start Date</label>
+                                    <label className="av-label text-[10.5px] text-muted-foreground">Start Date</label>
                                     <div className="relative">
-                                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
                                         <input
                                             type="date"
                                             value={startDate}
                                             onChange={(e) => setStartDate(e.target.value)}
-                                            className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+                                            className="w-full pl-9 pr-3 py-2.5 text-sm border border-border rounded-lg bg-muted focus:bg-card focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-signal-edge transition-all"
                                         />
                                     </div>
                                 </div>
 
                                 {/* End Date */}
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">End Date</label>
+                                    <label className="av-label text-[10.5px] text-muted-foreground">End Date</label>
                                     <div className="relative">
-                                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
                                         <input
                                             type="date"
                                             value={endDate}
                                             onChange={(e) => setEndDate(e.target.value)}
-                                            className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+                                            className="w-full pl-9 pr-3 py-2.5 text-sm border border-border rounded-lg bg-muted focus:bg-card focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-signal-edge transition-all"
                                         />
                                     </div>
                                 </div>
 
                                 {/* Tariff Select */}
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Tariff</label>
+                                    <label className="av-label text-[10.5px] text-muted-foreground">Tariff</label>
                                     <div className="relative">
-                                        <Layers className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                                        <Layers className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
                                         <select
                                             value={selectedTariff}
                                             onChange={(e) => setSelectedTariff(e.target.value)}
-                                            className="w-full pl-9 pr-8 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all appearance-none"
+                                            className="w-full pl-9 pr-8 py-2.5 text-sm border border-border rounded-lg bg-muted focus:bg-card focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-signal-edge transition-all appearance-none"
                                         >
                                             <option value="">Select a tariff…</option>
                                             {tariffs.map((t) => (
                                                 <option key={t.id} value={t.id}>{t.name} — {t.provider}</option>
                                             ))}
                                         </select>
-                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
                                     </div>
                                 </div>
 
@@ -455,10 +438,10 @@ export function ReportsPage() {
                                     <button
                                         onClick={handleGenerateTariffReport}
                                         disabled={isLoadingReport || isLoadingRevenue || !selectedTariff}
-                                        className="flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm shadow-blue-200"
+                                        className="flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-hover disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm shadow-black/10"
                                     >
                                         {isLoadingReport ? (
-                                            <RefreshCw className="w-4 h-4 spin" />
+                                            <RefreshCw className="w-4 h-4 animate-spin" />
                                         ) : (
                                             <FileText className="w-4 h-4" />
                                         )}
@@ -468,10 +451,10 @@ export function ReportsPage() {
                                         <button
                                             onClick={handleGenerateRevenueSummary}
                                             disabled={isLoadingReport || isLoadingRevenue}
-                                            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-lg hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm shadow-emerald-200"
+                                            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-ok text-white text-sm font-semibold rounded-lg hover:bg-ok disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm shadow-black/10"
                                         >
                                             {isLoadingRevenue ? (
-                                                <RefreshCw className="w-4 h-4 spin" />
+                                                <RefreshCw className="w-4 h-4 animate-spin" />
                                             ) : (
                                                 <TrendingUp className="w-4 h-4" />
                                             )}
@@ -485,9 +468,9 @@ export function ReportsPage() {
                 </div>
 
                 {/* ── Tabs ── */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden animate-in animate-delay-2">
+                <div className="av-panel overflow-hidden animate-in animate-delay-2">
                     {/* Tab Bar */}
-                    <div className="flex border-b border-gray-100 px-2 pt-1">
+                    <div className="flex border-b border-border px-2 pt-1">
                         {tabs.map((tab) => {
                             const Icon = tab.icon;
                             const active = activeTab === tab.id;
@@ -497,11 +480,11 @@ export function ReportsPage() {
                                     onClick={() => setActiveTab(tab.id)}
                                     className={`flex items-center gap-2 px-4 py-3 text-sm font-medium rounded-t-lg transition-all relative
                     ${active
-                                            ? "text-blue-600 bg-blue-50/60 border-b-2 border-blue-500"
-                                            : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                                            ? "text-accent-text bg-signal-soft/60 border-b-2 border-signal"
+                                            : "text-muted-foreground hover:text-text-secondary hover:bg-muted"
                                         }`}
                                 >
-                                    <Icon className={`w-4 h-4 ${active ? "text-blue-500" : "text-gray-400"}`} />
+                                    <Icon className={`w-4 h-4 ${active ? "text-accent-text" : "text-muted-foreground"}`} />
                                     {tab.label}
                                 </button>
                             );
@@ -517,23 +500,23 @@ export function ReportsPage() {
                                         {/* Report Context Badge */}
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-md shadow-blue-200">
-                                                    <Zap className="w-4 h-4 text-white" />
+                                                <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center">
+                                                    <Zap className="w-4 h-4 text-muted-foreground" />
                                                 </div>
                                                 <div>
-                                                    <h3 className="font-semibold text-gray-900 text-base leading-tight">
+                                                    <h3 className="font-semibold text-foreground text-base leading-tight">
                                                         {tariffReport.tariff.name}
                                                     </h3>
-                                                    <p className="text-xs text-gray-400">
+                                                    <p className="text-xs text-muted-foreground">
                                                         {tariffReport.tariff.provider} · Rate: {fmt(tariffReport.tariff.ratePerUnit)}/unit
                                                         {(tariffReport.dateRange.startDate || tariffReport.dateRange.endDate) && (
-                                                            <> · <span className="text-blue-400">{tariffReport.dateRange.startDate || "—"} → {tariffReport.dateRange.endDate || "—"}</span></>
+                                                            <> · <span className="text-accent-text">{tariffReport.dateRange.startDate || "—"} → {tariffReport.dateRange.endDate || "—"}</span></>
                                                         )}
                                                     </p>
                                                 </div>
                                             </div>
-                                            <span className="flex items-center gap-1 text-xs text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full font-medium">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+                                            <span className="flex items-center gap-1 text-xs text-ok-text bg-ok-soft border border-ok-edge px-2.5 py-1 rounded-md font-medium">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-ok inline-block" />
                                                 Report Ready
                                             </span>
                                         </div>
@@ -553,16 +536,16 @@ export function ReportsPage() {
                                         <MeterTable report={tariffReport} />
 
                                         {/* Transactions Download Strip */}
-                                        <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-xl px-5 py-4">
+                                        <div className="flex items-center justify-between bg-muted border border-border rounded-xl px-5 py-4">
                                             <div>
-                                                <p className="text-sm font-semibold text-gray-800">Transaction Data</p>
-                                                <p className="text-xs text-gray-400 mt-0.5">Export full transaction log as Excel spreadsheet</p>
+                                                <p className="text-sm font-semibold text-foreground">Transaction Data</p>
+                                                <p className="text-xs text-muted-foreground mt-0.5">Export full transaction log as Excel spreadsheet</p>
                                             </div>
                                             <button
                                                 onClick={() => handleDownloadTransactionsExcel(tariffReport.transactions)}
-                                                className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
+                                                className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-card border border-border rounded-lg text-text-secondary hover:bg-muted transition-colors shadow-sm"
                                             >
-                                                <Download className="w-4 h-4 text-emerald-500" />
+                                                <Download className="w-4 h-4 text-ok-text" />
                                                 Download Full Report (.xlsx)
                                             </button>
                                         </div>
@@ -570,12 +553,12 @@ export function ReportsPage() {
                                 ) : (
                                     /* Empty State */
                                     <div className="py-16 text-center animate-in">
-                                        <div className="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center mx-auto mb-4">
-                                            <FileText className="w-6 h-6 text-blue-400" />
+                                        <div className="w-14 h-14 rounded-xl bg-accent flex items-center justify-center mx-auto mb-4">
+                                            <FileText className="w-6 h-6 text-muted-foreground" />
                                         </div>
-                                        <h3 className="text-base font-semibold text-gray-800 mb-1">No report generated yet</h3>
-                                        <p className="text-sm text-gray-400 max-w-xs mx-auto">
-                                            Select a tariff from the filters above and click <span className="font-medium text-gray-600">Generate Report</span> to view analytics.
+                                        <h3 className="text-base font-semibold text-foreground mb-1">No report generated yet</h3>
+                                        <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                                            Select a tariff from the filters above and click <span className="font-medium text-text-secondary">Generate Report</span> to view analytics.
                                         </p>
                                     </div>
                                 )}
@@ -619,37 +602,37 @@ export function ReportsPage() {
                                         </div>
 
                                         {/* Tariff Breakdown Table */}
-                                        <div className="rounded-xl border border-gray-100 bg-white overflow-hidden">
-                                            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                                        <div className="av-panel overflow-hidden">
+                                            <div className="px-6 py-4 border-b border-border flex items-center justify-between">
                                                 <div className="flex items-center gap-2">
-                                                    <BarChart3 className="w-4 h-4 text-gray-400" />
-                                                    <h4 className="text-sm font-semibold text-gray-800">Comparison by Tariff</h4>
+                                                    <BarChart3 className="w-4 h-4 text-muted-foreground" />
+                                                    <h4 className="text-sm font-semibold text-foreground">Comparison by Tariff</h4>
                                                 </div>
                                             </div>
                                             <div className="overflow-x-auto">
                                                 <table className="w-full text-sm text-left">
                                                     <thead>
-                                                        <tr className="bg-gray-50 border-b border-gray-100">
-                                                            <th className="px-6 py-3 text-xs font-semibold text-gray-400 uppercase">Tariff</th>
-                                                            <th className="px-6 py-3 text-xs font-semibold text-gray-400 uppercase">Rate</th>
-                                                            <th className="px-6 py-3 text-xs font-semibold text-gray-400 uppercase">Meters</th>
-                                                            <th className="px-6 py-3 text-xs font-semibold text-gray-400 uppercase">Txns</th>
-                                                            <th className="px-6 py-3 text-xs font-semibold text-gray-400 uppercase">Revenue</th>
-                                                            <th className="px-6 py-3 text-xs font-semibold text-gray-400 uppercase text-right">Avg/Meter</th>
+                                                        <tr className="border-b border-border">
+                                                            <th className="av-th px-6 py-3">Tariff</th>
+                                                            <th className="av-th px-6 py-3">Rate</th>
+                                                            <th className="av-th px-6 py-3">Meters</th>
+                                                            <th className="av-th px-6 py-3">Txns</th>
+                                                            <th className="av-th px-6 py-3">Revenue</th>
+                                                            <th className="av-th px-6 py-3 text-right">Avg/Meter</th>
                                                         </tr>
                                                     </thead>
-                                                    <tbody className="divide-y divide-gray-50">
-                                                        {revenueSummary.tariffBreakdown.map((item, idx) => (
-                                                            <tr key={item.tariff.id} className={`${idx % 2 === 0 ? "bg-white" : "bg-gray-50/40"} hover:bg-gray-50 transition-colors`}>
+                                                    <tbody className="divide-y divide-border">
+                                                        {revenueSummary.tariffBreakdown.map((item) => (
+                                                            <tr key={item.tariff.id} className={`av-row hover:bg-muted transition-colors`}>
                                                                 <td className="px-6 py-3.5">
-                                                                    <p className="font-semibold text-gray-900">{item.tariff.name}</p>
-                                                                    <p className="text-xs text-gray-400">{item.tariff.provider}</p>
+                                                                    <p className="font-semibold text-foreground">{item.tariff.name}</p>
+                                                                    <p className="text-xs text-muted-foreground">{item.tariff.provider}</p>
                                                                 </td>
-                                                                <td className="px-6 py-3.5 text-gray-600">{fmt(item.tariff.ratePerUnit)}</td>
-                                                                <td className="px-6 py-3.5 text-gray-600">{fmtNum(item.meterCount)}</td>
-                                                                <td className="px-6 py-3.5 text-gray-600">{fmtNum(item.transactionCount)}</td>
-                                                                <td className="px-6 py-3.5 font-bold text-gray-900">{fmt(item.totalRevenue)}</td>
-                                                                <td className="px-6 py-3.5 text-right font-medium text-gray-600">
+                                                                <td className="px-6 py-3.5 text-text-secondary">{fmt(item.tariff.ratePerUnit)}</td>
+                                                                <td className="px-6 py-3.5 text-text-secondary">{fmtNum(item.meterCount)}</td>
+                                                                <td className="px-6 py-3.5 text-text-secondary">{fmtNum(item.transactionCount)}</td>
+                                                                <td className="px-6 py-3.5 font-bold text-foreground">{fmt(item.totalRevenue)}</td>
+                                                                <td className="px-6 py-3.5 text-right font-medium text-text-secondary">
                                                                     {fmt(item.totalRevenue / (item.meterCount || 1))}
                                                                 </td>
                                                             </tr>
@@ -661,12 +644,12 @@ export function ReportsPage() {
                                     </>
                                 ) : (
                                     <div className="py-16 text-center animate-in">
-                                        <div className="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center mx-auto mb-4">
-                                            <TrendingUp className="w-6 h-6 text-emerald-400" />
+                                        <div className="w-14 h-14 rounded-xl bg-ok-soft border border-ok-edge flex items-center justify-center mx-auto mb-4">
+                                            <TrendingUp className="w-6 h-6 text-ok-text" />
                                         </div>
-                                        <h3 className="text-base font-semibold text-gray-800 mb-1">No revenue summary generated</h3>
-                                        <p className="text-sm text-gray-400 max-w-xs mx-auto">
-                                            Set a date range and click <span className="font-medium text-gray-600">Revenue Summary</span> to compare performance across all tariffs.
+                                        <h3 className="text-base font-semibold text-foreground mb-1">No revenue summary generated</h3>
+                                        <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                                            Set a date range and click <span className="font-medium text-text-secondary">Revenue Summary</span> to compare performance across all tariffs.
                                         </p>
                                     </div>
                                 )}

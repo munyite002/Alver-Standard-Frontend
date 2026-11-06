@@ -129,7 +129,7 @@ export const TicketModal = ({ ticket, isOpen, onClose, onTicketUpdated, axiosIns
                         <Card>
                             <CardContent className="p-4">
                                 <div className="flex items-center gap-2 mb-2">
-                                    <Hash className="h-4 w-4 text-gray-500" />
+                                    <Hash className="h-4 w-4 text-muted-foreground" />
                                     <Label className="text-sm font-medium">Meter Number</Label>
                                 </div>
                                 <p className="text-lg font-semibold">{ticket.meterNumber}</p>
@@ -139,7 +139,7 @@ export const TicketModal = ({ ticket, isOpen, onClose, onTicketUpdated, axiosIns
                         <Card>
                             <CardContent className="p-4">
                                 <div className="flex items-center gap-2 mb-2">
-                                    <Phone className="h-4 w-4 text-gray-500" />
+                                    <Phone className="h-4 w-4 text-muted-foreground" />
                                     <Label className="text-sm font-medium">Phone Number</Label>
                                 </div>
                                 <p className="text-lg font-semibold">{ticket.phoneNumber}</p>
@@ -151,24 +151,24 @@ export const TicketModal = ({ ticket, isOpen, onClose, onTicketUpdated, axiosIns
                     <Card>
                         <CardContent className="p-4 space-y-4">
                             <div className="flex items-center gap-2">
-                                <MessageSquare className="h-4 w-4 text-gray-500" />
+                                <MessageSquare className="h-4 w-4 text-muted-foreground" />
                                 <Label className="text-sm font-medium">Issue Details</Label>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <p className="text-sm text-gray-500">Type</p>
+                                    <p className="text-sm text-muted-foreground">Type</p>
                                     <p className="font-medium">{ticket.issueType}</p>
                                 </div>
                                 {ticket.subIssueType && (
                                     <div>
-                                        <p className="text-sm text-gray-500">Sub-Type</p>
+                                        <p className="text-sm text-muted-foreground">Sub-Type</p>
                                         <p className="font-medium">{ticket.subIssueType}</p>
                                     </div>
                                 )}
                             </div>
                             <div>
-                                <p className="text-sm text-gray-500 mb-2">Description</p>
-                                <div className="bg-gray-50 p-3 rounded-md">
+                                <p className="text-sm text-muted-foreground mb-2">Description</p>
+                                <div className="bg-muted p-3 rounded-md">
                                     <p className="whitespace-pre-wrap">{ticket.description}</p>
                                 </div>
                             </div>
@@ -231,11 +231,11 @@ export const TicketModal = ({ ticket, isOpen, onClose, onTicketUpdated, axiosIns
                                         <Label className="text-sm font-medium">Status</Label>
                                     </div>
                                     <Badge className={
-                                        ticket.status === 'OPEN' ? 'bg-blue-100 text-blue-800' :
-                                            ticket.status === 'IN_PROGRESS' ? 'bg-yellow-100 text-yellow-800' :
-                                                ticket.status === 'RESOLVED' ? 'bg-green-100 text-green-800' :
-                                                    ticket.status === 'CLOSED' ? 'bg-gray-100 text-gray-800' :
-                                                        'bg-red-100 text-red-800'
+                                        ticket.status === 'OPEN' ? 'bg-signal-soft text-accent-text' :
+                                            ticket.status === 'IN_PROGRESS' ? 'bg-warn-soft text-warn-text' :
+                                                ticket.status === 'RESOLVED' ? 'bg-ok-soft text-ok-text' :
+                                                    ticket.status === 'CLOSED' ? 'bg-accent text-foreground' :
+                                                        'bg-danger-soft text-danger-text'
                                     }>
                                         {ticket.status.replace('_', ' ')}
                                     </Badge>
@@ -245,14 +245,14 @@ export const TicketModal = ({ ticket, isOpen, onClose, onTicketUpdated, axiosIns
                             <Card>
                                 <CardContent className="p-4">
                                     <div className="flex items-center gap-2 mb-2">
-                                        <AlertCircle className="h-4 w-4 text-gray-500" />
+                                        <AlertCircle className="h-4 w-4 text-muted-foreground" />
                                         <Label className="text-sm font-medium">Priority</Label>
                                     </div>
                                     <Badge className={
-                                        ticket.priority === 'LOW' ? 'bg-green-100 text-green-800' :
-                                            ticket.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
-                                                ticket.priority === 'HIGH' ? 'bg-orange-100 text-orange-800' :
-                                                    'bg-red-100 text-red-800'
+                                        ticket.priority === 'LOW' ? 'bg-ok-soft text-ok-text' :
+                                            ticket.priority === 'MEDIUM' ? 'bg-warn-soft text-warn-text' :
+                                                ticket.priority === 'HIGH' ? 'bg-warn-soft text-warn-text' :
+                                                    'bg-danger-soft text-danger-text'
                                     }>
                                         {ticket.priority}
                                     </Badge>
@@ -289,7 +289,7 @@ export const TicketModal = ({ ticket, isOpen, onClose, onTicketUpdated, axiosIns
                                 <Card>
                                     <CardContent className="p-4">
                                         <Label className="text-sm font-medium mb-2 block">Resolution</Label>
-                                        <div className="bg-gray-50 p-3 rounded-md">
+                                        <div className="bg-muted p-3 rounded-md">
                                             <p className="whitespace-pre-wrap">{ticket.resolution}</p>
                                         </div>
                                     </CardContent>
@@ -300,7 +300,7 @@ export const TicketModal = ({ ticket, isOpen, onClose, onTicketUpdated, axiosIns
                                 <Card>
                                     <CardContent className="p-4">
                                         <Label className="text-sm font-medium mb-2 block">Internal Notes</Label>
-                                        <div className="bg-gray-50 p-3 rounded-md">
+                                        <div className="bg-muted p-3 rounded-md">
                                             <p className="whitespace-pre-wrap">{ticket.notes}</p>
                                         </div>
                                     </CardContent>
@@ -311,7 +311,7 @@ export const TicketModal = ({ ticket, isOpen, onClose, onTicketUpdated, axiosIns
                                 <Card>
                                     <CardContent className="p-4">
                                         <div className="flex items-center gap-2 mb-2">
-                                            <User className="h-4 w-4 text-gray-500" />
+                                            <User className="h-4 w-4 text-muted-foreground" />
                                             <Label className="text-sm font-medium">Assigned To</Label>
                                         </div>
                                         <p>{ticket.assignedTo}</p>
@@ -325,14 +325,14 @@ export const TicketModal = ({ ticket, isOpen, onClose, onTicketUpdated, axiosIns
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
                         <div className="space-y-1">
                             <div className="flex items-center gap-2">
-                                <Calendar className="h-4 w-4 text-gray-500" />
+                                <Calendar className="h-4 w-4 text-muted-foreground" />
                                 <Label className="text-xs font-medium">Created</Label>
                             </div>
                             <p className="text-xs">{formatDate(ticket.createdAt)}</p>
                         </div>
                         <div className="space-y-1">
                             <div className="flex items-center gap-2">
-                                <Calendar className="h-4 w-4 text-gray-500" />
+                                <Calendar className="h-4 w-4 text-muted-foreground" />
                                 <Label className="text-xs font-medium">Last Updated</Label>
                             </div>
                             <p className="text-xs">{formatDate(ticket.updatedAt)}</p>
@@ -340,7 +340,7 @@ export const TicketModal = ({ ticket, isOpen, onClose, onTicketUpdated, axiosIns
                         {ticket.resolvedAt && (
                             <div className="space-y-1">
                                 <div className="flex items-center gap-2">
-                                    <CheckCircle className="h-4 w-4 text-gray-500" />
+                                    <CheckCircle className="h-4 w-4 text-muted-foreground" />
                                     <Label className="text-xs font-medium">Resolved At</Label>
                                 </div>
                                 <p className="text-xs">{formatDate(ticket.resolvedAt)}</p>

@@ -119,14 +119,14 @@ export function TransactionTable({
                 <div className="flex flex-col gap-2 md:flex-row md:items-center">
                     <CardTitle>Recent Transactions</CardTitle>
                     <div className="flex gap-2 items-center ml-0 md:ml-6">
-                        <label className="text-sm text-gray-700">Start Date:</label>
+                        <label className="text-sm text-text-secondary">Start Date:</label>
                         <input
                             type="date"
                             value={filters.startDate}
                             onChange={e => handleDateChange('startDate', e.target.value)}
                             className="border rounded px-2 py-1 text-sm"
                         />
-                        <label className="text-sm text-gray-700">End Date:</label>
+                        <label className="text-sm text-text-secondary">End Date:</label>
                         <input
                             type="date"
                             value={filters.endDate}
@@ -138,7 +138,7 @@ export function TransactionTable({
                             onClick={() => {
                                 onFilterChange({ startDate: "", endDate: "", page: 1 });
                             }}
-                            className="ml-2 px-3 py-1 rounded bg-gray-200 text-gray-700 text-sm hover:bg-gray-300 border"
+                            className="ml-2 px-3 py-1 rounded bg-accent text-text-secondary text-sm hover:bg-border-strong border"
                         >
                             Clear
                         </button>
@@ -146,11 +146,11 @@ export function TransactionTable({
                 </div>
                 <div className="flex gap-4 items-center">
                     <div className="flex items-center gap-2">
-                        <label className="text-sm text-gray-700">Rows:</label>
+                        <label className="text-sm text-text-secondary">Rows:</label>
                         <select
                             value={filters.limit}
                             onChange={(e) => handleLimitChange(Number(e.target.value))}
-                            className="border rounded px-2 py-1 text-sm bg-white"
+                            className="border rounded px-2 py-1 text-sm bg-card"
                         >
                             <option value={5}>5</option>
                             <option value={10}>10</option>
@@ -189,7 +189,7 @@ export function TransactionTable({
             <CardContent>
                 <div className="mb-4 flex items-center justify-between">
                     {(filters.startDate || filters.endDate) && (
-                        <div className="text-sm font-medium text-gray-700">
+                        <div className="text-sm font-medium text-text-secondary">
                             Transaction activity
                             {filters.startDate && filters.endDate
                                 ? ` between ${formatFancyDate(filters.startDate)} and ${formatFancyDate(filters.endDate)}`
@@ -205,38 +205,38 @@ export function TransactionTable({
                 <div className="rounded-md border">
                     <Table className="w-full">
                         <TableHeader>
-                            <TableRow className="bg-gray-50 border-b border-gray-200">
-                                <TableHead className="text-left py-4 px-6 text-sm font-semibold text-gray-900">
+                            <TableRow className="border-b border-border">
+                                <TableHead className="text-left py-4 px-6 text-sm font-semibold text-foreground">
                                     <div className="flex items-center gap-2">
-                                        <Hash className="h-4 w-4 text-gray-500" />
+                                        <Hash className="h-4 w-4 text-muted-foreground" />
                                         Transaction
                                     </div>
                                 </TableHead>
-                                <TableHead className="text-left py-4 px-6 text-sm font-semibold text-gray-900">
+                                <TableHead className="text-left py-4 px-6 text-sm font-semibold text-foreground">
                                     <div className="flex items-center gap-2">
-                                        <Calendar className="h-4 w-4 text-gray-500" />
+                                        <Calendar className="h-4 w-4 text-muted-foreground" />
                                         Date & Time
                                     </div>
                                 </TableHead>
-                                <TableHead className="text-left py-4 px-6 text-sm font-semibold text-gray-900">
+                                <TableHead className="text-left py-4 px-6 text-sm font-semibold text-foreground">
                                     <div className="flex items-center gap-2">
-                                        <DollarSign className="h-4 w-4 text-gray-500" />
+                                        <DollarSign className="h-4 w-4 text-muted-foreground" />
                                         Amount
                                     </div>
                                 </TableHead>
-                                <TableHead className="text-left py-4 px-6 text-sm font-semibold text-gray-900">
+                                <TableHead className="text-left py-4 px-6 text-sm font-semibold text-foreground">
                                     <div className="flex items-center gap-2">
-                                        <User className="h-4 w-4 text-gray-500" />
+                                        <User className="h-4 w-4 text-muted-foreground" />
                                         Customer
                                     </div>
                                 </TableHead>
-                                <TableHead className="text-left py-4 px-6 text-sm font-semibold text-gray-900">
+                                <TableHead className="text-left py-4 px-6 text-sm font-semibold text-foreground">
                                     <div className="flex items-center gap-2">
-                                        <User className="h-4 w-4 text-gray-500" />
+                                        <User className="h-4 w-4 text-muted-foreground" />
                                         Meter Number
                                     </div>
                                 </TableHead>
-                                <TableHead className="text-center py-4 px-6 text-sm font-semibold text-gray-900 w-20">Actions</TableHead>
+                                <TableHead className="text-center py-4 px-6 text-sm font-semibold text-foreground w-20">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -244,8 +244,8 @@ export function TransactionTable({
                                 <TableRow>
                                     <TableCell colSpan={6} className="text-center py-12">
                                         <div className="flex flex-col items-center justify-center space-y-3">
-                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                                            <p className="text-sm text-gray-500">Loading transactions...</p>
+                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-signal"></div>
+                                            <p className="text-sm text-muted-foreground">Loading transactions...</p>
                                         </div>
                                     </TableCell>
                                 </TableRow>
@@ -255,27 +255,27 @@ export function TransactionTable({
                                     return (
                                         <TableRow
                                             key={transaction.id}
-                                            className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${index === transactions.length - 1 ? 'border-b-0' : ''
+                                            className={`border-b border-border hover:bg-muted transition-colors ${index === transactions.length - 1 ? 'border-b-0' : ''
                                                 }`}
                                         >
                                             <TableCell className="py-4 px-6">
                                                 <div className="space-y-1">
-                                                    <div className="font-mono text-sm font-medium text-gray-900">
+                                                    <div className="font-mono text-sm font-medium text-foreground">
                                                         {transaction.transId}
                                                     </div>
-                                                    <div className="text-xs text-gray-500">
+                                                    <div className="text-xs text-muted-foreground">
                                                         {transaction.billRefNumber}
                                                     </div>
                                                 </div>
                                             </TableCell>
                                             <TableCell className="py-4 px-6">
                                                 <div className="space-y-1">
-                                                    <div className="text-sm font-medium text-gray-900">{date}</div>
-                                                    <div className="text-xs text-gray-500">{time}</div>
+                                                    <div className="text-sm font-medium text-foreground">{date}</div>
+                                                    <div className="text-xs text-muted-foreground">{time}</div>
                                                 </div>
                                             </TableCell>
                                             <TableCell className="py-4 px-6">
-                                                <div className="text-sm font-semibold text-gray-900">
+                                                <div className="text-sm font-semibold text-foreground">
                                                     Ksh {transaction.transAmount.toLocaleString('en-US', {
                                                         minimumFractionDigits: 2,
                                                         maximumFractionDigits: 2
@@ -285,14 +285,14 @@ export function TransactionTable({
                                             <TableCell className="py-4 px-6">
                                                 <div className="flex items-center space-x-3">
                                                     <div className="flex-shrink-0">
-                                                        <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                                                            <span className="text-sm font-medium text-blue-600">
+                                                        <div className="h-8 w-8 rounded-full bg-signal-soft flex items-center justify-center">
+                                                            <span className="text-sm font-medium text-accent-text">
                                                                 {transaction?.firstName?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'S'}
                                                             </span>
                                                         </div>
                                                     </div>
                                                     <div>
-                                                        <div className="text-sm font-medium text-gray-900">
+                                                        <div className="text-sm font-medium text-foreground">
                                                             {transaction?.firstName || "SYSTEM"}
                                                         </div>
                                                     </div>
@@ -301,7 +301,7 @@ export function TransactionTable({
                                             <TableCell className="py-4 px-6">
                                                 <div className="flex items-center space-x-3">
                                                     <div>
-                                                        <div className="text-sm font-medium text-blue-400">
+                                                        <div className="text-sm font-medium text-accent-text">
                                                             {transaction.billRefNumber}
                                                         </div>
                                                     </div>
@@ -310,7 +310,7 @@ export function TransactionTable({
                                             <TableCell className="py-4 px-6 text-center">
                                                 <button
                                                     onClick={() => onViewTransaction(transaction)}
-                                                    className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                                                    className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-muted-foreground hover:text-text-secondary hover:bg-accent transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
                                                 >
                                                     <Eye className="h-4 w-4" />
                                                     <span className="sr-only">View transaction details</span>
@@ -323,11 +323,11 @@ export function TransactionTable({
                                 <TableRow>
                                     <TableCell colSpan={6} className="text-center py-12">
                                         <div className="flex flex-col items-center justify-center space-y-3">
-                                            <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center">
-                                                <Search className="h-6 w-6 text-gray-400" />
+                                            <div className="h-12 w-12 rounded-full bg-accent flex items-center justify-center">
+                                                <Search className="h-6 w-6 text-muted-foreground" />
                                             </div>
                                             <div>
-                                                <p className="text-sm font-medium text-gray-900">No transactions found</p>
+                                                <p className="text-sm font-medium text-foreground">No transactions found</p>
                                             </div>
                                         </div>
                                     </TableCell>

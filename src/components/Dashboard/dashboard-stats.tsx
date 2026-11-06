@@ -2,7 +2,7 @@
 import { ArrowUp, ArrowDown, CreditCard, DollarSign, Users, Loader } from "lucide-react";
 
 const Card = ({ children, className = "" }: any) => (
-  <div className={`bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200 ${className}`}>
+  <div className={`av-panel hover:shadow-md transition-shadow duration-200 ${className}`}>
     {children}
   </div>
 );
@@ -14,7 +14,7 @@ const CardHeader = ({ children, className = "" }: any) => (
 );
 
 const CardTitle = ({ children, className = "" }: any) => (
-  <h3 className={`text-sm font-semibold text-gray-600 uppercase tracking-wide ${className}`}>
+  <h3 className={`text-sm font-semibold text-text-secondary uppercase tracking-wide ${className}`}>
     {children}
   </h3>
 );
@@ -61,17 +61,17 @@ export function DashboardStats({ metrics, isLoading = false }: any) {
     const getColorClasses = (color: any, isPositive = true) => {
         if (color === "blue") {
             return {
-                icon: "text-blue-500",
-                iconBg: "bg-blue-50",
-                change: isPositive ? "text-blue-600 bg-blue-50" : "text-red-600 bg-red-50",
-                gradient: "from-blue-500 to-blue-600"
+                icon: "text-accent-text",
+                iconBg: "bg-signal-soft",
+                change: isPositive ? "text-accent-text bg-signal-soft" : "text-danger-text bg-danger-soft",
+                gradient: "from-primary to-primary"
             };
         } else {
             return {
-                icon: "text-red-500",
-                iconBg: "bg-red-50",
-                change: isPositive ? "text-emerald-600 bg-emerald-50" : "text-red-600 bg-red-50",
-                gradient: "from-red-500 to-red-600"
+                icon: "text-danger-text",
+                iconBg: "bg-danger-soft",
+                change: isPositive ? "text-ok-text bg-ok-soft" : "text-danger-text bg-danger-soft",
+                gradient: "from-danger to-danger"
             };
         }
     };
@@ -95,7 +95,7 @@ export function DashboardStats({ metrics, isLoading = false }: any) {
                         <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${colors.gradient}`}></div>
                         
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-                            <CardTitle className="text-sm font-semibold text-gray-600 uppercase tracking-wide">
+                            <CardTitle className="text-sm font-semibold text-text-secondary uppercase tracking-wide">
                                 {stat.title}
                             </CardTitle>
                             <div className={`p-2 rounded-lg ${colors.iconBg} group-hover:scale-110 transition-transform duration-200`}>
@@ -107,11 +107,11 @@ export function DashboardStats({ metrics, isLoading = false }: any) {
                             <div className="mb-3">
                                 {isLoading ? (
                                     <div className="flex items-center space-x-2">
-                                        <Loader className="h-6 w-6 animate-spin text-gray-400" />
-                                        <div className="h-8 w-24 bg-gray-200 rounded animate-pulse"></div>
+                                        <Loader className="h-6 w-6 animate-spin text-muted-foreground" />
+                                        <div className="h-8 w-24 bg-accent rounded animate-pulse"></div>
                                     </div>
                                 ) : (
-                                    <div className="text-3xl font-bold text-gray-900 tracking-tight">
+                                    <div className="text-3xl font-bold text-foreground tracking-tight">
                                         {stat.prefix}{formatValue(stat.value) || 0}
                                     </div>
                                 )}
@@ -120,12 +120,12 @@ export function DashboardStats({ metrics, isLoading = false }: any) {
                             <div className="flex items-center space-x-2">
                                 {isLoading ? (
                                     <div className="flex items-center space-x-1">
-                                        <Loader className="h-3 w-3 animate-spin text-gray-400" />
-                                        <div className="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
+                                        <Loader className="h-3 w-3 animate-spin text-muted-foreground" />
+                                        <div className="h-4 w-16 bg-accent rounded animate-pulse"></div>
                                     </div>
                                 ) : (
                                     <>
-                                        <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${colors.change}`}>
+                                        <div className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${colors.change}`}>
                                             {isPositive ? (
                                                 <ArrowUp className="h-3 w-3 mr-1" />
                                             ) : (
@@ -133,7 +133,7 @@ export function DashboardStats({ metrics, isLoading = false }: any) {
                                             )}
                                             {Math.abs(stat.change) || 0}%
                                         </div>
-                                        <span className="text-xs text-gray-500">
+                                        <span className="text-xs text-muted-foreground">
                                             vs last month
                                         </span>
                                     </>

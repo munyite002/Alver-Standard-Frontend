@@ -45,23 +45,23 @@ import { toast } from "sonner";
 const getStatusBadge = (status: any) => {
     const variants = {
         OPEN: {
-            className: "bg-blue-100 text-blue-800 hover:bg-blue-100",
+            className: "bg-signal-soft text-accent-text hover:bg-signal-soft",
             icon: <Clock className="h-3 w-3 mr-1" />
         },
         IN_PROGRESS: {
-            className: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
+            className: "bg-warn-soft text-warn-text hover:bg-warn-soft",
             icon: <AlertCircle className="h-3 w-3 mr-1" />
         },
         RESOLVED: {
-            className: "bg-green-100 text-green-800 hover:bg-green-100",
+            className: "bg-ok-soft text-ok-text hover:bg-ok-soft",
             icon: <CheckCircle className="h-3 w-3 mr-1" />
         },
         CLOSED: {
-            className: "bg-gray-100 text-gray-800 hover:bg-gray-100",
+            className: "bg-accent text-foreground hover:bg-accent",
             icon: <CheckCircle className="h-3 w-3 mr-1" />
         },
         CANCELLED: {
-            className: "bg-red-100 text-red-800 hover:bg-red-100",
+            className: "bg-danger-soft text-danger-text hover:bg-danger-soft",
             icon: <XCircle className="h-3 w-3 mr-1" />
         },
     };
@@ -77,10 +77,10 @@ const getStatusBadge = (status: any) => {
 
 const getPriorityBadge = (priority) => {
     const variants = {
-        LOW: "bg-green-100 text-green-800 hover:bg-green-100",
-        MEDIUM: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
-        HIGH: "bg-orange-100 text-orange-800 hover:bg-orange-100",
-        URGENT: "bg-red-100 text-red-800 hover:bg-red-100",
+        LOW: "bg-ok-soft text-ok-text hover:bg-ok-soft",
+        MEDIUM: "bg-warn-soft text-warn-text hover:bg-warn-soft",
+        HIGH: "bg-warn-soft text-warn-text hover:bg-warn-soft",
+        URGENT: "bg-danger-soft text-danger-text hover:bg-danger-soft",
     };
 
     return <Badge className={variants[priority]}>{priority}</Badge>;
@@ -117,8 +117,8 @@ export const TicketsTable = ({
             <div className="rounded-md border">
                 <div className="flex items-center justify-center p-8">
                     <div className="flex flex-col items-center gap-2">
-                        <RefreshCw className="h-8 w-8 animate-spin text-gray-400" />
-                        <p className="text-gray-500">Loading tickets...</p>
+                        <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                        <p className="text-muted-foreground">Loading tickets...</p>
                     </div>
                 </div>
             </div>
@@ -130,8 +130,8 @@ export const TicketsTable = ({
             <div className="rounded-md border">
                 <div className="flex items-center justify-center p-8">
                     <div className="flex flex-col items-center gap-2">
-                        <AlertCircle className="h-8 w-8 text-gray-400" />
-                        <p className="text-gray-500">No tickets found</p>
+                        <AlertCircle className="h-8 w-8 text-muted-foreground" />
+                        <p className="text-muted-foreground">No tickets found</p>
                         <Button
                             variant="outline"
                             size="sm"
@@ -153,7 +153,7 @@ export const TicketsTable = ({
             <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1">
                     <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                         <Input
                             placeholder="Search by meter, phone, or description..."
                             className="pl-10"
@@ -296,7 +296,7 @@ export const TicketsTable = ({
             {/* Pagination */}
             {tickets.pagination?.pages > 1 && (
                 <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-500">
+                    <div className="text-sm text-muted-foreground">
                         Showing {((tickets.pagination.page - 1) * tickets.pagination.limit) + 1} to{' '}
                         {Math.min(tickets.pagination.page * tickets.pagination.limit, tickets.pagination.total)} of{' '}
                         {tickets.pagination.total} tickets

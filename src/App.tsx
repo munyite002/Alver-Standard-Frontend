@@ -21,10 +21,12 @@ import NotFound from "@/pages/NotFound.js";
 import { ForgotPasswordPage } from "./pages/ForgotPassword.js";
 import { ResetPasswordPage } from "./pages/ResetPassword.js";
 import RoleRoute from "./components/RoleRoute";
+import { ThemeProvider } from "./lib/theme";
 import "./App.css";
 
 function App() {
     return (
+        <ThemeProvider>
         <Router>
             <GlobalProvider>
                 <Routes>
@@ -73,6 +75,7 @@ function App() {
                 </Routes>
             </GlobalProvider>
         </Router>
+        </ThemeProvider>
     );
 }
 

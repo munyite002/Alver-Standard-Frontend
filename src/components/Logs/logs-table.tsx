@@ -201,32 +201,32 @@ export function LogsTable({ logs, isLoading, onViewLog }: LogsTableProps) {
                 <div className="rounded-md border">
                     <Table className="w-full">
                         <TableHeader>
-                            <TableRow className="bg-gray-50 border-b border-gray-200">
-                                <TableHead className="text-left py-4 px-6 text-sm font-semibold text-gray-900">
+                            <TableRow className="border-b border-border">
+                                <TableHead className="text-left py-4 px-6 text-sm font-semibold text-foreground">
                                     <div className="flex items-center gap-2">
-                                        <Activity className="h-4 w-4 text-gray-500" />
+                                        <Activity className="h-4 w-4 text-muted-foreground" />
                                         Event
                                     </div>
                                 </TableHead>
-                                <TableHead className="text-left py-4 px-6 text-sm font-semibold text-gray-900">
+                                <TableHead className="text-left py-4 px-6 text-sm font-semibold text-foreground">
                                     <div className="flex items-center gap-2">
-                                        <MessageSquare className="h-4 w-4 text-gray-500" />
+                                        <MessageSquare className="h-4 w-4 text-muted-foreground" />
                                         Details
                                     </div>
                                 </TableHead>
-                                <TableHead className="text-left py-4 px-6 text-sm font-semibold text-gray-900">
+                                <TableHead className="text-left py-4 px-6 text-sm font-semibold text-foreground">
                                     <div className="flex items-center gap-2">
-                                        <User className="h-4 w-4 text-gray-500" />
+                                        <User className="h-4 w-4 text-muted-foreground" />
                                         User
                                     </div>
                                 </TableHead>
-                                <TableHead className="text-left py-4 px-6 text-sm font-semibold text-gray-900">
+                                <TableHead className="text-left py-4 px-6 text-sm font-semibold text-foreground">
                                     <div className="flex items-center gap-2">
-                                        <Calendar className="h-4 w-4 text-gray-500" />
+                                        <Calendar className="h-4 w-4 text-muted-foreground" />
                                         Date & Time
                                     </div>
                                 </TableHead>
-                                <TableHead className="text-center py-4 px-6 text-sm font-semibold text-gray-900 w-20">Actions</TableHead>
+                                <TableHead className="text-center py-4 px-6 text-sm font-semibold text-foreground w-20">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -234,8 +234,8 @@ export function LogsTable({ logs, isLoading, onViewLog }: LogsTableProps) {
                                 <TableRow>
                                     <TableCell colSpan={6} className="text-center py-12">
                                         <div className="flex flex-col items-center justify-center space-y-3">
-                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                                            <p className="text-sm text-gray-500">Loading logs...</p>
+                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-signal"></div>
+                                            <p className="text-sm text-muted-foreground">Loading logs...</p>
                                         </div>
                                     </TableCell>
                                 </TableRow>
@@ -246,18 +246,18 @@ export function LogsTable({ logs, isLoading, onViewLog }: LogsTableProps) {
                                     return (
                                         <TableRow
                                             key={log.id}
-                                            className={`border-b border-gray-100 hover:bg-gray-50 transition-colors ${index === currentLogs.length - 1 ? 'border-b-0' : ''
+                                            className={`border-b border-border hover:bg-muted transition-colors ${index === currentLogs.length - 1 ? 'border-b-0' : ''
                                                 }`}
                                         >
                                             <TableCell className="py-4 px-6">
                                                 <div className="flex items-center gap-2">
-                                                    <EventIcon className="h-4 w-4 text-gray-500" />
+                                                    <EventIcon className="h-4 w-4 text-muted-foreground" />
                                                     {getEventBadge(log.event)}
                                                 </div>
                                             </TableCell>
                                             <TableCell className="py-4 px-6">
                                                 <div className="max-w-md">
-                                                    <div className="text-sm font-medium text-gray-900 line-clamp-2">
+                                                    <div className="text-sm font-medium text-foreground line-clamp-2">
                                                         {log.details}
                                                     </div>
                                                 </div>
@@ -265,14 +265,14 @@ export function LogsTable({ logs, isLoading, onViewLog }: LogsTableProps) {
                                             <TableCell className="py-4 px-6">
                                                 <div className="flex items-center space-x-3">
                                                     <div className="flex-shrink-0">
-                                                        <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                                                            <span className="text-sm font-medium text-blue-600">
+                                                        <div className="h-8 w-8 rounded-full bg-signal-soft flex items-center justify-center">
+                                                            <span className="text-sm font-medium text-accent-text">
                                                                 {log.user.split(' ').map((n: string) => n[0]).join('').toUpperCase()}
                                                             </span>
                                                         </div>
                                                     </div>
                                                     <div>
-                                                        <div className="text-sm font-medium text-gray-900">
+                                                        <div className="text-sm font-medium text-foreground">
                                                             {log.user}
                                                         </div>
                                                     </div>
@@ -280,14 +280,14 @@ export function LogsTable({ logs, isLoading, onViewLog }: LogsTableProps) {
                                             </TableCell>
                                             <TableCell className="py-4 px-6">
                                                 <div className="space-y-1">
-                                                    <div className="text-sm font-medium text-gray-900">{date}</div>
-                                                    <div className="text-xs text-gray-500">{time}</div>
+                                                    <div className="text-sm font-medium text-foreground">{date}</div>
+                                                    <div className="text-xs text-muted-foreground">{time}</div>
                                                 </div>
                                             </TableCell>
                                             <TableCell className="py-4 px-6 text-center">
                                                 <button
                                                     onClick={() => onViewLog(log)}
-                                                    className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                                                    className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-muted-foreground hover:text-text-secondary hover:bg-accent transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
                                                 >
                                                     <Eye className="h-4 w-4" />
                                                     <span className="sr-only">View log details</span>
@@ -300,11 +300,11 @@ export function LogsTable({ logs, isLoading, onViewLog }: LogsTableProps) {
                                 <TableRow>
                                     <TableCell colSpan={6} className="text-center py-12">
                                         <div className="flex flex-col items-center justify-center space-y-3">
-                                            <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center">
-                                                <Search className="h-6 w-6 text-gray-400" />
+                                            <div className="h-12 w-12 rounded-full bg-accent flex items-center justify-center">
+                                                <Search className="h-6 w-6 text-muted-foreground" />
                                             </div>
                                             <div>
-                                                <p className="text-sm font-medium text-gray-900">No logs found</p>
+                                                <p className="text-sm font-medium text-foreground">No logs found</p>
                                             </div>
                                         </div>
                                     </TableCell>

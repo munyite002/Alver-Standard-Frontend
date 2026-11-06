@@ -85,7 +85,7 @@ export function LogModal({ log, isOpen, onClose }: LogModalProps) {
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-3">
-                        <EventIcon className="h-5 w-5 text-gray-500" />
+                        <EventIcon className="h-5 w-5 text-muted-foreground" />
                         <span>Log Details</span>
                         {getEventBadge(log.event)}
                     </DialogTitle>
@@ -97,11 +97,11 @@ export function LogModal({ log, isOpen, onClose }: LogModalProps) {
                 <div className="space-y-6">
                     {/* Log ID */}
                     <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                        <div className="flex items-center gap-2 text-sm font-medium text-text-secondary">
                             <Hash className="h-4 w-4" />
                             Log ID
                         </div>
-                        <div className="font-mono text-sm bg-gray-50 p-3 rounded-md">
+                        <div className="font-mono text-sm bg-muted p-3 rounded-md">
                             {log.id}
                         </div>
                     </div>
@@ -110,11 +110,11 @@ export function LogModal({ log, isOpen, onClose }: LogModalProps) {
 
                     {/* Event */}
                     <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                        <div className="flex items-center gap-2 text-sm font-medium text-text-secondary">
                             <Activity className="h-4 w-4" />
                             Event
                         </div>
-                        <div className="text-sm bg-gray-50 p-3 rounded-md">
+                        <div className="text-sm bg-muted p-3 rounded-md">
                             {log.event.replace(/_/g, ' ').toUpperCase()}
                         </div>
                     </div>
@@ -123,11 +123,11 @@ export function LogModal({ log, isOpen, onClose }: LogModalProps) {
 
                     {/* Details */}
                     <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                        <div className="flex items-center gap-2 text-sm font-medium text-text-secondary">
                             <MessageSquare className="h-4 w-4" />
                             Details
                         </div>
-                        <div className="text-sm bg-gray-50 p-3 rounded-md">
+                        <div className="text-sm bg-muted p-3 rounded-md">
                             {log.details}
                         </div>
                     </div>
@@ -136,11 +136,11 @@ export function LogModal({ log, isOpen, onClose }: LogModalProps) {
 
                     {/* User */}
                     <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                        <div className="flex items-center gap-2 text-sm font-medium text-text-secondary">
                             <User className="h-4 w-4" />
                             User
                         </div>
-                        <div className="text-sm bg-gray-50 p-3 rounded-md">
+                        <div className="text-sm bg-muted p-3 rounded-md">
                             {log.user}
                         </div>
                     </div>
@@ -149,13 +149,13 @@ export function LogModal({ log, isOpen, onClose }: LogModalProps) {
 
                     {/* Timestamp */}
                     <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                        <div className="flex items-center gap-2 text-sm font-medium text-text-secondary">
                             <Calendar className="h-4 w-4" />
                             Timestamp
                         </div>
                         <div className="text-sm">
                             <div className="font-medium">{date}</div>
-                            <div className="text-gray-500">{time}</div>
+                            <div className="text-muted-foreground">{time}</div>
                         </div>
                     </div>
                 </div>

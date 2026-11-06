@@ -8,26 +8,23 @@ function RootLayout() {
     const [searchQuery, setSearchQuery] = useState("");
 
     return (
-        <div className="flex min-h-screen bg-gray-50">
+        <div className="flex min-h-dvh bg-background">
+            <a href="#main-content" className="skip-link">
+                Skip to content
+            </a>
+
             {/* Sidebar - hidden on mobile */}
-            <div className="hidden md:block w-64 flex-shrink-0 border-r border-gray-200 bg-white">
-                <div className="p-4">
-                    <div className="mb-6">
-                        <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-2">
-                            Main Menu
-                        </h2>
-                        <DashboardNav />
-                    </div>
-                </div>
-            </div>
+            <aside className="sticky top-0 hidden h-dvh w-64 flex-shrink-0 border-r border-sidebar-border bg-sidebar md:block">
+                <DashboardNav />
+            </aside>
 
             {/* Main content */}
-            <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+            <div className="flex min-w-0 flex-1 flex-col">
                 <DashboardHeader
                     searchQuery={searchQuery}
                     setSearchQuery={setSearchQuery}
                 />
-                <main className="flex-1 overflow-x-auto">
+                <main id="main-content" tabIndex={-1} className="flex-1 overflow-x-auto outline-none">
                     <Outlet context={{ searchQuery, setSearchQuery }} />
                 </main>
             </div>

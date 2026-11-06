@@ -8,7 +8,8 @@ import {
   ChevronDown, Loader2, CreditCard, ShieldAlert,
   Copy, Check, Calendar, SlidersHorizontal, RefreshCw
 } from "lucide-react";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
+import { Toaster } from "@/components/ui/toaster";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -51,11 +52,11 @@ const EMPTY_FORM = { meterNumber: "", location: "", openingDeficit: 0, make: "",
 function Field({ label, required, children, hint }: any) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-        {label}{required && <span className="text-rose-400 ml-0.5">*</span>}
+      <label className="av-label text-[10.5px] text-muted-foreground">
+        {label}{required && <span className="text-danger-text ml-0.5">*</span>}
       </label>
       {children}
-      {hint && <p className="text-xs text-gray-400">{hint}</p>}
+      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
     </div>
   );
 }
@@ -68,7 +69,7 @@ function TextInput({ value, onChange, placeholder = "", type = "text", required,
       onChange={onChange}
       placeholder={placeholder}
       required={required}
-      className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all placeholder:text-gray-400"
+      className="w-full px-3 py-2.5 text-sm border border-border rounded-lg bg-muted focus:bg-card focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-signal-edge transition-all placeholder:text-muted-foreground"
       {...rest}
     />
   );
@@ -80,11 +81,11 @@ function SelectInput({ value, onChange, children }: any) {
       <select
         value={value || ""}
         onChange={onChange}
-        className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all appearance-none pr-8"
+        className="w-full px-3 py-2.5 text-sm border border-border rounded-lg bg-muted focus:bg-card focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-signal-edge transition-all appearance-none pr-8"
       >
         {children}
       </select>
-      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
     </div>
   );
 }
@@ -116,28 +117,28 @@ function MeterFormDialog({ open, onClose, editing, tariffs, accounts, onSubmit, 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[var(--overlay)] backdrop-blur-sm" onClick={onClose}>
       <div
-        className="bg-white rounded-2xl border border-gray-200 shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col animate-in"
+        className="av-panel shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col animate-in"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 flex-shrink-0">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-border flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-md shadow-blue-200">
-              <Gauge className="w-4 h-4 text-white" />
+            <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center">
+              <Gauge className="w-4 h-4 text-muted-foreground" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 text-sm leading-tight">
+              <h3 className="font-semibold text-foreground text-sm leading-tight">
                 {editing ? "Edit Meter" : "Add New Meter"}
               </h3>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-muted-foreground">
                 {editing ? `Editing ${editing.meterNumber}` : "Fill in the details below"}
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
-            <X className="w-3.5 h-3.5 text-gray-500" />
+          <button onClick={onClose} className="w-7 h-7 rounded-lg bg-accent hover:bg-accent flex items-center justify-center transition-colors">
+            <X className="w-3.5 h-3.5 text-muted-foreground" />
           </button>
         </div>
 
@@ -147,7 +148,7 @@ function MeterFormDialog({ open, onClose, editing, tariffs, accounts, onSubmit, 
 
             {/* Core Details */}
             <div>
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Core Details</p>
+              <p className="av-label text-[10.5px] text-muted-foreground mb-3">Core Details</p>
               <div className="grid grid-cols-2 gap-4">
                 <Field label="Meter Number" required>
                   <TextInput value={form.meterNumber} onChange={(e: any) => set("meterNumber", e.target.value)} placeholder="e.g. KPL-001-A" required />
@@ -163,11 +164,11 @@ function MeterFormDialog({ open, onClose, editing, tariffs, accounts, onSubmit, 
               </div>
             </div>
 
-            <div className="border-t border-gray-100" />
+            <div className="border-t border-border" />
 
             {/* Assignment */}
             <div>
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Assignment</p>
+              <p className="av-label text-[10.5px] text-muted-foreground mb-3">Assignment</p>
               <div className="grid grid-cols-2 gap-4">
                 <Field label="Tariff">
                   <SelectInput value={form.tariffId} onChange={(e: any) => set("tariffId", e.target.value)}>
@@ -189,11 +190,11 @@ function MeterFormDialog({ open, onClose, editing, tariffs, accounts, onSubmit, 
               </div>
             </div>
 
-            <div className="border-t border-gray-100" />
+            <div className="border-t border-border" />
 
             {/* Hardware */}
             <div>
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Hardware</p>
+              <p className="av-label text-[10.5px] text-muted-foreground mb-3">Hardware</p>
               <Field label="Meter Make" required>
                 <SelectInput value={form.make} onChange={(e: any) => set("make", e.target.value)}>
                   <option value="">Select make…</option>
@@ -203,8 +204,8 @@ function MeterFormDialog({ open, onClose, editing, tariffs, accounts, onSubmit, 
               </Field>
 
               {form.make === "HES" && (
-                <div className="mt-4 p-4 rounded-xl bg-blue-50 border border-blue-100 space-y-3">
-                  <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide flex items-center gap-1.5">
+                <div className="mt-4 p-4 rounded-xl bg-muted border border-border space-y-3">
+                  <p className="av-label text-[10.5px] text-text-secondary flex items-center gap-1.5">
                     <Zap className="w-3 h-3" />
                     HES Configuration
                   </p>
@@ -226,15 +227,15 @@ function MeterFormDialog({ open, onClose, editing, tariffs, accounts, onSubmit, 
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-2 flex-shrink-0 bg-gray-50/60">
-          <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+        <div className="px-6 py-4 border-t border-border flex items-center justify-end gap-2 flex-shrink-0 bg-muted/60">
+          <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-text-secondary bg-card border border-border rounded-lg hover:bg-muted transition-colors">
             Cancel
           </button>
           <button
             type="submit"
             form="meter-form"
             disabled={isSaving}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm shadow-blue-200"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-primary rounded-lg hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm shadow-black/10"
           >
             {isSaving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
             {isSaving ? "Saving…" : editing ? "Save Changes" : "Create Meter"}
@@ -249,9 +250,9 @@ function MeterFormDialog({ open, onClose, editing, tariffs, accounts, onSubmit, 
 function TokenDisplay({ label, code, color = "gray" }: any) {
   const [copied, setCopied] = useState(false);
   const colors: any = {
-    blue: "bg-blue-50 border-blue-200 text-blue-900",
-    green: "bg-emerald-50 border-emerald-200 text-emerald-900",
-    gray: "bg-gray-100 border-gray-200 text-gray-800",
+    blue: "bg-accent border-border text-foreground",
+    green: "bg-ok-soft border-ok-edge text-ok-text",
+    gray: "bg-accent border-border text-foreground",
   };
   const copy = () => {
     navigator.clipboard.writeText(code);
@@ -261,7 +262,7 @@ function TokenDisplay({ label, code, color = "gray" }: any) {
   return (
     <div className={`rounded-xl border p-4 ${colors[color]}`}>
       <div className="flex items-center justify-between mb-2">
-        <p className="text-xs font-semibold uppercase tracking-wide opacity-60">{label}</p>
+        <p className="av-label text-[10.5px] opacity-60">{label}</p>
         <button onClick={copy} className="flex items-center gap-1 text-xs font-medium opacity-60 hover:opacity-100 transition-opacity">
           {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
           {copied ? "Copied" : "Copy"}
@@ -336,41 +337,41 @@ function MeterActionsDialog({ open, onClose, meter, axiosInstance }: any) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[var(--overlay)] backdrop-blur-sm" onClick={onClose}>
       <div
-        className="bg-white rounded-2xl border border-gray-200 shadow-2xl w-full max-w-md animate-in"
+        className="av-panel shadow-2xl w-full max-w-md animate-in"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-slate-700 flex items-center justify-center">
-              <Gauge className="w-4 h-4 text-white" />
+            <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center">
+              <Gauge className="w-4 h-4 text-muted-foreground" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 text-sm leading-tight">Meter Actions</h3>
-              <p className="font-mono-custom text-xs text-gray-400">{meter.meterNumber}</p>
+              <h3 className="font-semibold text-foreground text-sm leading-tight">Meter Actions</h3>
+              <p className="font-mono-custom text-xs text-muted-foreground">{meter.meterNumber}</p>
             </div>
           </div>
-          <button onClick={onClose} className="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
-            <X className="w-3.5 h-3.5 text-gray-500" />
+          <button onClick={onClose} className="w-7 h-7 rounded-lg bg-accent hover:bg-accent flex items-center justify-center transition-colors">
+            <X className="w-3.5 h-3.5 text-muted-foreground" />
           </button>
         </div>
 
         {/* Meter Info Strip */}
-        <div className="px-6 py-4 bg-gray-50 border-b border-gray-100">
+        <div className="px-6 py-4 bg-muted border-b border-border">
           <div className="grid grid-cols-3 gap-4 text-xs">
             <div>
-              <p className="text-gray-400 font-semibold uppercase tracking-wide mb-1">Location</p>
-              <p className="text-gray-700 font-medium">{meter.location}</p>
+              <p className="text-muted-foreground font-semibold uppercase tracking-wide mb-1">Location</p>
+              <p className="text-text-secondary font-medium">{meter.location}</p>
             </div>
             <div>
-              <p className="text-gray-400 font-semibold uppercase tracking-wide mb-1">Make</p>
-              <p className="text-gray-700 font-medium">{meter.make || "—"}</p>
+              <p className="text-muted-foreground font-semibold uppercase tracking-wide mb-1">Make</p>
+              <p className="text-text-secondary font-medium">{meter.make || "—"}</p>
             </div>
             <div>
-              <p className="text-gray-400 font-semibold uppercase tracking-wide mb-1">Deficit</p>
-              <p className={`font-semibold ${meter.openingDeficit > 0 ? "text-rose-600" : "text-emerald-600"}`}>
+              <p className="text-muted-foreground font-semibold uppercase tracking-wide mb-1">Deficit</p>
+              <p className={`font-semibold ${meter.openingDeficit > 0 ? "text-danger-text" : "text-ok-text"}`}>
                 {meter.openingDeficit > 0 ? fmt(meter.openingDeficit) : "None"}
               </p>
             </div>
@@ -384,13 +385,13 @@ function MeterActionsDialog({ open, onClose, meter, axiosInstance }: any) {
           <div>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <ShieldAlert className="w-4 h-4 text-amber-500" />
-                <p className="text-sm font-semibold text-gray-800">Clear Tamper</p>
+                <ShieldAlert className="w-4 h-4 text-warn-text" />
+                <p className="text-sm font-semibold text-foreground">Clear Tamper</p>
               </div>
               <button
                 onClick={handleTamper}
                 disabled={tamperLoading}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 rounded-lg hover:bg-amber-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-warn-soft text-warn-text border border-warn-edge rounded-lg hover:bg-warn-soft disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {tamperLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <ShieldAlert className="w-3 h-3" />}
                 {tamperLoading ? "Generating…" : "Generate Code"}
@@ -399,17 +400,17 @@ function MeterActionsDialog({ open, onClose, meter, axiosInstance }: any) {
             {tamperCode && <TokenDisplay label="Tamper Clear Code" code={tamperCode} color="gray" />}
           </div>
 
-          <div className="border-t border-gray-100" />
+          <div className="border-t border-border" />
 
           {/* Generate Credit */}
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <CreditCard className="w-4 h-4 text-blue-500" />
-              <p className="text-sm font-semibold text-gray-800">Generate Credit</p>
+              <CreditCard className="w-4 h-4 text-accent-text" />
+              <p className="text-sm font-semibold text-foreground">Generate Credit</p>
             </div>
             <form onSubmit={handleCredit} className="flex items-center gap-2">
               <div className="relative flex-1">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-gray-400">KES</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-muted-foreground">KES</span>
                 <input
                   type="number"
                   min={1}
@@ -418,13 +419,13 @@ function MeterActionsDialog({ open, onClose, meter, axiosInstance }: any) {
                   onChange={(e) => setCreditAmount(e.target.value)}
                   placeholder="0"
                   required
-                  className="w-full pl-11 pr-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+                  className="w-full pl-11 pr-3 py-2.5 text-sm border border-border rounded-lg bg-muted focus:bg-card focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-signal-edge transition-all"
                 />
               </div>
               <button
                 type="submit"
                 disabled={creditLoading || !creditAmount}
-                className="flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm shadow-blue-200 whitespace-nowrap"
+                className="flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold bg-primary text-white rounded-lg hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm shadow-black/10 whitespace-nowrap"
               >
                 {creditLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <CreditCard className="w-3 h-3" />}
                 {creditLoading ? "Generating…" : "Generate"}
@@ -439,8 +440,8 @@ function MeterActionsDialog({ open, onClose, meter, axiosInstance }: any) {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-100 flex justify-end bg-gray-50/60">
-          <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+        <div className="px-6 py-4 border-t border-border flex justify-end bg-muted/60">
+          <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-text-secondary bg-card border border-border rounded-lg hover:bg-muted transition-colors">
             Close
           </button>
         </div>
@@ -453,22 +454,22 @@ function MeterActionsDialog({ open, onClose, meter, axiosInstance }: any) {
 function DeleteDialog({ meter, onConfirm, onClose }: any) {
   if (!meter) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm" onClick={onClose}>
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-2xl w-full max-sm animate-in" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[var(--overlay)] backdrop-blur-sm" onClick={onClose}>
+      <div className="av-panel shadow-2xl w-full max-sm animate-in" onClick={(e) => e.stopPropagation()}>
         <div className="p-6">
-          <div className="w-12 h-12 rounded-2xl bg-rose-100 flex items-center justify-center mx-auto mb-4">
-            <Trash2 className="w-5 h-5 text-rose-600" />
+          <div className="w-12 h-12 rounded-xl bg-danger-soft flex items-center justify-center mx-auto mb-4">
+            <Trash2 className="w-5 h-5 text-danger-text" />
           </div>
-          <h3 className="text-base font-semibold text-gray-900 text-center mb-1">Delete meter?</h3>
-          <p className="text-sm text-gray-500 text-center">
-            <span className="font-mono-custom font-medium text-gray-700">{meter.meterNumber}</span> will be permanently removed. This action cannot be undone.
+          <h3 className="text-base font-semibold text-foreground text-center mb-1">Delete meter?</h3>
+          <p className="text-sm text-muted-foreground text-center">
+            <span className="font-mono-custom font-medium text-text-secondary">{meter.meterNumber}</span> will be permanently removed. This action cannot be undone.
           </p>
         </div>
         <div className="px-6 pb-6 flex gap-2">
-          <button onClick={onClose} className="flex-1 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+          <button onClick={onClose} className="flex-1 py-2.5 text-sm font-medium text-text-secondary bg-accent hover:bg-accent rounded-lg transition-colors">
             Cancel
           </button>
-          <button onClick={() => onConfirm(meter.id)} className="flex-1 py-2.5 text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-lg transition-colors">
+          <button onClick={() => onConfirm(meter.id)} className="flex-1 py-2.5 text-sm font-semibold text-white bg-danger hover:bg-danger rounded-lg transition-colors">
             Delete
           </button>
         </div>
@@ -489,29 +490,29 @@ function RowMenu({ meter, onEdit, onView, onDelete }: RowMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all focus:outline-none">
+        <button className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-accent-text hover:bg-signal-soft transition-all focus:outline-none">
           <MoreHorizontal className="w-5 h-5" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48 p-1.5">
         <DropdownMenuItem
           onClick={() => onEdit(meter)}
-          className="flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 cursor-pointer rounded-md"
+          className="flex items-center gap-2.5 px-3 py-2 text-sm text-text-secondary cursor-pointer rounded-md"
         >
-          <Pencil className="w-4 h-4 text-gray-400" />
+          <Pencil className="w-4 h-4 text-muted-foreground" />
           Edit Meter
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => onView(meter)}
-          className="flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 cursor-pointer rounded-md"
+          className="flex items-center gap-2.5 px-3 py-2 text-sm text-text-secondary cursor-pointer rounded-md"
         >
-          <Eye className="w-4 h-4 text-gray-400" />
+          <Eye className="w-4 h-4 text-muted-foreground" />
           View Actions
         </DropdownMenuItem>
         <DropdownMenuSeparator className="my-1" />
         <DropdownMenuItem
           onClick={() => onDelete(meter)}
-          className="flex items-center gap-2.5 px-3 py-2 text-sm text-rose-600 focus:text-rose-600 focus:bg-rose-50 cursor-pointer rounded-md"
+          className="flex items-center gap-2.5 px-3 py-2 text-sm text-danger-text focus:text-danger-text focus:bg-danger-soft cursor-pointer rounded-md"
         >
           <Trash2 className="w-4 h-4" />
           Delete Meter
@@ -663,40 +664,28 @@ export function MetersPage() {
   });
 
   const SortIcon = ({ field }: { field: string }) => {
-    if (filters.sortField !== field) return <ArrowUpDown className="w-3 h-3 text-gray-300" />;
+    if (filters.sortField !== field) return <ArrowUpDown className="w-3 h-3 text-muted-foreground" />;
     return filters.sortOrder === "asc"
-      ? <ChevronDown className="w-3 h-3 text-blue-500 rotate-180" />
-      : <ChevronDown className="w-3 h-3 text-blue-500" />;
+      ? <ChevronDown className="w-3 h-3 text-accent-text rotate-180" />
+      : <ChevronDown className="w-3 h-3 text-accent-text" />;
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/60 font-sans">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
-        * { font-family: 'DM Sans', sans-serif; }
-        .font-mono-custom { font-family: 'DM Mono', monospace; }
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(8px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        .animate-in { animation: fadeInUp 0.3s ease both; }
-        @keyframes shimmer { to { background-position: -200% 0; } }
-        .skeleton { background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 6px; }
-      `}</style>
+    <div className="min-h-full">
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-5">
 
         {/* ── Page Header ── */}
         <div className="flex items-start justify-between animate-in">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-blue-500 mb-1">Infrastructure</p>
-            <h1 className="text-2xl font-bold text-gray-900 leading-tight">Meters</h1>
-            <p className="text-sm text-gray-400 mt-0.5">{fmtNum(metersData.pagination.total)} total meters registered</p>
+            <p className="av-label text-[10.5px] text-accent-text mb-1">Infrastructure</p>
+            <h1 className="av-display text-[28px] leading-tight font-bold tracking-[-0.03em] text-foreground sm:text-[32px]">Meters<span className="text-signal">.</span></h1>
+            <p className="text-sm text-muted-foreground mt-0.5">{fmtNum(metersData.pagination.total)} total meters registered</p>
           </div>
           {isAdmin && (
             <button
               onClick={() => { setEditingMeter(null); setFormOpen(true); }}
-              className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200"
+              className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-primary rounded-lg hover:bg-primary-hover transition-colors shadow-sm shadow-black/10"
             >
               <Plus className="w-4 h-4" />
               Add Meter
@@ -705,52 +694,52 @@ export function MetersPage() {
         </div>
 
         {/* ── Table Card ── */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden animate-in" style={{ animationDelay: "80ms" }}>
+        <div className="av-panel overflow-hidden animate-in" style={{ animationDelay: "80ms" }}>
 
           {/* Toolbar */}
-          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between gap-4">
+          <div className="px-6 py-4 border-b border-border flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center">
-                <Gauge className="w-3.5 h-3.5 text-slate-500" />
+              <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center">
+                <Gauge className="w-3.5 h-3.5 text-muted-foreground" />
               </div>
-              <h2 className="text-sm font-semibold text-gray-900">Meter Registry</h2>
-              <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 text-xs font-medium">
+              <h2 className="text-sm font-semibold text-foreground">Meter Registry</h2>
+              <span className="px-2 py-0.5 rounded-md bg-accent text-muted-foreground text-xs font-medium">
                 {fmtNum(filteredMeters.length)} {filteredMeters.length !== metersData.meters.length ? "filtered" : "total"}
               </span>
             </div>
 
             <div className="flex items-center gap-2">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => handleMeterNumberChange(e.target.value)}
                   placeholder="Search meter or location…"
-                  className="w-full pl-9 pr-8 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all placeholder:text-gray-400"
+                  className="w-full pl-9 pr-8 py-2 text-sm border border-border rounded-lg bg-muted focus:bg-card focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-signal-edge transition-all placeholder:text-muted-foreground"
                 />
                 {searchQuery && (
                   <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2">
-                    <X className="w-3.5 h-3.5 text-gray-400 hover:text-gray-600" />
+                    <X className="w-3.5 h-3.5 text-muted-foreground hover:text-text-secondary" />
                   </button>
                 )}
               </div>
               <button
                 onClick={() => setFiltersOpen(!filtersOpen)}
                 className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border rounded-lg transition-colors ${filtersOpen
-                  ? "bg-blue-50 border-blue-200 text-blue-600"
-                  : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
+                  ? "bg-signal-soft border-signal-edge text-accent-text"
+                  : "bg-card border-border text-text-secondary hover:bg-muted"
                   }`}
               >
                 <SlidersHorizontal className="w-3.5 h-3.5" />
                 Filters
                 {(filters.startDate || filters.endDate) && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary" />
                 )}
               </button>
               <button
                 onClick={fetchMeters}
-                className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-gray-200"
+                className="p-2 text-muted-foreground hover:text-accent-text hover:bg-signal-soft rounded-lg transition-colors border border-border"
                 title="Refresh data"
               >
                 <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
@@ -760,35 +749,35 @@ export function MetersPage() {
 
           {/* Collapsible Filters */}
           {filtersOpen && (
-            <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/30 flex flex-wrap items-end gap-4 animate-in">
+            <div className="px-6 py-4 border-b border-border bg-muted/30 flex flex-wrap items-end gap-4 animate-in">
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Start Date</label>
+                <label className="av-label text-[10.5px] text-muted-foreground">Start Date</label>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
                   <input
                     type="date"
                     value={filters.startDate}
                     onChange={(e) => setFilters((prev: any) => ({ ...prev, startDate: e.target.value, page: 1 }))}
-                    className="pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+                    className="pl-9 pr-3 py-2 text-sm border border-border rounded-lg bg-card focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-signal-edge transition-all"
                   />
                 </div>
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">End Date</label>
+                <label className="av-label text-[10.5px] text-muted-foreground">End Date</label>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
                   <input
                     type="date"
                     value={filters.endDate}
                     onChange={(e) => setFilters((prev: any) => ({ ...prev, endDate: e.target.value, page: 1 }))}
-                    className="pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+                    className="pl-9 pr-3 py-2 text-sm border border-border rounded-lg bg-card focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-signal-edge transition-all"
                   />
                 </div>
               </div>
               {(filters.startDate || filters.endDate) && (
                 <button
                   onClick={() => setFilters((prev: any) => ({ ...prev, startDate: "", endDate: "", page: 1 }))}
-                  className="px-3 py-2 text-xs font-medium text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg hover:bg-white transition-colors h-[38px]"
+                  className="px-3 py-2 text-xs font-medium text-muted-foreground hover:text-text-secondary border border-border rounded-lg hover:bg-card transition-colors h-[38px]"
                 >
                   Clear dates
                 </button>
@@ -807,11 +796,11 @@ export function MetersPage() {
             </div>
           ) : filteredMeters.length === 0 ? (
             <div className="py-20 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                <Gauge className="w-6 h-6 text-gray-400" />
+              <div className="w-14 h-14 rounded-xl bg-accent flex items-center justify-center mx-auto mb-4">
+                <Gauge className="w-6 h-6 text-muted-foreground" />
               </div>
-              <p className="text-sm font-semibold text-gray-700">No meters found</p>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-sm font-semibold text-text-secondary">No meters found</p>
+              <p className="text-xs text-muted-foreground mt-1">
                 {searchQuery ? "Try a different search term" : "Add your first meter to get started"}
               </p>
             </div>
@@ -819,7 +808,7 @@ export function MetersPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-gray-50 border-b border-gray-100">
+                  <tr className="border-b border-border">
                     {[
                       { label: "Meter", field: "meterNumber", sortable: true },
                       { label: "Location", field: "location", sortable: true },
@@ -831,8 +820,8 @@ export function MetersPage() {
                       <th
                         key={label}
                         onClick={() => sortable && field && handleSort(field)}
-                        className={`px-5 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap
-                          ${sortable ? "cursor-pointer hover:text-gray-600 select-none" : ""}`}
+                        className={`av-label text-[10.5px] px-4 py-3 text-left text-muted-foreground whitespace-nowrap
+                          ${sortable ? "cursor-pointer hover:text-text-secondary select-none" : ""}`}
                       >
                         <div className="flex items-center gap-1.5">
                           {label}
@@ -840,61 +829,60 @@ export function MetersPage() {
                         </div>
                       </th>
                     ))}
-                    {isAdmin && <th className="px-5 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap" >
+                    {isAdmin && <th className="av-th sticky right-0 bg-card px-4 py-3 text-right" >
                       Actions
                     </th>}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {filteredMeters.map((meter: Meter, idx: number) => {
+                <tbody className="divide-y divide-border">
+                  {filteredMeters.map((meter: Meter) => {
                     const account = accounts.find((a: Account) => a.id === meter.accountId);
                     return (
                       <tr
                         key={meter.id}
-                        className={`${idx % 2 === 0 ? "bg-white" : "bg-gray-50/40"} hover:bg-blue-50/30 transition-colors group`}
+                        className={`av-row group`}
                       >
                         {/* Meter Number */}
-                        <td className="px-5 py-3.5 whitespace-nowrap">
+                        <td className="px-4 py-3.5 whitespace-nowrap">
                           <div className="flex items-center gap-2.5">
-                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0" />
-                            <span className="font-mono-custom text-xs font-medium text-gray-800 bg-gray-100 px-2 py-0.5 rounded">
+                            <span className="font-mono-custom text-xs font-medium text-foreground bg-accent px-2 py-0.5 rounded">
                               {meter.meterNumber}
                             </span>
                             {meter.make && (
-                              <span className="text-xs text-gray-400 font-medium">{meter.make}</span>
+                              <span className="text-xs text-muted-foreground font-medium">{meter.make}</span>
                             )}
                           </div>
                         </td>
 
                         {/* Location */}
-                        <td className="px-5 py-3.5 whitespace-nowrap">
-                          <div className="flex items-center gap-1.5 text-gray-600">
-                            <MapPin className="w-3 h-3 text-gray-400 flex-shrink-0" />
+                        <td className="px-4 py-3.5 whitespace-nowrap">
+                          <div className="flex items-center gap-1.5 text-text-secondary">
+                            <MapPin className="w-3 h-3 text-muted-foreground flex-shrink-0" />
                             <span className="text-sm">{meter.location}</span>
                           </div>
                         </td>
 
                         {/* Account */}
-                        <td className="px-5 py-3.5 whitespace-nowrap">
+                        <td className="px-4 py-3.5 whitespace-nowrap">
                           {account ? (
                             <div className="flex items-center gap-1.5">
-                              <Building2 className="w-3 h-3 text-gray-400" />
-                              <span className="text-sm text-gray-600">{account.name}</span>
+                              <Building2 className="w-3 h-3 text-muted-foreground" />
+                              <span className="text-sm text-text-secondary">{account.name}</span>
                             </div>
                           ) : (
-                            <span className="text-xs text-gray-400 italic">No account</span>
+                            <span className="text-xs text-muted-foreground italic">No account</span>
                           )}
                         </td>
 
                         {/* Deficit */}
-                        <td className="px-5 py-3.5 whitespace-nowrap">
+                        <td className="px-4 py-3.5 whitespace-nowrap">
                           {meter.openingDeficit > 0 ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-600 border border-rose-100">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-danger-soft text-danger-text border border-danger-edge">
                               <AlertCircle className="w-3 h-3" />
                               {fmt(meter.openingDeficit)}
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-600 border border-emerald-100">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-ok-soft text-ok-text border border-ok-edge">
                               <CheckCircle2 className="w-3 h-3" />
                               Clear
                             </span>
@@ -902,22 +890,22 @@ export function MetersPage() {
                         </td>
 
                         {/* Total Amount */}
-                        <td className="px-5 py-3.5 whitespace-nowrap">
-                          <span className="text-sm font-semibold text-gray-900">{fmt(meter.totalAmount || 0)}</span>
+                        <td className="px-4 py-3.5 whitespace-nowrap">
+                          <span className="text-sm font-semibold text-foreground">{fmt(meter.totalAmount || 0)}</span>
                         </td>
 
                         {/* Total Units */}
-                        <td className="px-5 py-3.5 whitespace-nowrap">
+                        <td className="px-4 py-3.5 whitespace-nowrap">
                           <div className="flex items-center gap-1">
-                            <Zap className="w-3 h-3 text-amber-400" />
-                            <span className="text-sm text-gray-700">{(meter.totalUnits || 0).toFixed(2)}</span>
+                            <Zap className="w-3 h-3 text-warn-text" />
+                            <span className="text-sm text-text-secondary">{(meter.totalUnits || 0).toFixed(2)}</span>
                           </div>
                         </td>
 
                         {/* Actions */}
                         {isAdmin && (
-                          <td className="px-5 py-3.5 whitespace-nowrap text-right">
-                            <div className="text-gray-400 group-hover:text-blue-400 transition-all">
+                          <td className="sticky right-0 bg-card px-4 py-3.5 whitespace-nowrap text-right">
+                            <div className="text-muted-foreground group-hover:text-accent-text transition-all">
                               <RowMenu
                                 meter={meter}
                                 onEdit={(m: any) => { setEditingMeter(m); setFormOpen(true); }}
@@ -936,17 +924,17 @@ export function MetersPage() {
           )}
 
           {/* ── Pagination Footer ── */}
-          <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+          <div className="px-6 py-4 border-t border-border flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <p className="text-xs text-gray-400">
-                Showing <span className="font-medium text-gray-600">{fmtNum(((metersData.pagination.page - 1) * metersData.pagination.limit) + 1)}</span>–<span className="font-medium text-gray-600">{fmtNum(Math.min(metersData.pagination.page * metersData.pagination.limit, metersData.pagination.total))}</span> of <span className="font-medium text-gray-600">{fmtNum(metersData.pagination.total)}</span>
+              <p className="text-xs text-muted-foreground">
+                Showing <span className="font-medium text-text-secondary">{fmtNum(((metersData.pagination.page - 1) * metersData.pagination.limit) + 1)}</span>–<span className="font-medium text-text-secondary">{fmtNum(Math.min(metersData.pagination.page * metersData.pagination.limit, metersData.pagination.total))}</span> of <span className="font-medium text-text-secondary">{fmtNum(metersData.pagination.total)}</span>
               </p>
               <div className="flex items-center gap-1.5">
-                <span className="text-xs text-gray-400">Rows:</span>
+                <span className="text-xs text-muted-foreground">Rows:</span>
                 <select
                   value={filters.limit}
                   onChange={(e) => handleLimitChange(Number(e.target.value))}
-                  className="text-xs border border-gray-200 rounded-md px-1.5 py-1 bg-white text-gray-600 focus:outline-none"
+                  className="text-xs border border-border rounded-md px-1.5 py-1 bg-card text-text-secondary focus:outline-none"
                 >
                   {[10, 20, 50, 100].map((l) => <option key={l} value={l}>{l}</option>)}
                 </select>
@@ -957,7 +945,7 @@ export function MetersPage() {
               <button
                 onClick={() => handlePageChange(metersData.pagination.page - 1)}
                 disabled={!metersData.pagination.hasPrevPage || isLoading}
-                className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center gap-1 whitespace-nowrap px-3 py-1.5 text-xs font-medium text-text-secondary border border-border rounded-lg bg-card hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
                 Prev
@@ -968,17 +956,17 @@ export function MetersPage() {
                   <button
                     key={p}
                     onClick={() => handlePageChange(p)}
-                    className={`w-7 h-7 text-xs font-medium rounded-lg transition-colors ${metersData.pagination.page === p ? "bg-blue-600 text-white shadow-sm" : "text-gray-600 border border-gray-200 bg-white hover:bg-gray-50"}`}
+                    className={`w-7 h-7 text-xs font-medium rounded-lg transition-colors ${metersData.pagination.page === p ? "bg-primary text-white shadow-sm" : "text-text-secondary border border-border bg-card hover:bg-muted"}`}
                   >
                     {p}
                   </button>
                 );
               })}
-              {metersData.pagination.totalPages > 5 && <span className="text-xs text-gray-400 px-1">…</span>}
+              {metersData.pagination.totalPages > 5 && <span className="text-xs text-muted-foreground px-1">…</span>}
               <button
                 onClick={() => handlePageChange(metersData.pagination.page + 1)}
                 disabled={!metersData.pagination.hasNextPage || isLoading}
-                className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center gap-1 whitespace-nowrap px-3 py-1.5 text-xs font-medium text-text-secondary border border-border rounded-lg bg-card hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 Next
                 <ChevronRight className="w-3.5 h-3.5" />

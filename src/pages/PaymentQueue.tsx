@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useRef, useCallback } from "react";
+import { StatTile as StatCard } from "@/components/ui/stat-tile";
 import {
     Clock, CheckCircle2, XCircle, AlertTriangle, RotateCcw, Trash2,
     ChevronLeft, ChevronRight, Calendar, SlidersHorizontal, Search,
@@ -36,48 +37,19 @@ const timeAgo = (d: string | Date | null | undefined) => {
 };
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────
-function StatCard({ label, value, sublabel, icon: Icon, color, delay = 0 }: any) {
-    const colors: any = {
-        amber: { bg: "bg-amber-50", border: "border-amber-100", icon: "text-amber-500", iconBg: "bg-amber-100", text: "text-amber-700" },
-        blue: { bg: "bg-blue-50", border: "border-blue-100", icon: "text-blue-500", iconBg: "bg-blue-100", text: "text-blue-700" },
-        green: { bg: "bg-emerald-50", border: "border-emerald-100", icon: "text-emerald-500", iconBg: "bg-emerald-100", text: "text-emerald-700" },
-        red: { bg: "bg-rose-50", border: "border-rose-100", icon: "text-rose-500", iconBg: "bg-rose-100", text: "text-rose-700" },
-        slate: { bg: "bg-slate-50", border: "border-slate-100", icon: "text-slate-500", iconBg: "bg-slate-100", text: "text-slate-700" },
-        violet: { bg: "bg-violet-50", border: "border-violet-100", icon: "text-violet-500", iconBg: "bg-violet-100", text: "text-violet-700" },
-    };
-    const c = colors[color] || colors.blue;
-
-    return (
-        <div
-            className={`rounded-xl border ${c.border} ${c.bg} p-5 flex flex-col gap-3 animate-in`}
-            style={{ animationDelay: `${delay}ms` }}
-        >
-            <div className="flex items-center justify-between">
-                <span className={`text-xs font-semibold uppercase tracking-widest ${c.text} opacity-60`}>{label}</span>
-                <div className={`w-8 h-8 rounded-lg ${c.iconBg} flex items-center justify-center`}>
-                    <Icon className={`w-4 h-4 ${c.icon}`} />
-                </div>
-            </div>
-            <p className="text-2xl font-bold text-gray-900 leading-none">{value}</p>
-            {sublabel && (
-                <span className="text-xs text-gray-400">{sublabel}</span>
-            )}
-        </div>
-    );
-}
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
 function QueueStatusBadge({ status }: { status: QueueStatus }) {
     const map: Record<QueueStatus, { icon: any; label: string; cls: string }> = {
-        pending: { icon: Clock, label: "Pending", cls: "bg-amber-50 text-amber-700 border-amber-100" },
-        processing: { icon: Loader2, label: "Processing", cls: "bg-blue-50 text-blue-700 border-blue-100" },
-        completed: { icon: CheckCircle2, label: "Completed", cls: "bg-emerald-50 text-emerald-700 border-emerald-100" },
-        failed: { icon: XCircle, label: "Failed", cls: "bg-rose-50 text-rose-600 border-rose-100" },
-        retry_wait: { icon: RotateCcw, label: "Retry Wait", cls: "bg-violet-50 text-violet-700 border-violet-100" },
+        pending: { icon: Clock, label: "Pending", cls: "bg-warn-soft text-warn-text border-warn-edge" },
+        processing: { icon: Loader2, label: "Processing", cls: "bg-info-soft text-info-text border-info-edge" },
+        completed: { icon: CheckCircle2, label: "Completed", cls: "bg-ok-soft text-ok-text border-ok-edge" },
+        failed: { icon: XCircle, label: "Failed", cls: "bg-danger-soft text-danger-text border-danger-edge" },
+        retry_wait: { icon: RotateCcw, label: "Retry Wait", cls: "bg-info-soft text-info-text border-info-edge" },
     };
     const { icon: Icon, label, cls } = map[status] || map.pending;
     return (
-        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${cls}`}>
+        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium border ${cls}`}>
             <Icon className={`w-3 h-3 ${status === "processing" ? "animate-spin" : ""}`} />
             {label}
         </span>
@@ -88,7 +60,7 @@ function QueueStatusBadge({ status }: { status: QueueStatus }) {
 function SourceBadge({ source }: { source: string }) {
     const isStk = source === "stk";
     return (
-        <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium ${isStk ? "bg-indigo-50 text-indigo-600 border border-indigo-100" : "bg-slate-50 text-slate-600 border border-slate-100"
+        <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium ${isStk ? "bg-info-soft text-info-text border border-info-edge" : "bg-muted text-text-secondary border border-border"
             }`}>
             {isStk ? "STK" : "C2B"}
         </span>
@@ -124,26 +96,26 @@ function QueueDetailModal({ item, onClose, onRetry, onCancel, actionLoading }: {
     const canCancel = ["pending", "retry_wait"].includes(item.status);
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm" onClick={onClose}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[var(--overlay)] backdrop-blur-sm" onClick={onClose}>
             <div
-                className="bg-white rounded-2xl border border-gray-200 shadow-2xl w-full max-w-lg animate-in"
+                className="av-panel shadow-2xl w-full max-w-lg animate-in"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+                <div className="flex items-center justify-between px-6 py-5 border-b border-border">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-md shadow-blue-200">
-                            <ListOrdered className="w-4 h-4 text-white" />
+                        <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center">
+                            <ListOrdered className="w-4 h-4 text-muted-foreground" />
                         </div>
                         <div>
-                            <h3 className="font-semibold text-gray-900 text-sm leading-tight">Queue Item Detail</h3>
-                            <p className="text-xs text-gray-400 font-mono-custom">{item.id.slice(0, 8)}…</p>
+                            <h3 className="font-semibold text-foreground text-sm leading-tight">Queue Item Detail</h3>
+                            <p className="text-xs text-muted-foreground font-mono-custom">{item.id.slice(0, 8)}…</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
                         <QueueStatusBadge status={item.status} />
-                        <button onClick={onClose} className="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
-                            <Minus className="w-3.5 h-3.5 text-gray-500" />
+                        <button onClick={onClose} className="w-7 h-7 rounded-lg bg-accent hover:bg-accent flex items-center justify-center transition-colors">
+                            <Minus className="w-3.5 h-3.5 text-muted-foreground" />
                         </button>
                     </div>
                 </div>
@@ -152,21 +124,21 @@ function QueueDetailModal({ item, onClose, onRetry, onCancel, actionLoading }: {
                 <div className="p-6 grid grid-cols-2 gap-x-6 gap-y-4">
                     {fields.map(([label, val]) => (
                         <div key={label as string}>
-                            <p className="text-xs text-gray-400 uppercase tracking-wide font-semibold mb-0.5">{label}</p>
-                            <p className="text-sm font-medium text-gray-800 break-all">{val ?? "—"}</p>
+                            <p className="av-label text-[10.5px] text-muted-foreground mb-0.5">{label}</p>
+                            <p className="text-sm font-medium text-foreground break-all">{val ?? "—"}</p>
                         </div>
                     ))}
                 </div>
 
                 {/* Error details */}
                 {item.errorMessage && (
-                    <div className="mx-6 mb-4 p-3 rounded-lg bg-rose-50 border border-rose-100">
-                        <p className="text-xs font-semibold text-rose-600 uppercase tracking-wide mb-1">Error</p>
-                        <p className="text-xs text-rose-700 font-mono-custom break-all">{item.errorMessage}</p>
+                    <div className="mx-6 mb-4 p-3 rounded-lg bg-danger-soft border border-danger-edge">
+                        <p className="av-label text-[10.5px] text-danger-text mb-1">Error</p>
+                        <p className="text-xs text-danger-text font-mono-custom break-all">{item.errorMessage}</p>
                         {item.errorDetails && (
                             <details className="mt-2">
-                                <summary className="text-xs text-rose-400 cursor-pointer hover:text-rose-600">Stack trace</summary>
-                                <pre className="mt-1 text-xs text-rose-600 whitespace-pre-wrap font-mono-custom max-h-32 overflow-y-auto">{item.errorDetails}</pre>
+                                <summary className="text-xs text-danger-text cursor-pointer hover:text-danger-text">Stack trace</summary>
+                                <pre className="mt-1 text-xs text-danger-text whitespace-pre-wrap font-mono-custom max-h-32 overflow-y-auto">{item.errorDetails}</pre>
                             </details>
                         )}
                     </div>
@@ -174,21 +146,21 @@ function QueueDetailModal({ item, onClose, onRetry, onCancel, actionLoading }: {
 
                 {/* Next retry */}
                 {item.nextRetryAt && (
-                    <div className="mx-6 mb-4 p-3 rounded-lg bg-violet-50 border border-violet-100">
-                        <p className="text-xs text-violet-600">
+                    <div className="mx-6 mb-4 p-3 rounded-lg bg-info-soft border border-info-edge">
+                        <p className="text-xs text-info-text">
                             <span className="font-semibold">Next retry:</span> {fmtDate(item.nextRetryAt)} ({timeAgo(item.nextRetryAt)})
                         </p>
                     </div>
                 )}
 
                 {/* Footer */}
-                <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+                <div className="px-6 py-4 border-t border-border flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
                         {canRetry && (
                             <button
                                 onClick={() => onRetry(item.id)}
                                 disabled={actionLoading === item.id}
-                                className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium bg-violet-50 text-violet-700 border border-violet-200 rounded-lg hover:bg-violet-100 transition-colors disabled:opacity-50"
+                                className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium bg-info-soft text-info-text border border-info-edge rounded-lg hover:bg-info-soft transition-colors disabled:opacity-50"
                             >
                                 <RotateCcw className={`w-3 h-3 ${actionLoading === item.id ? "animate-spin" : ""}`} />
                                 Retry
@@ -198,7 +170,7 @@ function QueueDetailModal({ item, onClose, onRetry, onCancel, actionLoading }: {
                             <button
                                 onClick={() => onCancel(item.id)}
                                 disabled={actionLoading === item.id}
-                                className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium bg-rose-50 text-rose-600 border border-rose-200 rounded-lg hover:bg-rose-100 transition-colors disabled:opacity-50"
+                                className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium bg-danger-soft text-danger-text border border-danger-edge rounded-lg hover:bg-danger-soft transition-colors disabled:opacity-50"
                             >
                                 <Trash2 className="w-3 h-3" />
                                 Cancel
@@ -207,7 +179,7 @@ function QueueDetailModal({ item, onClose, onRetry, onCancel, actionLoading }: {
                     </div>
                     <button
                         onClick={onClose}
-                        className="px-4 py-2 text-sm font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                        className="px-4 py-2 text-sm font-medium bg-accent text-text-secondary rounded-lg hover:bg-accent transition-colors"
                     >
                         Close
                     </button>
@@ -227,30 +199,30 @@ function ConfirmDialog({ title, message, confirmLabel, confirmColor, onConfirm, 
     onCancel: () => void;
 }) {
     return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm" onClick={onCancel}>
-            <div className="bg-white rounded-xl border border-gray-200 shadow-2xl w-full max-w-sm animate-in p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-[var(--overlay)] backdrop-blur-sm" onClick={onCancel}>
+            <div className="av-panel shadow-2xl w-full max-w-sm animate-in p-6" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center gap-3 mb-4">
-                    <div className={`w-10 h-10 rounded-xl ${confirmColor === "red" ? "bg-rose-100" : "bg-violet-100"} flex items-center justify-center`}>
+                    <div className={`w-10 h-10 rounded-xl ${confirmColor === "red" ? "bg-danger-soft" : "bg-info-soft"} flex items-center justify-center`}>
                         {confirmColor === "red"
-                            ? <Trash2 className="w-5 h-5 text-rose-500" />
-                            : <RotateCcw className="w-5 h-5 text-violet-500" />
+                            ? <Trash2 className="w-5 h-5 text-danger-text" />
+                            : <RotateCcw className="w-5 h-5 text-info-text" />
                         }
                     </div>
                     <div>
-                        <h3 className="font-semibold text-gray-900 text-sm">{title}</h3>
-                        <p className="text-xs text-gray-400 mt-0.5">{message}</p>
+                        <h3 className="font-semibold text-foreground text-sm">{title}</h3>
+                        <p className="text-xs text-muted-foreground mt-0.5">{message}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2 justify-end">
                     <button
                         onClick={onCancel}
-                        className="px-4 py-2 text-sm font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                        className="px-4 py-2 text-sm font-medium bg-accent text-text-secondary rounded-lg hover:bg-accent transition-colors"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={onConfirm}
-                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors text-white ${confirmColor === "red" ? "bg-rose-500 hover:bg-rose-600" : "bg-violet-500 hover:bg-violet-600"
+                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors text-white ${confirmColor === "red" ? "bg-danger hover:bg-danger" : "bg-info hover:bg-info"
                             }`}
                     >
                         {confirmLabel}
@@ -401,48 +373,36 @@ export function PaymentQueuePage() {
     const activeFilterCount = [filters.status, filters.billRefNumber, filters.startDate, filters.endDate].filter(Boolean).length;
 
     return (
-        <div className="min-h-screen bg-gray-50/60 font-sans">
-            <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
-        * { font-family: 'DM Sans', sans-serif; }
-        .font-mono-custom { font-family: 'DM Mono', monospace; }
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(8px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        .animate-in { animation: fadeInUp 0.3s ease both; }
-        @keyframes shimmer { to { background-position: -200% 0; } }
-        .skeleton { background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 6px; }
-      `}</style>
+        <div className="min-h-full">
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
                 {/* ── Page Header ── */}
                 <div className="flex items-start justify-between animate-in">
                     <div>
-                        <p className="text-xs font-semibold uppercase tracking-widest text-blue-500 mb-1">Operations</p>
-                        <h1 className="text-2xl font-bold text-gray-900 leading-tight">Payment Queue</h1>
-                        <p className="text-sm text-gray-400 mt-0.5">{today}</p>
+                        <p className="av-label text-[10.5px] text-accent-text mb-1">Operations</p>
+                        <h1 className="av-display text-[28px] leading-tight font-bold tracking-[-0.03em] text-foreground sm:text-[32px]">Payment Queue<span className="text-signal">.</span></h1>
+                        <p className="text-sm text-muted-foreground mt-0.5">{today}</p>
                     </div>
                     <div className="flex items-center gap-2">
                         {/* Auto-refresh Toggle */}
                         <button
                             onClick={() => setAutoRefresh(!autoRefresh)}
-                            className={`flex items-center gap-2 px-3 py-1.5 border rounded-full shadow-sm text-xs font-medium transition-colors ${autoRefresh
-                                ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-                                : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
+                            className={`flex items-center gap-2 px-3 py-1.5 border rounded-md shadow-sm text-xs font-medium transition-colors ${autoRefresh
+                                ? "bg-ok-soft border-ok-edge text-ok-text"
+                                : "bg-card border-border text-text-secondary hover:bg-muted"
                                 }`}
                         >
                             <span className="relative flex h-2 w-2">
-                                {autoRefresh && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>}
-                                <span className={`relative inline-flex rounded-full h-2 w-2 ${autoRefresh ? "bg-emerald-500" : "bg-gray-300"}`}></span>
+                                {autoRefresh && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-ok opacity-75"></span>}
+                                <span className={`relative inline-flex rounded-full h-2 w-2 ${autoRefresh ? "bg-ok" : "bg-border-strong"}`}></span>
                             </span>
                             {autoRefresh ? "Live" : "Paused"}
                         </button>
                         {/* Manual Refresh */}
                         <button
                             onClick={refreshAll}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-full shadow-sm text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-card border border-border rounded-md shadow-sm text-xs font-medium text-text-secondary hover:bg-muted transition-colors"
                         >
                             <RefreshCw className="w-3 h-3" />
                             Refresh
@@ -453,14 +413,14 @@ export function PaymentQueuePage() {
                 {/* ── Stats Cards ── */}
                 <div>
                     <div className="flex items-center gap-2 mb-3">
-                        <span className="text-xs font-semibold uppercase tracking-widest text-gray-400">Queue Status</span>
-                        <span className="flex-1 h-px bg-gray-200" />
-                        <span className="text-xs text-gray-400">Real-time</span>
+                        <span className="av-label text-[10.5px] text-muted-foreground">Queue Status</span>
+                        <span className="flex-1 h-px bg-accent" />
+                        <span className="text-xs text-muted-foreground">Real-time</span>
                     </div>
                     {isLoadingStats ? (
                         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
                             {[...Array(5)].map((_, i) => (
-                                <div key={i} className="rounded-xl border border-gray-100 bg-white p-5 space-y-3">
+                                <div key={i} className="av-panel p-5 space-y-3">
                                     <div className="skeleton h-3 w-24" />
                                     <div className="skeleton h-7 w-16" />
                                     <div className="skeleton h-4 w-20" />
@@ -472,7 +432,7 @@ export function PaymentQueuePage() {
                             <StatCard
                                 label="Pending"
                                 value={fmtNum(stats?.counts?.pending || 0)}
-                                sublabel="Awaiting processing"
+                                sub="Awaiting processing"
                                 icon={Clock}
                                 color="amber"
                                 delay={0}
@@ -480,7 +440,7 @@ export function PaymentQueuePage() {
                             <StatCard
                                 label="Processing"
                                 value={fmtNum(stats?.counts?.processing || 0)}
-                                sublabel="Currently active"
+                                sub="Currently active"
                                 icon={Loader2}
                                 color="blue"
                                 delay={60}
@@ -488,7 +448,7 @@ export function PaymentQueuePage() {
                             <StatCard
                                 label="Completed Today"
                                 value={fmtNum(stats?.totalToday || 0)}
-                                sublabel={`Avg: ${fmtDuration(stats?.avgProcessingTimeMs)}`}
+                                sub={`Avg: ${fmtDuration(stats?.avgProcessingTimeMs)}`}
                                 icon={CheckCircle2}
                                 color="green"
                                 delay={120}
@@ -496,7 +456,7 @@ export function PaymentQueuePage() {
                             <StatCard
                                 label="Failed"
                                 value={fmtNum(stats?.counts?.failed || 0)}
-                                sublabel="Require attention"
+                                sub="Require attention"
                                 icon={XCircle}
                                 color="red"
                                 delay={180}
@@ -504,7 +464,7 @@ export function PaymentQueuePage() {
                             <StatCard
                                 label="Retry Wait"
                                 value={fmtNum(stats?.counts?.retry_wait || 0)}
-                                sublabel={stats?.oldestPending ? `Oldest: ${timeAgo(stats.oldestPending.createdAt)}` : "None pending"}
+                                sub={stats?.oldestPending ? `Oldest: ${timeAgo(stats.oldestPending.createdAt)}` : "None pending"}
                                 icon={RotateCcw}
                                 color="violet"
                                 delay={240}
@@ -514,18 +474,18 @@ export function PaymentQueuePage() {
                 </div>
 
                 {/* ── Queue Table ── */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden animate-in" style={{ animationDelay: "300ms" }}>
+                <div className="av-panel overflow-hidden animate-in" style={{ animationDelay: "300ms" }}>
 
                     {/* Section Header  */}
-                    <div className="px-6 py-4 border-b border-gray-100">
-                        <div className="flex items-center justify-between">
+                    <div className="px-6 py-4 border-b border-border">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
                             <div className="flex items-center gap-3">
-                                <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center">
-                                    <ListOrdered className="w-3.5 h-3.5 text-slate-500" />
+                                <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center">
+                                    <ListOrdered className="w-3.5 h-3.5 text-muted-foreground" />
                                 </div>
                                 <div>
-                                    <h2 className="text-sm font-semibold text-gray-900">Queue Items</h2>
-                                    <p className="text-xs text-gray-400">
+                                    <h2 className="text-sm font-semibold text-foreground">Queue Items</h2>
+                                    <p className="text-xs text-muted-foreground">
                                         {fmtNum(pagination.total)} total · page {pagination.page} of {fmtNum(pagination.totalPages || 1)}
                                     </p>
                                 </div>
@@ -533,26 +493,26 @@ export function PaymentQueuePage() {
 
                             <div className="flex items-center gap-2">
                                 <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
                                     <input
                                         type="text"
                                         placeholder="Search queue…"
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all w-48"
+                                        className="pl-9 pr-4 py-2 text-sm border border-border rounded-lg bg-muted focus:outline-none focus:ring-1 focus:ring-ring transition-all w-48"
                                     />
                                 </div>
                                 <button
                                     onClick={() => setFiltersOpen(!filtersOpen)}
                                     className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border rounded-lg transition-colors ${filtersOpen
-                                        ? "bg-blue-50 border-blue-200 text-blue-600"
-                                        : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
+                                        ? "bg-signal-soft border-signal-edge text-accent-text"
+                                        : "bg-card border-border text-text-secondary hover:bg-muted"
                                         }`}
                                 >
                                     <SlidersHorizontal className="w-3.5 h-3.5" />
                                     Filters
                                     {activeFilterCount > 0 && (
-                                        <span className="flex items-center justify-center w-4 h-4 rounded-full bg-blue-500 text-white text-xs font-bold leading-none">
+                                        <span className="flex items-center justify-center w-4 h-4 rounded-full bg-primary text-white text-xs font-bold leading-none">
                                             {activeFilterCount}
                                         </span>
                                     )}
@@ -562,15 +522,15 @@ export function PaymentQueuePage() {
 
                         {/* Filters Panel */}
                         {filtersOpen && (
-                            <div className="mt-4 pt-4 border-t border-gray-100 flex flex-wrap items-end gap-3 animate-in">
+                            <div className="mt-4 pt-4 border-t border-border flex flex-wrap items-end gap-3 animate-in">
                                 {/* Status filter */}
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Status</label>
+                                    <label className="av-label text-[10.5px] text-muted-foreground">Status</label>
                                     <div className="relative">
                                         <select
                                             value={filters.status}
                                             onChange={(e) => handleFilterChange({ status: e.target.value })}
-                                            className="pl-3 pr-8 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all appearance-none"
+                                            className="pl-3 pr-8 py-2 text-sm border border-border rounded-lg bg-muted focus:bg-card focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-signal-edge transition-all appearance-none"
                                         >
                                             <option value="">All statuses</option>
                                             <option value="pending">Pending</option>
@@ -579,44 +539,44 @@ export function PaymentQueuePage() {
                                             <option value="failed">Failed</option>
                                             <option value="retry_wait">Retry Wait</option>
                                         </select>
-                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
                                     </div>
                                 </div>
 
                                 {/* Meter search */}
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Meter Number</label>
+                                    <label className="av-label text-[10.5px] text-muted-foreground">Meter Number</label>
                                     <input
                                         type="text"
                                         placeholder="e.g. 37000..."
                                         value={filters.billRefNumber}
                                         onChange={(e) => handleFilterChange({ billRefNumber: e.target.value })}
-                                        className="px-3 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all w-36"
+                                        className="px-3 py-2 text-sm border border-border rounded-lg bg-muted focus:bg-card focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-signal-edge transition-all w-36"
                                     />
                                 </div>
 
                                 {/* Date range */}
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Start Date</label>
+                                    <label className="av-label text-[10.5px] text-muted-foreground">Start Date</label>
                                     <div className="relative">
-                                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
                                         <input
                                             type="date"
                                             value={filters.startDate}
                                             onChange={(e) => handleFilterChange({ startDate: e.target.value })}
-                                            className="pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+                                            className="pl-9 pr-3 py-2 text-sm border border-border rounded-lg bg-muted focus:bg-card focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-signal-edge transition-all"
                                         />
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">End Date</label>
+                                    <label className="av-label text-[10.5px] text-muted-foreground">End Date</label>
                                     <div className="relative">
-                                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
                                         <input
                                             type="date"
                                             value={filters.endDate}
                                             onChange={(e) => handleFilterChange({ endDate: e.target.value })}
-                                            className="pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+                                            className="pl-9 pr-3 py-2 text-sm border border-border rounded-lg bg-muted focus:bg-card focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-signal-edge transition-all"
                                         />
                                     </div>
                                 </div>
@@ -625,7 +585,7 @@ export function PaymentQueuePage() {
                                 {activeFilterCount > 0 && (
                                     <button
                                         onClick={() => handleFilterChange({ status: "", billRefNumber: "", startDate: "", endDate: "" })}
-                                        className="px-3 py-2 text-xs font-medium text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                                        className="px-3 py-2 text-xs font-medium text-muted-foreground hover:text-text-secondary border border-border rounded-lg hover:bg-muted transition-colors"
                                     >
                                         Clear all
                                     </button>
@@ -647,50 +607,50 @@ export function PaymentQueuePage() {
                         </div>
                     ) : filtered.length === 0 ? (
                         <div className="py-16 text-center">
-                            <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mx-auto mb-3">
-                                <ListOrdered className="w-5 h-5 text-gray-400" />
+                            <div className="w-12 h-12 rounded-xl bg-accent flex items-center justify-center mx-auto mb-3">
+                                <ListOrdered className="w-5 h-5 text-muted-foreground" />
                             </div>
-                            <p className="text-sm font-medium text-gray-700">No queue items found</p>
-                            <p className="text-xs text-gray-400 mt-1">Try adjusting your search or filters</p>
+                            <p className="text-sm font-medium text-text-secondary">No queue items found</p>
+                            <p className="text-xs text-muted-foreground mt-1">Try adjusting your search or filters</p>
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm">
                                 <thead>
-                                    <tr className="bg-gray-50 border-b border-gray-100">
+                                    <tr className="border-b border-border">
                                         {["Transaction ID", "Meter", "Customer", "Amount", "Source", "Status", "Retries", "Created", "Actions"].map((h) => (
-                                            <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            <th key={h} className="av-th px-5 py-3 text-left">
                                                 {h}
                                             </th>
                                         ))}
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-50">
-                                    {filtered.map((item: QueueItem, idx: number) => {
+                                <tbody className="divide-y divide-border">
+                                    {filtered.map((item: QueueItem) => {
                                         const canRetry = ["failed", "retry_wait"].includes(item.status);
                                         const canCancel = ["pending", "retry_wait"].includes(item.status);
 
                                         return (
                                             <tr
                                                 key={item.id}
-                                                className={`${idx % 2 === 0 ? "bg-white" : "bg-gray-50/40"} hover:bg-blue-50/30 transition-colors group cursor-pointer`}
+                                                className={`av-row group cursor-pointer`}
                                                 onClick={() => setSelectedItem(item)}
                                             >
                                                 <td className="px-5 py-3.5 whitespace-nowrap">
-                                                    <span className="font-mono-custom text-xs text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded">
+                                                    <span className="font-mono-custom text-xs text-text-secondary bg-accent px-1.5 py-0.5 rounded">
                                                         {item.transId}
                                                     </span>
                                                 </td>
                                                 <td className="px-5 py-3.5 whitespace-nowrap">
-                                                    <span className="text-xs text-gray-600 font-mono-custom">{item.billRefNumber}</span>
+                                                    <span className="text-xs text-text-secondary font-mono-custom">{item.billRefNumber}</span>
                                                 </td>
                                                 <td className="px-5 py-3.5 whitespace-nowrap">
-                                                    <p className="text-sm font-medium text-gray-800">
+                                                    <p className="text-sm font-medium text-foreground">
                                                         {`${item.firstName || ""} ${item.lastName || ""}`.trim() || "—"}
                                                     </p>
                                                 </td>
                                                 <td className="px-5 py-3.5 whitespace-nowrap">
-                                                    <span className="text-sm font-semibold text-gray-900">{fmt(item.transAmount)}</span>
+                                                    <span className="text-sm font-semibold text-foreground">{fmt(item.transAmount)}</span>
                                                 </td>
                                                 <td className="px-5 py-3.5 whitespace-nowrap">
                                                     <SourceBadge source={item.source} />
@@ -700,20 +660,20 @@ export function PaymentQueuePage() {
                                                 </td>
                                                 <td className="px-5 py-3.5 whitespace-nowrap">
                                                     <div className="flex items-center gap-1.5">
-                                                        <span className="text-xs text-gray-600">{item.retryCount}/{item.maxRetries}</span>
+                                                        <span className="text-xs text-text-secondary">{item.retryCount}/{item.maxRetries}</span>
                                                         {item.retryCount > 0 && (
-                                                            <AlertTriangle className="w-3 h-3 text-amber-400" />
+                                                            <AlertTriangle className="w-3 h-3 text-warn-text" />
                                                         )}
                                                     </div>
                                                 </td>
-                                                <td className="px-5 py-3.5 whitespace-nowrap text-xs text-gray-500">
+                                                <td className="px-5 py-3.5 whitespace-nowrap text-xs text-muted-foreground">
                                                     {fmtDate(item.createdAt)}
                                                 </td>
                                                 <td className="px-5 py-3.5 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                                                     <div className="flex items-center gap-1">
                                                         <button
                                                             onClick={() => setSelectedItem(item)}
-                                                            className="flex items-center gap-1 text-xs font-medium text-gray-400 hover:text-blue-600 transition-all p-1 rounded"
+                                                            className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-accent-text transition-all p-1 rounded"
                                                             title="View details"
                                                         >
                                                             <Eye className="w-3.5 h-3.5" />
@@ -722,7 +682,7 @@ export function PaymentQueuePage() {
                                                             <button
                                                                 onClick={() => setConfirmAction({ type: "retry", id: item.id })}
                                                                 disabled={actionLoading === item.id}
-                                                                className="flex items-center gap-1 text-xs font-medium text-violet-400 hover:text-violet-600 transition-all p-1 rounded disabled:opacity-50"
+                                                                className="flex items-center gap-1 text-xs font-medium text-info-text hover:text-info-text transition-all p-1 rounded disabled:opacity-50"
                                                                 title="Retry"
                                                             >
                                                                 <RotateCcw className={`w-3.5 h-3.5 ${actionLoading === item.id ? "animate-spin" : ""}`} />
@@ -732,7 +692,7 @@ export function PaymentQueuePage() {
                                                             <button
                                                                 onClick={() => setConfirmAction({ type: "cancel", id: item.id })}
                                                                 disabled={actionLoading === item.id}
-                                                                className="flex items-center gap-1 text-xs font-medium text-rose-400 hover:text-rose-600 transition-all p-1 rounded disabled:opacity-50"
+                                                                className="flex items-center gap-1 text-xs font-medium text-danger-text hover:text-danger-text transition-all p-1 rounded disabled:opacity-50"
                                                                 title="Cancel"
                                                             >
                                                                 <Trash2 className="w-3.5 h-3.5" />
@@ -749,24 +709,24 @@ export function PaymentQueuePage() {
                     )}
 
                     {/* Pagination */}
-                    <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-                        <p className="text-xs text-gray-400">
+                    <div className="px-6 py-4 border-t border-border flex flex-wrap items-center justify-between gap-3">
+                        <p className="text-xs text-muted-foreground">
                             Showing{" "}
-                            <span className="font-medium text-gray-600">
+                            <span className="font-medium text-text-secondary">
                                 {pagination.total === 0 ? 0 : (pagination.page - 1) * pagination.limit + 1}
                             </span>
                             –
-                            <span className="font-medium text-gray-600">
+                            <span className="font-medium text-text-secondary">
                                 {Math.min(pagination.page * pagination.limit, pagination.total)}
                             </span>
                             {" "}of{" "}
-                            <span className="font-medium text-gray-600">{fmtNum(pagination.total)}</span> items
+                            <span className="font-medium text-text-secondary">{fmtNum(pagination.total)}</span> items
                         </p>
                         <div className="flex items-center gap-1">
                             <button
                                 onClick={() => handlePageChange(pagination.page - 1)}
                                 disabled={!pagination.hasPrevPage}
-                                className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                className="flex items-center gap-1 whitespace-nowrap px-3 py-1.5 text-xs font-medium text-text-secondary border border-border rounded-lg bg-card hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                             >
                                 <ChevronLeft className="w-3.5 h-3.5" />
                                 Prev
@@ -779,8 +739,8 @@ export function PaymentQueuePage() {
                                         key={p}
                                         onClick={() => handlePageChange(p)}
                                         className={`w-7 h-7 text-xs font-medium rounded-lg transition-colors ${pagination.page === p
-                                            ? "bg-blue-600 text-white shadow-sm"
-                                            : "text-gray-600 border border-gray-200 bg-white hover:bg-gray-50"
+                                            ? "bg-primary text-white shadow-sm"
+                                            : "text-text-secondary border border-border bg-card hover:bg-muted"
                                             }`}
                                     >
                                         {p}
@@ -788,13 +748,13 @@ export function PaymentQueuePage() {
                                 );
                             })}
                             {pagination.totalPages > 5 && (
-                                <span className="text-xs text-gray-400 px-1">…</span>
+                                <span className="text-xs text-muted-foreground px-1">…</span>
                             )}
 
                             <button
                                 onClick={() => handlePageChange(pagination.page + 1)}
                                 disabled={!pagination.hasNextPage}
-                                className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                className="flex items-center gap-1 whitespace-nowrap px-3 py-1.5 text-xs font-medium text-text-secondary border border-border rounded-lg bg-card hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                             >
                                 Next
                                 <ChevronRight className="w-3.5 h-3.5" />

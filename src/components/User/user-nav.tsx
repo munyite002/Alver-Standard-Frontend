@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { useNavigate } from "react-router-dom";
 import { LogOut, Settings, User } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -33,15 +33,12 @@ export function UserNav() {
             <DropdownMenuTrigger asChild>
                 <Button
                     variant="ghost"
-                    className="relative h-8 w-8 rounded-full"
+                    aria-label="Account menu"
+                    className="relative h-10 w-10 rounded-lg p-0"
                 >
-                    <Avatar className="h-8 w-8">
-                        <AvatarImage
-                            src="/placeholder.svg?height=32&width=32"
-                            alt="User"
-                        />
-                        <AvatarFallback>
-                            <User className="h-4 w-4" />
+                    <Avatar className="h-8 w-8 rounded-lg">
+                        <AvatarFallback className="rounded-lg bg-accent text-xs font-semibold text-accent-foreground">
+                            {(user?.name || user?.email || "").charAt(0).toUpperCase() || <User className="h-4 w-4" />}
                         </AvatarFallback>
                     </Avatar>
                 </Button>

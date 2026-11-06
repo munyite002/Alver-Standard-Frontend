@@ -1,11 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import {
-    TrendingUp, Zap, CreditCard, Users, ArrowUpRight,
-    ArrowDownRight, Eye, ChevronLeft, ChevronRight,
-    Calendar, SlidersHorizontal, Search, ArrowUpDown,
-    CheckCircle2, Clock, XCircle, Receipt, ChevronDown,
-    Minus, RefreshCw, MailCheck
+    ArrowUpRight, ArrowDownRight, ChevronLeft, ChevronRight,
+    SlidersHorizontal, Receipt, MailCheck
 } from "lucide-react";
 import { useOutletContext } from "react-router-dom";
 import useAxiosWithAuth from "@/../utils/axiosInterceptor";
@@ -15,7 +12,10 @@ import {
 } from "@/../api/transactions.api";
 import { resendSms } from "@/../api/users.api";
 import type { Payment } from "@/lib/types";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
+import { Toaster } from "@/components/ui/toaster";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const fmt = (n: number) => new Intl.NumberFormat("en-KE", { style: "currency", currency: "KES", maximumFractionDigits: 0 }).format(n);
@@ -66,63 +66,52 @@ const getMonthDates = () => {
     };
 };
 
-// ─── Stat Card ────────────────────────────────────────────────────────────────
-function StatCard({ label, value, change, icon: Icon, color, prefix = "", suffix = "", delay = 0 }: any) {
+// ─── Change against last month ────────────────────────────────────────────────
+function Delta({ change }: { change: any }) {
+    if (change === undefined || change === null) return null;
     const isPositive = change >= 0;
-    const colors: any = {
-        blue: { bg: "bg-blue-50", border: "border-blue-100", icon: "text-blue-500", iconBg: "bg-blue-100", text: "text-blue-700" },
-        green: { bg: "bg-emerald-50", border: "border-emerald-100", icon: "text-emerald-500", iconBg: "bg-emerald-100", text: "text-emerald-700" },
-        amber: { bg: "bg-amber-50", border: "border-amber-100", icon: "text-amber-500", iconBg: "bg-amber-100", text: "text-amber-700" },
-        slate: { bg: "bg-slate-50", border: "border-slate-100", icon: "text-slate-500", iconBg: "bg-slate-100", text: "text-slate-700" },
-    };
-    const c = colors[color] || colors.blue;
-
     return (
-        <div
-            className={`rounded-xl border ${c.border} ${c.bg} p-5 flex flex-col gap-4 animate-in`}
-            style={{ animationDelay: `${delay}ms` }}
-        >
-            <div className="flex items-center justify-between">
-                <span className={`text-xs font-semibold uppercase tracking-widest ${c.text} opacity-60`}>{label}</span>
-                <div className={`w-8 h-8 rounded-lg ${c.iconBg} flex items-center justify-center`}>
-                    <Icon className={`w-4 h-4 ${c.icon}`} />
-                </div>
-            </div>
+        <span className={`av-num inline-flex items-center gap-1 text-xs font-medium ${isPositive ? "text-ok-text" : "text-danger-text"}`}>
+            {isPositive ? <ArrowUpRight className="h-3.5 w-3.5" aria-hidden /> : <ArrowDownRight className="h-3.5 w-3.5" aria-hidden />}
+            {Math.abs(change)}%
+            <span className="font-normal text-muted-foreground">vs last month</span>
+        </span>
+    );
+}
 
-            <div>
-                <p className="text-2xl font-bold text-gray-900 leading-none">
-                    {prefix}{value}{suffix}
-                </p>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-                <div className={`flex items-center gap-0.5 text-xs font-semibold px-1.5 py-0.5 rounded-full
-          ${isPositive ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-600"}`}
-                >
-                    {isPositive
-                        ? <ArrowUpRight className="w-3 h-3" />
-                        : <ArrowDownRight className="w-3 h-3" />
-                    }
-                    {Math.abs(change)}%
+// ─── A supporting figure in the metrics strip ─────────────────────────────────
+function Metric({ label, value, change, loading }: { label: string; value: string; change?: any; loading: boolean }) {
+    return (
+        <div className="flex min-w-0 flex-col justify-between gap-3 p-5">
+            <p className="av-label text-[10.5px] text-muted-foreground">{label}</p>
+            {loading ? (
+                <div className="space-y-2.5">
+                    <div className="skeleton h-7 w-28" />
+                    <div className="skeleton h-3.5 w-24" />
                 </div>
-                <span className="text-xs text-gray-400">vs last month</span>
-            </div>
+            ) : (
+                <div className="space-y-2">
+                    <p className="av-display av-num text-xl font-semibold sm:text-2xl tracking-[-0.02em] text-foreground">{value}</p>
+                    <div className="min-h-4"><Delta change={change} /></div>
+                </div>
+            )}
         </div>
     );
 }
+
 // ─── Status Badge ─────────────────────────────────────────────────────────────
 function StatusBadge({ status }: { status?: string }) {
     const map: any = {
-        completed: { icon: CheckCircle2, label: "Completed", cls: "bg-emerald-50 text-emerald-700 border-emerald-100" },
-        pending: { icon: Clock, label: "Pending", cls: "bg-amber-50  text-amber-700  border-amber-100" },
-        failed: { icon: XCircle, label: "Failed", cls: "bg-rose-50   text-rose-600   border-rose-100" },
+        completed: { label: "Completed", dot: "bg-ok", text: "text-ok-text" },
+        pending: { label: "Pending", dot: "bg-warn", text: "text-warn-text" },
+        failed: { label: "Failed", dot: "bg-danger", text: "text-danger-text" },
     };
     // Default to completed for real data unless status is specified
     const key = status || "completed";
-    const { icon: Icon, label, cls } = map[key] || map.completed;
+    const { label, dot, text } = map[key] || map.completed;
     return (
-        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${cls}`}>
-            <Icon className="w-3 h-3" />
+        <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${text}`}>
+            <span className={`h-1.5 w-1.5 rounded-full ${dot}`} aria-hidden />
             {label}
         </span>
     );
@@ -147,10 +136,10 @@ function TransactionModal({ tx, onClose }: { tx: Payment | null; onClose: () => 
         if (!s) return "—";
         const date = new Date(s);
         if (isNaN(date.getTime())) return "—";
-        
+
         // Add 2 hours to the API time
         const adjustedDate = new Date(date.getTime() + (2 * 60 * 60 * 1000));
-        
+
         return new Intl.DateTimeFormat("en-GB", {
             day: "2-digit",
             month: "short",
@@ -179,88 +168,53 @@ function TransactionModal({ tx, onClose }: { tx: Payment | null; onClose: () => 
     };
 
     const fields = [
-        ["Transaction ID", tx.transId],
-        ["Meter Number", tx.billRefNumber],
-        ["Reference", tx.billRefNumber],
-        ["Customer", `${tx.firstName || ''} ${tx.lastName || ''}`.trim() || '—'],
-        ["Token", `${tx.token || 'N/A'}`],
-        ["Amount", fmt(tx.transAmount)],
-        ["Units", `${tx.units} kWh`],
-        ["Date & Time", fmtDate(tx.transTime)],
+        ["Meter Number", tx.billRefNumber, true],
+        ["Customer", `${tx.firstName || ''} ${tx.lastName || ''}`.trim() || '—', false],
+        ["Amount", fmt(tx.transAmount), true],
+        ["Units", `${tx.units} kWh`, true],
+        ["Date & Time", fmtDate(tx.transTime), true],
     ];
 
-    const StatusBadge = () => {
-        const status = tx.status || "completed";
-        const statusConfig = {
-            completed: { bg: "bg-green-50", text: "text-green-700", label: "Completed" },
-            pending: { bg: "bg-yellow-50", text: "text-yellow-700", label: "Pending" },
-            failed: { bg: "bg-red-50", text: "text-red-700", label: "Failed" }
-        };
-        const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.completed;
-        
-        return (
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
-                {config.label}
-            </span>
-        );
-    };
-
     return (
-        <>
-            <Toaster richColors position="top-right" />
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm" onClick={onClose}>
-                <div
-                    className="bg-white rounded-2xl border border-gray-200 shadow-2xl w-full max-w-md animate-in"
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
-                        <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-md shadow-blue-200">
-                                <Receipt className="w-4 h-4 text-white" />
-                            </div>
-                            <div>
-                                <h3 className="font-semibold text-gray-900 text-sm leading-tight">Transaction Detail</h3>
-                                <p className="text-xs text-gray-400 font-mono-custom">{tx.transId}</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <StatusBadge />
-                            <button onClick={onClose} className="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
-                                <Minus className="w-3.5 h-3.5 text-gray-500" />
-                            </button>
-                        </div>
-                    </div>
+        <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
+            <DialogContent className="gap-0 overflow-hidden rounded-xl p-0 sm:max-w-md">
+                <DialogHeader className="border-b border-border px-6 py-5 pr-12 text-left">
+                    <DialogTitle className="av-display text-lg font-semibold tracking-[-0.01em]">Transaction detail</DialogTitle>
+                    <DialogDescription className="font-mono text-xs break-all">{tx.transId}</DialogDescription>
+                </DialogHeader>
 
-                    <div className="p-6 grid grid-cols-2 gap-x-6 gap-y-4">
-                        {fields.map(([label, val]: any) => (
-                            <div key={label}>
-                                <p className="text-xs text-gray-400 uppercase tracking-wide font-semibold mb-0.5">{label}</p>
-                                <p className="text-sm font-medium text-gray-800 break-all">{val}</p>
+                <div className="space-y-5 px-6 py-5">
+                    <div className="rounded-lg border border-border bg-muted p-4">
+                        <p className="av-label text-[10.5px] text-muted-foreground">Token</p>
+                        <p className="av-num mt-1.5 font-mono text-[15px] font-medium break-all text-foreground">{tx.token || 'N/A'}</p>
+                    </div>
+                    <dl className="grid grid-cols-2 gap-x-6 gap-y-4">
+                        {fields.map(([label, val, mono]: any) => (
+                            <div key={label} className="min-w-0">
+                                <dt className="av-label text-[10.5px] text-muted-foreground">{label}</dt>
+                                <dd className={`mt-1 text-sm font-medium break-words text-foreground ${mono ? "av-num font-mono text-[13px]" : ""}`}>{val}</dd>
                             </div>
                         ))}
-                    </div>
-
-                    <div className="px-6 py-4 border-t border-gray-100 flex justify-between gap-3">
-                        <button
-                            onClick={handleResendSms}
-                            disabled={isSubmitting}
-                            className="px-4 py-2 text-sm font-medium bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            <MailCheck className="w-4 h-4" />
-                            {isSubmitting ? "Sending..." : "Re-Send SMS"}
-                        </button>
-                        <button
-                            onClick={onClose}
-                            className="px-4 py-2 text-sm font-medium bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-                        >
-                            Close
-                        </button>
-                    </div>
+                        <div>
+                            <dt className="av-label text-[10.5px] text-muted-foreground">Status</dt>
+                            <dd className="mt-1"><StatusBadge status={(tx as any).status} /></dd>
+                        </div>
+                    </dl>
                 </div>
-            </div>
-        </>
+
+                <DialogFooter className="flex-row justify-between gap-3 border-t border-border px-6 py-4 sm:justify-between">
+                    <Button variant="outline" onClick={handleResendSms} disabled={isSubmitting}>
+                        <MailCheck aria-hidden />
+                        {isSubmitting ? "Sending..." : "Re-Send SMS"}
+                    </Button>
+                    <Button variant="ghost" onClick={onClose}>Close</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     );
 }
+
+const FIELD = "av-focus h-10 rounded-lg border border-input bg-card px-3 text-sm text-foreground transition-[border-color,box-shadow] outline-none focus:border-ring focus:ring-[3px] focus:ring-ring/15";
 
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 export function DashboardPage() {
@@ -346,329 +300,208 @@ export function DashboardPage() {
     const pagination = transactionsData.pagination;
     const today = new Date().toLocaleDateString("en-KE", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
 
+    const hasDates = filters.startDate || filters.endDate;
+
     return (
-        <div className="min-h-screen bg-gray-50/60 font-sans">
-            <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
-        * { font-family: 'DM Sans', sans-serif; }
-        .font-mono-custom { font-family: 'DM Mono', monospace; }
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(8px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        .animate-in { animation: fadeInUp 0.3s ease both; }
-        @keyframes shimmer { to { background-position: -200% 0; } }
-        .skeleton { background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 6px; }
-      `}</style>
+        <div className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+            <Toaster richColors position="top-right" />
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+            {/* ── Page Header ── */}
+            <header className="animate-in">
+                <h1 className="av-display text-[28px] leading-tight font-bold tracking-[-0.03em] text-foreground sm:text-[32px]">
+                    Dashboard<span className="text-signal">.</span>
+                </h1>
+                <p className="mt-1 text-sm text-text-secondary">{today}</p>
+            </header>
 
-                {/* ── Page Header ── */}
-                <div className="flex items-start justify-between animate-in">
-                    <div>
-                        <p className="text-xs font-semibold uppercase tracking-widest text-blue-500 mb-1">Overview</p>
-                        <h1 className="text-2xl font-bold text-gray-900 leading-tight">Dashboard</h1>
-                        <p className="text-sm text-gray-400 mt-0.5">{today}</p>
-                    </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-full shadow-sm">
-                        <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                        </span>
-                        <span className="text-xs font-medium text-gray-600">Live</span>
-                    </div>
-                </div>
-
-                {/* ── KPI Hero Section ── */}
-                <div>
-                    <div className="flex items-center gap-2 mb-3">
-                        <span className="text-xs font-semibold uppercase tracking-widest text-gray-400">Key Metrics</span>
-                        <span className="flex-1 h-px bg-gray-200" />
-                        <span className="text-xs text-gray-400">Month to date</span>
-                    </div>
+            {/* ── Key figures, month to date. Revenue leads: it is the number this page exists for. ── */}
+            <section aria-label="Key metrics, month to date" className="av-panel animate-in grid overflow-hidden lg:grid-cols-[1.5fr_1fr_1fr_1fr]" style={{ animationDelay: "60ms" }}>
+                <div className="relative flex flex-col justify-between gap-5 overflow-hidden border-b border-border p-6 lg:border-r lg:border-b-0">
+                    <div className="av-hero-glow" aria-hidden />
+                    <p className="av-label relative text-[10.5px] text-muted-foreground">Gross revenue, month to date</p>
                     {isLoadingMetrics ? (
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                            {[...Array(4)].map((_, i) => (
-                                <div key={i} className="rounded-xl border border-gray-100 bg-white p-5 space-y-3">
-                                    <div className="skeleton h-3 w-24" />
-                                    <div className="skeleton h-7 w-32" />
-                                    <div className="skeleton h-4 w-20" />
-                                </div>
-                            ))}
+                        <div className="relative space-y-3">
+                            <div className="skeleton h-11 w-52" />
+                            <div className="skeleton h-3.5 w-28" />
                         </div>
                     ) : (
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                            <StatCard
-                                label="Gross Revenue"
-                                value={fmt(metrics?.totalRevenue?.amount || 0)}
-                                change={metrics?.totalRevenue?.percentageChange || 0}
-                                icon={TrendingUp}
-                                color="blue"
-                                delay={0}
-                            />
-                            <StatCard
-                                label="Transactions"
-                                value={fmtNum(metrics?.totalPayments?.count || 0)}
-                                change={metrics?.totalPayments?.percentageChange || 0}
-                                icon={CreditCard}
-                                color="green"
-                                delay={60}
-                            />
-                            <StatCard
-                                label="Units Dispensed"
-                                value={fmtNum(Math.round(metrics?.totalUnits || 0))}
-                                change={0}
-                                icon={Zap}
-                                color="amber"
-                                delay={120}
-                                suffix=" kWh"
-                            />
-                            <StatCard
-                                label="Average Amount"
-                                value={fmt(metrics?.averageAmount?.amount)}
-                                change={metrics?.averageAmount?.percentageChange}
-                                icon={CreditCard}
-                                color="slate"
-                                delay={180}
-                            />
+                        <div className="relative space-y-2">
+                            <p className="av-display av-num text-[clamp(32px,3.4vw,44px)] leading-none font-bold tracking-[-0.03em] text-foreground">
+                                {fmt(metrics?.totalRevenue?.amount || 0)}
+                            </p>
+                            <Delta change={metrics?.totalRevenue?.percentageChange || 0} />
+                        </div>
+                    )}
+                </div>
+                <div className="grid grid-cols-2 divide-border max-lg:divide-y sm:grid-cols-3 sm:divide-x lg:col-span-3 max-sm:[&>*:last-child]:col-span-2">
+                    <Metric
+                        label="Transactions"
+                        value={fmtNum(metrics?.totalPayments?.count || 0)}
+                        change={metrics?.totalPayments?.percentageChange || 0}
+                        loading={isLoadingMetrics}
+                    />
+                    <Metric
+                        label="Units dispensed"
+                        value={`${fmtNum(Math.round(metrics?.totalUnits || 0))} kWh`}
+                        loading={isLoadingMetrics}
+                    />
+                    <Metric
+                        label="Average amount"
+                        value={fmt(metrics?.averageAmount?.amount || 0)}
+                        change={metrics?.averageAmount?.percentageChange}
+                        loading={isLoadingMetrics}
+                    />
+                </div>
+            </section>
+
+            {/* ── Transactions ── */}
+            <section aria-labelledby="transactions-heading" className="av-panel animate-in overflow-hidden" style={{ animationDelay: "120ms" }}>
+                <div className="border-b border-border px-5 py-4 sm:px-6">
+                    <div className="flex items-center justify-between gap-4">
+                        <div className="min-w-0">
+                            <h2 id="transactions-heading" className="av-display text-base font-semibold tracking-[-0.01em] text-foreground">Recent transactions</h2>
+                            <p className="av-num mt-0.5 text-xs text-muted-foreground">
+                                {fmtNum(pagination.total)} total, page {pagination.page} of {fmtNum(pagination.totalPages || 1)}
+                            </p>
+                        </div>
+                        <Button
+                            variant="outline"
+                            aria-expanded={filtersOpen}
+                            onClick={() => setFiltersOpen(!filtersOpen)}
+                            className={filtersOpen ? "border-signal-edge text-accent-text" : ""}
+                        >
+                            <SlidersHorizontal aria-hidden />
+                            Filters
+                            {hasDates && <span className="h-1.5 w-1.5 rounded-full bg-signal" aria-label="Date filter applied" />}
+                        </Button>
+                    </div>
+
+                    {filtersOpen && (
+                        <div className="animate-in mt-4 flex flex-wrap items-end gap-3 border-t border-border pt-4">
+                            <div className="flex flex-col gap-1.5">
+                                <label htmlFor="tx-start" className="av-label text-[10.5px] text-text-secondary">Start date</label>
+                                <input id="tx-start" type="date" value={filters.startDate} onChange={(e) => handleFilterChange({ startDate: e.target.value })} className={FIELD} />
+                            </div>
+                            <div className="flex flex-col gap-1.5">
+                                <label htmlFor="tx-end" className="av-label text-[10.5px] text-text-secondary">End date</label>
+                                <input id="tx-end" type="date" value={filters.endDate} onChange={(e) => handleFilterChange({ endDate: e.target.value })} className={FIELD} />
+                            </div>
+                            <div className="flex flex-col gap-1.5">
+                                <label htmlFor="tx-sort" className="av-label text-[10.5px] text-text-secondary">Sort</label>
+                                <select
+                                    id="tx-sort"
+                                    value={filters.sort === "earliest" ? "oldest" : filters.sort === "highest" ? "amount_desc" : filters.sort === "lowest" ? "amount_asc" : "latest"}
+                                    onChange={(e) => handleSortChange(e.target.value)}
+                                    className={FIELD}
+                                >
+                                    <option value="latest">Latest first</option>
+                                    <option value="oldest">Oldest first</option>
+                                    <option value="amount_desc">Amount: high to low</option>
+                                    <option value="amount_asc">Amount: low to high</option>
+                                </select>
+                            </div>
+                            {hasDates && (
+                                <Button variant="ghost" onClick={() => handleFilterChange({ startDate: "", endDate: "" })}>
+                                    Clear dates
+                                </Button>
+                            )}
                         </div>
                     )}
                 </div>
 
-                {/* ── Transactions Section ── */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden animate-in" style={{ animationDelay: "240ms" }}>
-
-                    {/* Section Header */}
-                    <div className="px-6 py-4 border-b border-gray-100">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center">
-                                    <Receipt className="w-3.5 h-3.5 text-slate-500" />
-                                </div>
-                                <div>
-                                    <h2 className="text-sm font-semibold text-gray-900">Recent Transactions</h2>
-                                    <p className="text-xs text-gray-400">
-                                        {fmtNum(pagination.total)} total · page {pagination.page} of {fmtNum(pagination.totalPages || 1)}
-                                    </p>
-                                </div>
+                {isLoadingTransactions ? (
+                    <div className="space-y-4 p-6" aria-label="Loading transactions">
+                        {[...Array(6)].map((_, i) => (
+                            <div key={i} className="flex gap-4">
+                                <div className="skeleton h-4 flex-1" style={{ animationDelay: `${i * 80}ms` }} />
+                                <div className="skeleton h-4 w-24" style={{ animationDelay: `${i * 80 + 20}ms` }} />
+                                <div className="skeleton h-4 w-20" style={{ animationDelay: `${i * 80 + 40}ms` }} />
                             </div>
-
-                            <div className="flex items-center gap-2">
-                                <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
-                                    <input
-                                        type="text"
-                                        placeholder="Search transactions…"
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all w-52 cursor-not-allowed"
-                                        title="Use global search in header"
-                                    />
-                                </div>
-                                <button
-                                    onClick={() => setFiltersOpen(!filtersOpen)}
-                                    className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border rounded-lg transition-colors ${filtersOpen
-                                            ? "bg-blue-50 border-blue-200 text-blue-600"
-                                            : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
-                                        }`}
-                                >
-                                    <SlidersHorizontal className="w-3.5 h-3.5" />
-                                    Filters
-                                    {(filters.startDate || filters.endDate) && (
-                                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                                    )}
-                                </button>
-                            </div>
-                        </div>
-
-                        {filtersOpen && (
-                            <div className="mt-4 pt-4 border-t border-gray-100 flex flex-wrap items-end gap-3 animate-in">
-                                <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Start Date</label>
-                                    <div className="relative">
-                                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
-                                        <input
-                                            type="date"
-                                            value={filters.startDate}
-                                            onChange={(e) => handleFilterChange({ startDate: e.target.value })}
-                                            className="pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">End Date</label>
-                                    <div className="relative">
-                                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
-                                        <input
-                                            type="date"
-                                            value={filters.endDate}
-                                            onChange={(e) => handleFilterChange({ endDate: e.target.value })}
-                                            className="pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
-                                        />
-                                    </div>
-                                </div>
-                                <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Sort</label>
-                                    <div className="relative">
-                                        <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
-                                        <select
-                                            value={filters.sort === "earliest" ? "oldest" : filters.sort === "highest" ? "amount_desc" : filters.sort === "lowest" ? "amount_asc" : "latest"}
-                                            onChange={(e) => handleSortChange(e.target.value)}
-                                            className="pl-9 pr-8 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all appearance-none"
-                                        >
-                                            <option value="latest">Latest first</option>
-                                            <option value="oldest">Oldest first</option>
-                                            <option value="amount_desc">Amount: high → low</option>
-                                            <option value="amount_asc">Amount: low → high</option>
-                                        </select>
-                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
-                                    </div>
-                                </div>
-                                {(filters.startDate || filters.endDate) && (
-                                    <button
-                                        onClick={() => handleFilterChange({ startDate: "", endDate: "" })}
-                                        className="px-3 py-2 text-xs font-medium text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                                    >
-                                        Clear dates
-                                    </button>
-                                )}
-                            </div>
+                        ))}
+                    </div>
+                ) : filtered.length === 0 ? (
+                    <div className="px-6 py-16 text-center">
+                        <Receipt className="mx-auto mb-3 h-6 w-6 text-muted-foreground" aria-hidden />
+                        <p className="text-sm font-medium text-foreground">
+                            {searchQuery ? `No transactions match "${searchQuery}"` : "No transactions found"}
+                        </p>
+                        {searchQuery ? (
+                            <Button variant="link" className="mt-1" onClick={() => setSearchQuery("")}>Clear search</Button>
+                        ) : (
+                            <p className="mt-1 text-xs text-muted-foreground">Try a wider date range in Filters.</p>
                         )}
                     </div>
-
-                    {/* Table */}
-                    {isLoadingTransactions ? (
-                        <div className="p-6 space-y-3">
-                            {[...Array(6)].map((_, i) => (
-                                <div key={i} className="flex gap-4">
-                                    <div className="skeleton h-4 flex-1" style={{ animationDelay: `${i * 80}ms` }} />
-                                    <div className="skeleton h-4 w-24" style={{ animationDelay: `${i * 80 + 20}ms` }} />
-                                    <div className="skeleton h-4 w-20" style={{ animationDelay: `${i * 80 + 40}ms` }} />
-                                </div>
-                            ))}
-                        </div>
-                    ) : filtered.length === 0 ? (
-                        <div className="py-16 text-center">
-                            <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mx-auto mb-3">
-                                <Receipt className="w-5 h-5 text-gray-400" />
-                            </div>
-                            <p className="text-sm font-medium text-gray-700">No transactions found</p>
-                            <p className="text-xs text-gray-400 mt-1">Try adjusting your search or filters</p>
-                        </div>
-                    ) : (
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-sm">
-                                <thead>
-                                    <tr className="bg-gray-50 border-b border-gray-100">
-                                        {["Transaction ID", "Customer", "Meter", "Date & Time", "Units", "Amount", "Status", "Actions"].map((h) => (
-                                            <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">
-                                                {h}
-                                            </th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-50">
-                                    {filtered.map((tx: Payment, idx: number) => (
-                                        <tr
-                                            key={tx.id}
-                                            className={`${idx % 2 === 0 ? "bg-white" : "bg-gray-50/40"} hover:bg-blue-50/30 transition-colors group`}
-                                        >
-                                            <td className="px-5 py-3.5 whitespace-nowrap">
-                                                <span className="font-mono-custom text-xs text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded">
-                                                    {tx.transId}
-                                                </span>
-                                            </td>
-
-                                            <td className="px-5 py-3.5 whitespace-nowrap">
-                                                <div>
-                                                    <p className="text-sm font-medium text-gray-800">{tx.firstName} {tx.lastName}</p>
-                                                </div>
-                                            </td>
-
-                                            <td className="px-5 py-3.5 whitespace-nowrap">
-                                                <span className="text-xs text-gray-600 font-mono-custom">{tx.billRefNumber}</span>
-                                            </td>
-
-                                            <td className="px-5 py-3.5 whitespace-nowrap text-xs text-gray-500">
-                                                {fmtDate(tx.transTime)}
-                                            </td>
-
-                                            <td className="px-5 py-3.5 whitespace-nowrap">
-                                                <div className="flex items-center gap-1">
-                                                    <Zap className="w-3 h-3 text-amber-400" />
-                                                    <span className="text-sm text-gray-700">{tx.units || 'N/A'}</span>
-                                                </div>
-                                            </td>
-
-                                            <td className="px-5 py-3.5 whitespace-nowrap">
-                                                <span className="text-sm font-semibold text-gray-900">{fmt(tx.transAmount)}</span>
-                                            </td>
-
-                                            <td className="px-5 py-3.5 whitespace-nowrap">
-                                                <StatusBadge />
-                                            </td>
-
-                                            <td className="px-5 py-3.5 whitespace-nowrap">
-                                                <button
-                                                    onClick={() => setSelectedTx(tx)}
-                                                    className="flex items-center gap-1 text-xs font-medium text-gray-400 hover:text-blue-600 group-hover:text-blue-600 transition-all"
-                                                >
-                                                    <Eye className="w-3.5 h-3.5" />
-                                                    View
-                                                </button>
-                                            </td>
-                                        </tr>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="border-b border-border">
+                                    {["Transaction ID", "Customer", "Meter", "Date & Time", "Units", "Amount", "Status"].map((h) => (
+                                        <th key={h} scope="col" className={`av-th px-5 py-3 ${h === "Amount" || h === "Units" ? "text-right" : "text-left"}`}>
+                                            {h}
+                                        </th>
                                     ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-
-                    <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-                        <p className="text-xs text-gray-400">
-                            Showing <span className="font-medium text-gray-600">{pagination.total === 0 ? 0 : ((pagination.page - 1) * pagination.limit) + 1}</span>–<span className="font-medium text-gray-600">{Math.min(pagination.page * pagination.limit, pagination.total)}</span> of <span className="font-medium text-gray-600">{fmtNum(pagination.total)}</span> transactions
-                        </p>
-                        <div className="flex items-center gap-1">
-                            <button
-                                onClick={() => handlePageChange(pagination.page - 1)}
-                                disabled={!pagination.hasPrevPage}
-                                className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                            >
-                                <ChevronLeft className="w-3.5 h-3.5" />
-                                Prev
-                            </button>
-
-                            {[...Array(Math.min(5, pagination.totalPages))].map((_, i) => {
-                                const p = i + 1;
-                                return (
-                                    <button
-                                        key={p}
-                                        onClick={() => handlePageChange(p)}
-                                        className={`w-7 h-7 text-xs font-medium rounded-lg transition-colors ${pagination.page === p
-                                                ? "bg-blue-600 text-white shadow-sm"
-                                                : "text-gray-600 border border-gray-200 bg-white hover:bg-gray-50"
-                                            }`}
-                                    >
-                                        {p}
-                                    </button>
-                                );
-                            })}
-                            {pagination.totalPages > 5 && (
-                                <span className="text-xs text-gray-400 px-1">…</span>
-                            )}
-
-                            <button
-                                onClick={() => handlePageChange(pagination.page + 1)}
-                                disabled={!pagination.hasNextPage}
-                                className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                            >
-                                Next
-                                <ChevronRight className="w-3.5 h-3.5" />
-                            </button>
-                        </div>
+                                    <th scope="col" className="av-th px-5 py-3"><span className="sr-only">Actions</span></th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-border">
+                                {filtered.map((tx: Payment) => (
+                                    <tr key={tx.id} className="av-row">
+                                        <td className="px-5 py-3.5 font-mono text-xs whitespace-nowrap text-text-secondary">{tx.transId}</td>
+                                        <td className="px-5 py-3.5 font-medium whitespace-nowrap text-foreground">{tx.firstName} {tx.lastName}</td>
+                                        <td className="px-5 py-3.5 font-mono text-xs whitespace-nowrap text-text-secondary">{tx.billRefNumber}</td>
+                                        <td className="av-num px-5 py-3.5 text-xs whitespace-nowrap text-muted-foreground">{fmtDate(tx.transTime)}</td>
+                                        <td className="av-num px-5 py-3.5 text-right font-mono text-xs whitespace-nowrap text-text-secondary">{tx.units || 'N/A'}</td>
+                                        <td className="av-num px-5 py-3.5 text-right font-semibold whitespace-nowrap text-foreground">{fmt(tx.transAmount)}</td>
+                                        <td className="px-5 py-3.5 whitespace-nowrap"><StatusBadge /></td>
+                                        <td className="px-5 py-2 text-right whitespace-nowrap">
+                                            <Button variant="ghost" size="sm" onClick={() => setSelectedTx(tx)} aria-label={`View transaction ${tx.transId}`}>
+                                                View
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
+                )}
+
+                <div className="flex flex-col gap-3 border-t border-border px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                    <p className="av-num text-xs text-muted-foreground">
+                        Showing <span className="font-medium text-text-secondary">{pagination.total === 0 ? 0 : ((pagination.page - 1) * pagination.limit) + 1}-{Math.min(pagination.page * pagination.limit, pagination.total)}</span> of <span className="font-medium text-text-secondary">{fmtNum(pagination.total)}</span> transactions
+                    </p>
+                    <nav aria-label="Pagination" className="flex items-center gap-1">
+                        <Button variant="ghost" size="sm" onClick={() => handlePageChange(pagination.page - 1)} disabled={!pagination.hasPrevPage}>
+                            <ChevronLeft aria-hidden />
+                            Prev
+                        </Button>
+
+                        {[...Array(Math.min(5, pagination.totalPages))].map((_, i) => {
+                            const p = i + 1;
+                            return (
+                                <Button
+                                    key={p}
+                                    variant={pagination.page === p ? "secondary" : "ghost"}
+                                    size="icon"
+                                    aria-current={pagination.page === p ? "page" : undefined}
+                                    onClick={() => handlePageChange(p)}
+                                    className="av-num size-8 text-xs"
+                                >
+                                    {p}
+                                </Button>
+                            );
+                        })}
+                        {pagination.totalPages > 5 && (
+                            <span className="px-1 text-xs text-muted-foreground">…</span>
+                        )}
+
+                        <Button variant="ghost" size="sm" onClick={() => handlePageChange(pagination.page + 1)} disabled={!pagination.hasNextPage}>
+                            Next
+                            <ChevronRight aria-hidden />
+                        </Button>
+                    </nav>
                 </div>
-            </div>
+            </section>
 
             {selectedTx && (
                 <TransactionModal tx={selectedTx} onClose={() => setSelectedTx(null)} />

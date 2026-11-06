@@ -9,7 +9,8 @@ import {
 } from "lucide-react";
 import { getAccounts, createAccount, updateAccount, deleteAccount } from '../../api/accounts.api';
 import type { Account } from '../../api/accounts.api';
-import { toast, Toaster } from 'sonner';
+import { toast } from "sonner";
+import { Toaster } from "@/components/ui/toaster";
 import { getTariffs } from '../../api/tariffs.api';
 import useAxiosWithAuth from "@/../utils/axiosInterceptor";
 import { useOutletContext } from 'react-router-dom';
@@ -23,11 +24,11 @@ const EMPTY_FORM = { name: '', email: '', phone: '', tarrifId: '' };
 function Field({ label, required, children, hint }: any) {
     return (
         <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                {label}{required && <span className="text-rose-400 ml-0.5">*</span>}
+            <label className="av-label text-[10.5px] text-muted-foreground">
+                {label}{required && <span className="text-danger-text ml-0.5">*</span>}
             </label>
             {children}
-            {hint && <p className="text-xs text-gray-400">{hint}</p>}
+            {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
         </div>
     );
 }
@@ -40,7 +41,7 @@ function TextInput({ value, onChange, placeholder = "", type = "text", required,
             onChange={onChange}
             placeholder={placeholder}
             required={required}
-            className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all placeholder:text-gray-400"
+            className="w-full px-3 py-2.5 text-sm border border-border rounded-lg bg-muted focus:bg-card focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-signal-edge transition-all placeholder:text-muted-foreground"
             {...rest}
         />
     );
@@ -52,11 +53,11 @@ function SelectInput({ value, onChange, children }: any) {
             <select
                 value={value || ""}
                 onChange={onChange}
-                className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all appearance-none pr-8"
+                className="w-full px-3 py-2.5 text-sm border border-border rounded-lg bg-muted focus:bg-card focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-signal-edge transition-all appearance-none pr-8"
             >
                 {children}
             </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
         </div>
     );
 }
@@ -82,28 +83,28 @@ function AccountFormDialog({ open, onClose, editing, tariffs, onSubmit, isSaving
     if (!open) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm" onClick={onClose}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[var(--overlay)] backdrop-blur-sm" onClick={onClose}>
             <div
-                className="bg-white rounded-2xl border border-gray-200 shadow-2xl w-full max-w-lg animate-in"
+                className="av-panel shadow-2xl w-full max-w-lg animate-in"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+                <div className="flex items-center justify-between px-6 py-5 border-b border-border">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center shadow-md shadow-blue-200">
-                            <Building2 className="w-4 h-4 text-white" />
+                        <div className="w-9 h-9 rounded-xl bg-accent flex items-center justify-center">
+                            <Building2 className="w-4 h-4 text-muted-foreground" />
                         </div>
                         <div>
-                            <h3 className="font-semibold text-gray-900 text-sm leading-tight">
+                            <h3 className="font-semibold text-foreground text-sm leading-tight">
                                 {editing ? "Edit Account" : "Add New Account"}
                             </h3>
-                            <p className="text-xs text-gray-400">
+                            <p className="text-xs text-muted-foreground">
                                 {editing ? `Editing ${editing.name}` : "Fill in the details below"}
                             </p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
-                        <X className="w-3.5 h-3.5 text-gray-500" />
+                    <button onClick={onClose} className="w-7 h-7 rounded-lg bg-accent hover:bg-accent flex items-center justify-center transition-colors">
+                        <X className="w-3.5 h-3.5 text-muted-foreground" />
                     </button>
                 </div>
 
@@ -133,15 +134,15 @@ function AccountFormDialog({ open, onClose, editing, tariffs, onSubmit, isSaving
                 </div>
 
                 {/* Footer */}
-                <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-2 bg-gray-50/60 rounded-b-2xl">
-                    <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                <div className="px-6 py-4 border-t border-border flex items-center justify-end gap-2 bg-muted/60 rounded-b-2xl">
+                    <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-text-secondary bg-card border border-border rounded-lg hover:bg-muted transition-colors">
                         Cancel
                     </button>
                     <button
                         type="submit"
                         form="account-form"
                         disabled={isSaving}
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm shadow-blue-200"
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-primary rounded-lg hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm shadow-black/10"
                     >
                         {isSaving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                         {isSaving ? "Saving…" : editing ? "Update Account" : "Create Account"}
@@ -156,22 +157,22 @@ function AccountFormDialog({ open, onClose, editing, tariffs, onSubmit, isSaving
 function DeleteDialog({ account, onConfirm, onClose }: any) {
     if (!account) return null;
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm" onClick={onClose}>
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-2xl w-full max-w-sm animate-in" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[var(--overlay)] backdrop-blur-sm" onClick={onClose}>
+            <div className="av-panel shadow-2xl w-full max-w-sm animate-in" onClick={(e) => e.stopPropagation()}>
                 <div className="p-6">
-                    <div className="w-12 h-12 rounded-2xl bg-rose-100 flex items-center justify-center mx-auto mb-4">
-                        <Trash2 className="w-5 h-5 text-rose-600" />
+                    <div className="w-12 h-12 rounded-xl bg-danger-soft flex items-center justify-center mx-auto mb-4">
+                        <Trash2 className="w-5 h-5 text-danger-text" />
                     </div>
-                    <h3 className="text-base font-semibold text-gray-900 text-center mb-1">Delete account?</h3>
-                    <p className="text-sm text-gray-500 text-center">
-                        <span className="font-semibold text-gray-700">{account.name}</span> and all associated data will be permanently removed.
+                    <h3 className="text-base font-semibold text-foreground text-center mb-1">Delete account?</h3>
+                    <p className="text-sm text-muted-foreground text-center">
+                        <span className="font-semibold text-text-secondary">{account.name}</span> and all associated data will be permanently removed.
                     </p>
                 </div>
                 <div className="px-6 pb-6 flex gap-2">
-                    <button onClick={onClose} className="flex-1 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+                    <button onClick={onClose} className="flex-1 py-2.5 text-sm font-medium text-text-secondary bg-accent hover:bg-accent rounded-lg transition-colors">
                         Cancel
                     </button>
-                    <button onClick={() => onConfirm(account.id)} className="flex-1 py-2.5 text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-lg transition-colors">
+                    <button onClick={() => onConfirm(account.id)} className="flex-1 py-2.5 text-sm font-semibold text-white bg-danger hover:bg-danger rounded-lg transition-colors">
                         Delete
                     </button>
                 </div>
@@ -215,7 +216,7 @@ function RowMenu({ account, onEdit, onDelete }: any) {
             <button
                 ref={buttonRef}
                 onClick={(e) => { e.stopPropagation(); setOpen(!open); }}
-                className="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-text-secondary hover:bg-accent transition-colors"
             >
                 <MoreHorizontal className="w-4 h-4" />
             </button>
@@ -225,7 +226,7 @@ function RowMenu({ account, onEdit, onDelete }: any) {
                     {ReactDOM.createPortal(
                         <div 
                             ref={dropdownRef}
-                            className="fixed z-50 w-40 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden animate-in"
+                            className="fixed z-50 w-40 bg-card border border-border rounded-xl shadow-lg overflow-hidden animate-in"
                             style={{
                                 top: position.top,
                                 left: position.left,
@@ -234,16 +235,16 @@ function RowMenu({ account, onEdit, onDelete }: any) {
                             <div className="p-1">
                                 <button
                                     onClick={() => { setOpen(false); onEdit(account); }}
-                                    className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                                    className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-text-secondary hover:bg-muted rounded-lg transition-colors"
                                 >
-                                    <Pencil className="w-3.5 h-3.5 text-gray-400" />
+                                    <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
                                     Edit Account
                                 </button>
                             </div>
-                            <div className="border-t border-gray-100 p-1">
+                            <div className="border-t border-border p-1">
                                 <button
                                     onClick={() => { setOpen(false); onDelete(account); }}
-                                    className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                                    className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-danger-text hover:bg-danger-soft rounded-lg transition-colors"
                                 >
                                     <Trash2 className="w-3.5 h-3.5" />
                                     Delete
@@ -377,38 +378,27 @@ const Accounts: React.FC = () => {
     const paginated = filteredAccounts.slice(startIndex, startIndex + itemsPerPage);
 
     const SortIcon = ({ field }: { field: string }) => {
-        if (sortField !== field) return <ArrowUpDown className="w-3 h-3 text-gray-300" />;
+        if (sortField !== field) return <ArrowUpDown className="w-3 h-3 text-muted-foreground" />;
         return sortOrder === "asc"
-            ? <ChevronDown className="w-3 h-3 text-blue-500 rotate-180" />
-            : <ChevronDown className="w-3 h-3 text-blue-500" />;
+            ? <ChevronDown className="w-3 h-3 text-accent-text rotate-180" />
+            : <ChevronDown className="w-3 h-3 text-accent-text" />;
     };
 
     return (
-        <div className="min-h-screen bg-gray-50/60 font-sans">
-            <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
-                * { font-family: 'DM Sans', sans-serif; }
-                @keyframes fadeInUp {
-                  from { opacity: 0; transform: translateY(8px); }
-                  to   { opacity: 1; transform: translateY(0); }
-                }
-                .animate-in { animation: fadeInUp 0.3s ease both; }
-                @keyframes shimmer { to { background-position: -200% 0; } }
-                .skeleton { background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 6px; }
-            `}</style>
+        <div className="min-h-full">
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-5">
 
                 {/* ── Page Header ── */}
                 <div className="flex items-start justify-between animate-in">
                     <div>
-                        <p className="text-xs font-semibold uppercase tracking-widest text-blue-500 mb-1">Organization</p>
-                        <h1 className="text-2xl font-bold text-gray-900 leading-tight">Accounts</h1>
-                        <p className="text-sm text-gray-400 mt-0.5">{fmtNum(accounts.length)} property accounts managed</p>
+                        <p className="av-label text-[10.5px] text-accent-text mb-1">Organization</p>
+                        <h1 className="av-display text-[28px] leading-tight font-bold tracking-[-0.03em] text-foreground sm:text-[32px]">Accounts<span className="text-signal">.</span></h1>
+                        <p className="text-sm text-muted-foreground mt-0.5">{fmtNum(accounts.length)} property accounts managed</p>
                     </div>
                     <button
                         onClick={() => { setEditingAccount(null); setFormOpen(true); }}
-                        className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm shadow-blue-200"
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-primary rounded-lg hover:bg-primary-hover transition-colors shadow-sm shadow-black/10"
                     >
                         <Plus className="w-4 h-4" />
                         New Account
@@ -416,22 +406,22 @@ const Accounts: React.FC = () => {
                 </div>
 
                 {/* ── Table Card ── */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden animate-in" style={{ animationDelay: "80ms" }}>
+                <div className="av-panel overflow-hidden animate-in" style={{ animationDelay: "80ms" }}>
 
                     {/* Toolbar */}
-                    <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                    <div className="px-6 py-4 border-b border-border flex flex-wrap items-center justify-between gap-3">
                         <div className="flex items-center gap-3">
-                            <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center">
-                                <Building2 className="w-3.5 h-3.5 text-slate-500" />
+                            <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center">
+                                <Building2 className="w-3.5 h-3.5 text-muted-foreground" />
                             </div>
-                            <h2 className="text-sm font-semibold text-gray-900">Account Registry</h2>
-                            <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 text-xs font-medium">
+                            <h2 className="text-sm font-semibold text-foreground">Account Registry</h2>
+                            <span className="px-2 py-0.5 rounded-md bg-accent text-muted-foreground text-xs font-medium">
                                 {fmtNum(filteredAccounts.length)} total
                             </span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <ListFilter className="w-4 h-4 text-gray-400" />
-                            <span className="text-xs text-gray-500 font-medium">Sorting by {sortField}</span>
+                            <ListFilter className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-xs text-muted-foreground font-medium">Sorting by {sortField}</span>
                         </div>
                     </div>
 
@@ -448,7 +438,7 @@ const Accounts: React.FC = () => {
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm">
                                 <thead>
-                                    <tr className="bg-gray-50 border-b border-gray-100">
+                                    <tr className="border-b border-border">
                                         {[
                                             { label: "Account Name", field: "name", sortable: true },
                                             { label: "Contact", field: "email", sortable: true },
@@ -459,8 +449,8 @@ const Accounts: React.FC = () => {
                                             <th
                                                 key={label}
                                                 onClick={() => sortable && field && handleSort(field)}
-                                                className={`px-5 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap
-                                                ${sortable ? "cursor-pointer hover:text-gray-600 select-none" : ""}`}
+                                                className={`av-label text-[10.5px] px-5 py-3 text-left text-muted-foreground whitespace-nowrap
+                                                ${sortable ? "cursor-pointer hover:text-text-secondary select-none" : ""}`}
                                             >
                                                 <div className="flex items-center gap-1.5">
                                                     {label}
@@ -471,44 +461,44 @@ const Accounts: React.FC = () => {
                                         <th className="px-5 py-3 w-12" />
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-50">
-                                    {paginated.map((acc, idx) => (
-                                        <tr key={acc.id} className={`${idx % 2 === 0 ? "bg-white" : "bg-gray-50/40"} hover:bg-blue-50/30 transition-colors group`}>
+                                <tbody className="divide-y divide-border">
+                                    {paginated.map((acc) => (
+                                        <tr key={acc.id} className={`av-row group`}>
                                             <td className="px-5 py-3.5 whitespace-nowrap">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                                                        <Building2 className="w-3.5 h-3.5 text-blue-600" />
+                                                    <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
+                                                        <Building2 className="w-3.5 h-3.5 text-muted-foreground" />
                                                     </div>
-                                                    <span className="font-semibold text-gray-900">{acc.name}</span>
+                                                    <span className="font-semibold text-foreground">{acc.name}</span>
                                                 </div>
                                             </td>
                                             <td className="px-5 py-3.5 whitespace-nowrap">
-                                                <div className="flex items-center gap-1.5 text-gray-600">
-                                                    <Mail className="w-3.5 h-3.5 text-gray-400" />
+                                                <div className="flex items-center gap-1.5 text-text-secondary">
+                                                    <Mail className="w-3.5 h-3.5 text-muted-foreground" />
                                                     <span>{acc.email || "—"}</span>
                                                 </div>
                                             </td>
                                             <td className="px-5 py-3.5 whitespace-nowrap">
-                                                <div className="flex items-center gap-1.5 text-gray-600">
-                                                    <Phone className="w-3.5 h-3.5 text-gray-400" />
+                                                <div className="flex items-center gap-1.5 text-text-secondary">
+                                                    <Phone className="w-3.5 h-3.5 text-muted-foreground" />
                                                     <span>{acc.phone || "—"}</span>
                                                 </div>
                                             </td>
                                             <td className="px-5 py-3.5 whitespace-nowrap">
                                                 <div className="flex items-center gap-1.5">
-                                                    <CreditCard className="w-3.5 h-3.5 text-amber-400" />
-                                                    <span className="text-sm text-gray-600">
+                                                    <CreditCard className="w-3.5 h-3.5 text-warn-text" />
+                                                    <span className="text-sm text-text-secondary">
                                                         {tariffs.find(t => t.id === acc.tarrifId)?.name || acc.tarrifId || "Default"}
                                                     </span>
                                                 </div>
                                             </td>
                                             <td className="px-5 py-3.5 whitespace-nowrap">
-                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
+                                                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-accent text-text-secondary">
                                                     {acc._count?.meters || 0} Meters
                                                 </span>
                                             </td>
                                             <td className="px-5 py-3.5 text-right">
-                                                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <div className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:none)]:opacity-100 transition-opacity">
                                                     <RowMenu
                                                         account={acc}
                                                         onEdit={(a: any) => { setEditingAccount(a); setFormOpen(true); }}
@@ -521,11 +511,11 @@ const Accounts: React.FC = () => {
                                     {paginated.length === 0 && (
                                         <tr>
                                             <td colSpan={6} className="py-20 text-center">
-                                                <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                                                    <Building2 className="w-6 h-6 text-gray-400" />
+                                                <div className="w-14 h-14 rounded-xl bg-accent flex items-center justify-center mx-auto mb-4">
+                                                    <Building2 className="w-6 h-6 text-muted-foreground" />
                                                 </div>
-                                                <p className="text-sm font-semibold text-gray-700">No accounts found</p>
-                                                <p className="text-xs text-gray-400 mt-1">
+                                                <p className="text-sm font-semibold text-text-secondary">No accounts found</p>
+                                                <p className="text-xs text-muted-foreground mt-1">
                                                     {searchQuery ? "Try a different search term" : "Add your first property account to get started"}
                                                 </p>
                                             </td>
@@ -537,15 +527,15 @@ const Accounts: React.FC = () => {
                     )}
 
                     {/* ── Pagination Footer ── */}
-                    <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between bg-gray-50/30">
-                        <p className="text-xs text-gray-400">
-                            Showing <span className="font-medium text-gray-600">{fmtNum(startIndex + 1)}</span>–<span className="font-medium text-gray-600">{fmtNum(Math.min(startIndex + itemsPerPage, filteredAccounts.length))}</span> of <span className="font-medium text-gray-600">{fmtNum(filteredAccounts.length)}</span>
+                    <div className="px-6 py-4 border-t border-border flex flex-wrap items-center justify-between gap-3 bg-muted/30">
+                        <p className="text-xs text-muted-foreground">
+                            Showing <span className="font-medium text-text-secondary">{fmtNum(startIndex + 1)}</span>–<span className="font-medium text-text-secondary">{fmtNum(Math.min(startIndex + itemsPerPage, filteredAccounts.length))}</span> of <span className="font-medium text-text-secondary">{fmtNum(filteredAccounts.length)}</span>
                         </p>
                         <div className="flex items-center gap-1.5">
                             <button
                                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                                 disabled={currentPage === 1}
-                                className="px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
+                                className="flex items-center gap-1 whitespace-nowrap px-3 py-1.5 text-xs font-medium text-text-secondary border border-border rounded-lg bg-card hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
                             >
                                 <ChevronLeft className="w-3.5 h-3.5" />
                                 Previous
@@ -555,7 +545,7 @@ const Accounts: React.FC = () => {
                                     <button
                                         key={i}
                                         onClick={() => setCurrentPage(i + 1)}
-                                        className={`w-7 h-7 text-xs font-medium rounded-lg transition-colors ${currentPage === i + 1 ? "bg-blue-600 text-white shadow-sm" : "text-gray-600 border border-gray-200 bg-white hover:bg-gray-50"}`}
+                                        className={`w-7 h-7 text-xs font-medium rounded-lg transition-colors ${currentPage === i + 1 ? "bg-primary text-white shadow-sm" : "text-text-secondary border border-border bg-card hover:bg-muted"}`}
                                     >
                                         {i + 1}
                                     </button>
@@ -564,7 +554,7 @@ const Accounts: React.FC = () => {
                             <button
                                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                                 disabled={currentPage === totalPages || totalPages === 0}
-                                className="px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
+                                className="flex items-center gap-1 whitespace-nowrap px-3 py-1.5 text-xs font-medium text-text-secondary border border-border rounded-lg bg-card hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
                             >
                                 Next
                                 <ChevronRight className="w-3.5 h-3.5" />

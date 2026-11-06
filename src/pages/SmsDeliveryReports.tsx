@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useCallback, useEffect, useState } from "react";
+import { StatTile as StatCard } from "@/components/ui/stat-tile";
 import {
     CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, Clock,
     Filter, Inbox, Link2, MessageSquareText, RefreshCw, Search,
@@ -36,47 +37,20 @@ function StatusBadge({ description }: { description: string }) {
     const delivered = description === "DeliveredToTerminal";
     const pending = ["SentToNetwork", "Scheduled"].includes(description);
     const cls = delivered
-        ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+        ? "bg-ok-soft text-ok-text border-ok-edge"
         : pending
-            ? "bg-amber-50 text-amber-700 border-amber-100"
-            : "bg-rose-50 text-rose-700 border-rose-100";
+            ? "bg-warn-soft text-warn-text border-warn-edge"
+            : "bg-danger-soft text-danger-text border-danger-edge";
     const Icon = delivered ? CheckCircle2 : pending ? Clock : XCircle;
 
     return (
-        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border ${cls}`}>
+        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold border ${cls}`}>
             <Icon className="w-3 h-3" />
             {description}
         </span>
     );
 }
 
-function StatCard({ label, value, sub, icon: Icon, color }: any) {
-    const colors: Record<string, string> = {
-        blue: "bg-blue-50 border-blue-100 text-blue-700",
-        emerald: "bg-emerald-50 border-emerald-100 text-emerald-700",
-        amber: "bg-amber-50 border-amber-100 text-amber-700",
-        rose: "bg-rose-50 border-rose-100 text-rose-700",
-    };
-    const iconBg: Record<string, string> = {
-        blue: "bg-blue-100 text-blue-500",
-        emerald: "bg-emerald-100 text-emerald-500",
-        amber: "bg-amber-100 text-amber-500",
-        rose: "bg-rose-100 text-rose-500",
-    };
-
-    return (
-        <div className={`rounded-xl border px-5 py-4 flex items-center gap-4 ${colors[color]}`}>
-            <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${iconBg[color]}`}>
-                <Icon className="w-4 h-4" />
-            </div>
-            <div className="min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-widest opacity-60 leading-none">{label}</p>
-                <p className="text-2xl font-bold leading-tight mt-1">{value}</p>
-                {sub && <p className="text-xs opacity-60 mt-0.5">{sub}</p>}
-            </div>
-        </div>
-    );
-}
 
 export function SmsDeliveryReportsPage() {
     const axiosInstance = useAxiosWithAuth(import.meta.env.VITE_PUBLIC_STAGING_API);
@@ -152,28 +126,19 @@ export function SmsDeliveryReportsPage() {
     const failed = Math.max((stats?.total || 0) - delivered - pending, 0);
 
     return (
-        <div className="min-h-screen bg-gray-50/60 font-sans">
-            <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=DM+Mono:wght@400;500&display=swap');
-                * { font-family: 'DM Sans', sans-serif; }
-                .font-mono-custom { font-family: 'DM Mono', monospace; }
-                @keyframes fadeInUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-                .animate-in { animation: fadeInUp 0.3s ease both; }
-                @keyframes shimmer { to { background-position: -200% 0; } }
-                .skeleton { background: linear-gradient(90deg,#f1f5f9 25%,#e2e8f0 50%,#f1f5f9 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 6px; }
-            `}</style>
+        <div className="min-h-full">
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
                 <div className="flex items-start justify-between animate-in">
                     <div>
-                        <p className="text-xs font-semibold uppercase tracking-widest text-blue-500 mb-1">Admin</p>
-                        <h1 className="text-2xl font-bold text-gray-900 leading-tight">SMS Delivery Reports</h1>
-                        <p className="text-sm text-gray-400 mt-0.5">Track Advanta delivery callbacks and unmatched message IDs</p>
+                        <p className="av-label text-[10.5px] text-accent-text mb-1">Admin</p>
+                        <h1 className="av-display text-[28px] leading-tight font-bold tracking-[-0.03em] text-foreground sm:text-[32px]">SMS Delivery Reports<span className="text-signal">.</span></h1>
+                        <p className="text-sm text-muted-foreground mt-0.5">Track Advanta delivery callbacks and unmatched message IDs</p>
                     </div>
                     <button
                         onClick={() => { fetchReports(); fetchStats(); }}
                         disabled={isLoading}
-                        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 border border-gray-200 bg-white rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors shadow-sm"
+                        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-text-secondary border border-border bg-card rounded-lg hover:bg-muted disabled:opacity-50 transition-colors shadow-sm"
                     >
                         <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
                         Refresh
@@ -187,44 +152,44 @@ export function SmsDeliveryReportsPage() {
                     <StatCard label="Unmatched" value={fmtNum(stats?.unmatched || 0)} icon={ShieldAlert} color={(stats?.unmatched || 0) > 0 ? "rose" : "blue"} sub={`${fmtNum(failed)} non-delivered`} />
                 </div>
 
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden animate-in" style={{ animationDelay: "120ms" }}>
-                    <div className="px-6 py-4 border-b border-gray-100">
+                <div className="av-panel overflow-hidden animate-in" style={{ animationDelay: "120ms" }}>
+                    <div className="px-6 py-4 border-b border-border">
                         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                             <div className="flex items-center gap-3">
-                                <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center">
-                                    <Send className="w-3.5 h-3.5 text-slate-500" />
+                                <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center">
+                                    <Send className="w-3.5 h-3.5 text-muted-foreground" />
                                 </div>
-                                <h2 className="text-sm font-semibold text-gray-900">Delivery Report Feed</h2>
-                                <span className="px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 text-xs font-medium">
+                                <h2 className="text-sm font-semibold text-foreground">Delivery Report Feed</h2>
+                                <span className="px-2 py-0.5 rounded-md bg-accent text-muted-foreground text-xs font-medium">
                                     {fmtNum(pagination.total)} total
                                 </span>
                             </div>
 
                             <div className="flex items-center gap-2">
                                 <div className="relative w-56">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
                                     <input
                                         type="text"
                                         value={filters.search}
                                         onChange={(e) => handleFilterChange({ search: e.target.value })}
                                         placeholder="Search message ID"
-                                        className="w-full pl-9 pr-8 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all placeholder:text-gray-400"
+                                        className="w-full pl-9 pr-8 py-2 text-sm border border-border rounded-lg bg-muted focus:bg-card focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-signal-edge transition-all placeholder:text-muted-foreground"
                                     />
                                     {filters.search && (
                                         <button aria-label="Clear message ID search" onClick={() => handleFilterChange({ search: "" })} className="absolute right-2.5 top-1/2 -translate-y-1/2">
-                                            <X className="w-3.5 h-3.5 text-gray-400 hover:text-gray-600" />
+                                            <X className="w-3.5 h-3.5 text-muted-foreground hover:text-text-secondary" />
                                         </button>
                                     )}
                                 </div>
 
                                 <button
                                     onClick={() => setFiltersOpen(!filtersOpen)}
-                                    className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border rounded-lg transition-colors ${filtersOpen || activeFilters > 0 ? "bg-blue-50 border-blue-200 text-blue-600" : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"}`}
+                                    className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border rounded-lg transition-colors ${filtersOpen || activeFilters > 0 ? "bg-signal-soft border-signal-edge text-accent-text" : "bg-card border-border text-text-secondary hover:bg-muted"}`}
                                 >
                                     <Filter className="w-3.5 h-3.5" />
                                     Filters
                                     {activeFilters > 0 && (
-                                        <span className="w-4 h-4 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center leading-none">
+                                        <span className="w-4 h-4 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center leading-none">
                                             {activeFilters}
                                         </span>
                                     )}
@@ -233,49 +198,49 @@ export function SmsDeliveryReportsPage() {
                         </div>
 
                         {filtersOpen && (
-                            <div className="mt-4 pt-4 border-t border-gray-100 flex flex-wrap items-end gap-3 animate-in">
+                            <div className="mt-4 pt-4 border-t border-border flex flex-wrap items-end gap-3 animate-in">
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Status Description</label>
+                                    <label className="av-label text-[10.5px] text-muted-foreground">Status Description</label>
                                     <div className="relative">
                                         <select
                                             value={filters.description}
                                             onChange={(e) => handleFilterChange({ description: e.target.value })}
-                                            className="pl-3 pr-8 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all appearance-none"
+                                            className="pl-3 pr-8 py-2 text-sm border border-border rounded-lg bg-muted focus:bg-card focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-signal-edge transition-all appearance-none"
                                         >
                                             <option value="all">All descriptions</option>
                                             {DESCRIPTIONS.map((description) => (
                                                 <option key={description} value={description}>{description}</option>
                                             ))}
                                         </select>
-                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
                                     </div>
                                 </div>
 
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Sort By</label>
+                                    <label className="av-label text-[10.5px] text-muted-foreground">Sort By</label>
                                     <div className="relative">
-                                        <SlidersHorizontal className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                                        <SlidersHorizontal className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
                                         <select
                                             value={`${filters.sortBy}:${filters.sortOrder}`}
                                             onChange={(e) => {
                                                 const [sortBy, sortOrder] = e.target.value.split(":");
                                                 handleFilterChange({ sortBy, sortOrder });
                                             }}
-                                            className="pl-9 pr-8 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all appearance-none"
+                                            className="pl-9 pr-8 py-2 text-sm border border-border rounded-lg bg-muted focus:bg-card focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-signal-edge transition-all appearance-none"
                                         >
                                             <option value="createdAt:desc">Newest created</option>
                                             <option value="createdAt:asc">Oldest created</option>
                                             <option value="timestamp:desc">Newest timestamp</option>
                                             <option value="timestamp:asc">Oldest timestamp</option>
                                         </select>
-                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
                                     </div>
                                 </div>
 
                                 {activeFilters > 0 && (
                                     <button
                                         onClick={() => handleFilterChange({ description: "all", search: "", sortBy: "createdAt", sortOrder: "desc" })}
-                                        className="px-3 py-2 text-xs font-medium text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                                        className="px-3 py-2 text-xs font-medium text-muted-foreground hover:text-text-secondary border border-border rounded-lg hover:bg-muted transition-colors"
                                     >
                                         Clear all
                                     </button>
@@ -297,60 +262,60 @@ export function SmsDeliveryReportsPage() {
                         </div>
                     ) : reports.length === 0 ? (
                         <div className="py-20 text-center">
-                            <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                                <Inbox className="w-6 h-6 text-gray-400" />
+                            <div className="w-14 h-14 rounded-xl bg-accent flex items-center justify-center mx-auto mb-4">
+                                <Inbox className="w-6 h-6 text-muted-foreground" />
                             </div>
-                            <p className="text-sm font-semibold text-gray-700">No SMS delivery reports found</p>
-                            <p className="text-xs text-gray-400 mt-1">{activeFilters > 0 ? "Try adjusting your filters" : "Advanta callbacks will appear here"}</p>
+                            <p className="text-sm font-semibold text-text-secondary">No SMS delivery reports found</p>
+                            <p className="text-xs text-muted-foreground mt-1">{activeFilters > 0 ? "Try adjusting your filters" : "Advanta callbacks will appear here"}</p>
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm">
                                 <thead>
-                                    <tr className="bg-gray-50 border-b border-gray-100">
+                                    <tr className="border-b border-border">
                                         {["Message ID", "Description", "Time Taken", "Timestamp", "Linked SMS / Recipient", "Created At"].map((heading) => (
-                                            <th key={heading} className="px-5 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">
+                                            <th key={heading} className="av-th px-5 py-3 text-left">
                                                 {heading}
                                             </th>
                                         ))}
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-50">
-                                    {reports.map((report, idx) => (
-                                        <tr key={report.id} className={`${idx % 2 === 0 ? "bg-white" : "bg-gray-50/40"} hover:bg-blue-50/20 transition-colors`}>
+                                <tbody className="divide-y divide-border">
+                                    {reports.map((report) => (
+                                        <tr key={report.id} className={`av-row`}>
                                             <td className="px-5 py-3.5 whitespace-nowrap">
-                                                <span className="font-mono-custom text-xs text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200">
+                                                <span className="font-mono-custom text-xs text-text-secondary bg-accent px-1.5 py-0.5 rounded border border-border">
                                                     {report.messageId}
                                                 </span>
                                             </td>
                                             <td className="px-5 py-3.5 whitespace-nowrap">
                                                 <StatusBadge description={report.description} />
                                             </td>
-                                            <td className="px-5 py-3.5 whitespace-nowrap text-xs font-medium text-gray-600">
+                                            <td className="px-5 py-3.5 whitespace-nowrap text-xs font-medium text-text-secondary">
                                                 {report.timeTaken}
                                             </td>
-                                            <td className="px-5 py-3.5 whitespace-nowrap text-xs text-gray-500">
+                                            <td className="px-5 py-3.5 whitespace-nowrap text-xs text-muted-foreground">
                                                 {fmtDate(report.reportTimestamp)}
                                             </td>
                                             <td className="px-5 py-3.5 min-w-[220px]">
                                                 {report.smsMessage ? (
                                                     <div className="flex items-center gap-2">
-                                                        <div className="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center flex-shrink-0">
-                                                            <Link2 className="w-3.5 h-3.5 text-emerald-600" />
+                                                        <div className="w-7 h-7 rounded-lg bg-ok-soft border border-ok-edge flex items-center justify-center flex-shrink-0">
+                                                            <Link2 className="w-3.5 h-3.5 text-ok-text" />
                                                         </div>
                                                         <div className="min-w-0">
-                                                            <p className="text-sm font-medium text-gray-800 truncate">{report.smsMessage.recipient}</p>
-                                                            <p className="text-xs text-gray-400 truncate">{report.smsMessage.message}</p>
+                                                            <p className="text-sm font-medium text-foreground truncate">{report.smsMessage.recipient}</p>
+                                                            <p className="text-xs text-muted-foreground truncate">{report.smsMessage.message}</p>
                                                         </div>
                                                     </div>
                                                 ) : (
-                                                    <span className="inline-flex items-center gap-1.5 text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-full px-2 py-0.5">
+                                                    <span className="inline-flex items-center gap-1.5 text-xs text-warn-text bg-warn-soft border border-warn-edge rounded-md px-2 py-0.5">
                                                         <ShieldAlert className="w-3 h-3" />
                                                         Unmatched message ID
                                                     </span>
                                                 )}
                                             </td>
-                                            <td className="px-5 py-3.5 whitespace-nowrap text-xs text-gray-500">
+                                            <td className="px-5 py-3.5 whitespace-nowrap text-xs text-muted-foreground">
                                                 {fmtDate(report.createdAt)}
                                             </td>
                                         </tr>
@@ -360,17 +325,17 @@ export function SmsDeliveryReportsPage() {
                         </div>
                     )}
 
-                    <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-                        <p className="text-xs text-gray-400">
-                            Showing <span className="font-medium text-gray-600">{pagination.total === 0 ? 0 : fmtNum((pagination.page - 1) * pagination.limit + 1)}</span>
-                            -<span className="font-medium text-gray-600">{fmtNum(Math.min(pagination.page * pagination.limit, pagination.total))}</span>
-                            {" "}of <span className="font-medium text-gray-600">{fmtNum(pagination.total)}</span>
+                    <div className="px-6 py-4 border-t border-border flex flex-wrap items-center justify-between gap-3">
+                        <p className="text-xs text-muted-foreground">
+                            Showing <span className="font-medium text-text-secondary">{pagination.total === 0 ? 0 : fmtNum((pagination.page - 1) * pagination.limit + 1)}</span>
+                            -<span className="font-medium text-text-secondary">{fmtNum(Math.min(pagination.page * pagination.limit, pagination.total))}</span>
+                            {" "}of <span className="font-medium text-text-secondary">{fmtNum(pagination.total)}</span>
                         </p>
                         <div className="flex items-center gap-1">
                             <button
                                 onClick={() => handleFilterChange({ page: pagination.page - 1 })}
                                 disabled={!pagination.hasPrevPage}
-                                className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                className="flex items-center gap-1 whitespace-nowrap px-3 py-1.5 text-xs font-medium text-text-secondary border border-border rounded-lg bg-card hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                             >
                                 <ChevronLeft className="w-3.5 h-3.5" />
                                 Prev
@@ -378,7 +343,7 @@ export function SmsDeliveryReportsPage() {
                             <button
                                 onClick={() => handleFilterChange({ page: pagination.page + 1 })}
                                 disabled={!pagination.hasNextPage}
-                                className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                className="flex items-center gap-1 whitespace-nowrap px-3 py-1.5 text-xs font-medium text-text-secondary border border-border rounded-lg bg-card hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                             >
                                 Next
                                 <ChevronRight className="w-3.5 h-3.5" />

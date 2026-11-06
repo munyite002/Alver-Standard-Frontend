@@ -1,9 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
-import { Shield, Eye, EyeOff, ArrowLeft, Loader, Check } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { toast, Toaster } from 'sonner';
+import { toast } from "sonner";
 import { resetPasswordWithOTP } from "@/../api/users.api"
+import { AuthShell } from "@/components/auth/auth-shell";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export function ResetPasswordPage() {
     const [code, setCode] = React.useState(['', '', '', '', '', '']);
@@ -91,184 +94,135 @@ export function ResetPasswordPage() {
 
     if (isSuccess) {
         return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-                <div className="max-w-md w-full">
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-                        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <Check className="h-8 w-8 text-green-600" />
-                        </div>
-
-                        <h2 className="text-2xl font-bold text-gray-900 mb-4">Password Reset!</h2>
-
-                        <p className="text-gray-600 mb-6 leading-relaxed">
-                            Your password has been successfully reset. You can now sign in with your new password.
-                        </p>
-
-                        <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200">
-                            Continue to Login
-                        </button>
-                    </div>
-                </div>
+            <AuthShell>
+                <div className="space-y-3">
+                <p className="av-label av-rise text-accent-text" style={{ animationDelay: "80ms" }}>Account access</p>
+                <h1 className="auth-title av-display av-rise text-[clamp(30px,3vw,42px)] leading-[1.04] font-bold tracking-[-0.035em] text-foreground" style={{ animationDelay: "130ms" }}>
+                    Password reset<span className="text-signal">.</span>
+                </h1>
+                <p className="auth-shortest-hide av-rise max-w-[40ch] text-[15px] leading-relaxed text-text-secondary" style={{ animationDelay: "180ms" }}>
+                    Your password has been successfully reset. You can now sign in with your new password.
+                </p>
             </div>
+                <div className="av-rise mt-9" style={{ animationDelay: "240ms" }}>
+                    <button className="auth-cta auth-focus group relative flex h-12 w-full items-center justify-center overflow-hidden rounded-lg text-[15px] font-semibold disabled:opacity-60" onClick={() => navigate("/login")}>
+                        <span className="auth-sheen" aria-hidden />
+                        <span className="relative">Continue to Login</span>
+                    </button>
+                </div>
+            </AuthShell>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-            <div className="max-w-md w-full">
-                {/* Back Link */}
-                <button className="flex items-center text-gray-600 hover:text-gray-800 mb-6 transition-colors duration-200" onClick={() => navigate("/forgot-password")}>
-                    <ArrowLeft className="h-4 w-4 mr-2" />
+        <AuthShell>
+            <div className="space-y-3">
+                <p className="av-label av-rise text-accent-text" style={{ animationDelay: "80ms" }}>Account access</p>
+                <h1 className="auth-title av-display av-rise text-[clamp(30px,3vw,42px)] leading-[1.04] font-bold tracking-[-0.035em] text-foreground" style={{ animationDelay: "130ms" }}>
+                    Reset password<span className="text-signal">.</span>
+                </h1>
+                <p className="auth-shortest-hide av-rise max-w-[40ch] text-[15px] leading-relaxed text-text-secondary" style={{ animationDelay: "180ms" }}>
+                    Enter the 6-digit code sent to your phone number and create a new password.
+                </p>
+            </div>
+
+            <div className="mt-7 space-y-4">
+                <fieldset className="auth-field av-rise space-y-2" style={{ animationDelay: "240ms" }}>
+                    <legend className="auth-label av-label">Verification Code</legend>
+                    <div className="flex gap-2">
+                        {code.map((digit, index) => (
+                            <Input
+                                key={index}
+                                id={`code-${index}`}
+                                type="text"
+                                inputMode="numeric"
+                                autoComplete={index === 0 ? "one-time-code" : "off"}
+                                aria-label={`Digit ${index + 1} of 6`}
+                                aria-invalid={!!errors.code}
+                                value={digit}
+                                onChange={(e) => handleCodeChange(index, e.target.value.replace(/\D/g, ''))}
+                                onKeyDown={(e) => handleKeyDown(index, e)}
+                                className="auth-input av-num min-w-0 flex-1 px-0 text-center font-mono text-lg font-medium"
+                                disabled={isLoading}
+                            />
+                        ))}
+                    </div>
+                    {errors.code && <p role="alert" className="text-[13px] text-danger-text">{errors.code}</p>}
+                </fieldset>
+
+                <div className="auth-field av-rise space-y-2" style={{ animationDelay: "300ms" }}>
+                    <Label htmlFor="password" className="auth-label av-label block">New Password</Label>
+                    <div className="auth-input-wrap">
+                        <Input
+                            id="password"
+                            type={showPassword ? 'text' : 'password'}
+                            autoComplete="new-password"
+                            aria-invalid={!!errors.password}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="Enter new password"
+                            className="auth-input pr-12"
+                            disabled={isLoading}
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            aria-label={showPassword ? "Hide password" : "Show password"}
+                            aria-pressed={showPassword}
+                            className="auth-focus absolute top-1/2 right-1.5 flex size-9 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                        >
+                            {showPassword ? <EyeOff className="size-4" aria-hidden /> : <Eye className="size-4" aria-hidden />}
+                        </button>
+                        <span className="auth-beam" aria-hidden />
+                    </div>
+                    {errors.password && <p role="alert" className="text-[13px] text-danger-text">{errors.password}</p>}
+                </div>
+
+                <div className="auth-field av-rise space-y-2" style={{ animationDelay: "340ms" }}>
+                    <Label htmlFor="confirmPassword" className="auth-label av-label block">Confirm New Password</Label>
+                    <div className="auth-input-wrap">
+                        <Input
+                            id="confirmPassword"
+                            type={showConfirmPassword ? 'text' : 'password'}
+                            autoComplete="new-password"
+                            aria-invalid={!!errors.confirmPassword}
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            placeholder="Confirm new password"
+                            className="auth-input pr-12"
+                            disabled={isLoading}
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                            aria-pressed={showConfirmPassword}
+                            className="auth-focus absolute top-1/2 right-1.5 flex size-9 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                        >
+                            {showConfirmPassword ? <EyeOff className="size-4" aria-hidden /> : <Eye className="size-4" aria-hidden />}
+                        </button>
+                        <span className="auth-beam" aria-hidden />
+                    </div>
+                    {errors.confirmPassword && <p role="alert" className="text-[13px] text-danger-text">{errors.confirmPassword}</p>}
+                </div>
+
+                <p className="av-rise text-xs leading-relaxed text-muted-foreground" style={{ animationDelay: "380ms" }}>
+                    Password must contain at least 8 characters, a mix of uppercase and lowercase letters, and at least one number.
+                </p>
+
+                <div className="av-rise" style={{ animationDelay: "420ms" }}>
+                    <button onClick={handleSubmit} disabled={isLoading} aria-busy={isLoading} className="auth-cta auth-focus group relative flex h-12 w-full items-center justify-center overflow-hidden rounded-lg text-[15px] font-semibold disabled:opacity-60">
+                        <span className="auth-sheen" aria-hidden />
+                        <span className="relative">{isLoading ? "Resetting Password..." : "Reset Password"}</span>
+                        {isLoading && <span className="auth-charge" aria-hidden />}
+                    </button>
+                </div>
+
+                <button className="auth-focus rounded-sm text-[13px] font-medium text-accent-text av-rise" style={{ animationDelay: "460ms" }} onClick={() => navigate("/forgot-password")}>
                     Back
                 </button>
-
-                {/* Main Card */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <Toaster position='top-center' richColors />
-                    {/* Header with blue accent */}
-                    <div className="border-l-4 border-l-blue-500 bg-blue-50/30 px-8 py-6">
-                        <div className="flex items-center mb-2">
-                            <Shield className="h-6 w-6 text-blue-600 mr-2" />
-                            <h1 className="text-2xl font-bold text-gray-900">Reset Password</h1>
-                        </div>
-                        <p className="text-gray-600">
-                            Enter the 6-digit code sent to your phone number and create a new password.
-                        </p>
-                    </div>
-
-                    {/* Form */}
-                    <div className="p-8">
-                        <div className="space-y-6">
-                            {/* Verification Code */}
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-3">
-                                    Verification Code
-                                </label>
-                                <div className="flex space-x-3 justify-center">
-                                    {code.map((digit, index) => (
-                                        <input
-                                            key={index}
-                                            id={`code-${index}`}
-                                            type="text"
-                                            inputMode="numeric"
-                                            value={digit}
-                                            onChange={(e) => handleCodeChange(index, e.target.value.replace(/\D/g, ''))}
-                                            onKeyDown={(e) => handleKeyDown(index, e)}
-                                            className={`w-12 h-12 text-center text-lg font-semibold border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 ${errors.code ? 'border-red-300' : 'border-gray-300'
-                                                }`}
-                                            disabled={isLoading}
-                                        />
-                                    ))}
-                                </div>
-                                {errors.code && (
-                                    <p className="mt-2 text-sm text-red-600">{errors.code}</p>
-                                )}
-                            </div>
-
-                            {/* New Password */}
-                            <div>
-                                <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
-                                    New Password
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        id="password"
-                                        type={showPassword ? 'text' : 'password'}
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        placeholder="Enter new password"
-                                        className={`w-full pr-12 pl-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 ${errors.password ? 'border-red-300' : 'border-gray-300'
-                                            }`}
-                                        disabled={isLoading}
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                                    >
-                                        {showPassword ? (
-                                            <EyeOff className="h-5 w-5 text-gray-400" />
-                                        ) : (
-                                            <Eye className="h-5 w-5 text-gray-400" />
-                                        )}
-                                    </button>
-                                </div>
-                                {errors.password && (
-                                    <p className="mt-2 text-sm text-red-600">{errors.password}</p>
-                                )}
-                            </div>
-
-                            {/* Confirm Password */}
-                            <div>
-                                <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-700 mb-2">
-                                    Confirm New Password
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        id="confirmPassword"
-                                        type={showConfirmPassword ? 'text' : 'password'}
-                                        value={confirmPassword}
-                                        onChange={(e) => setConfirmPassword(e.target.value)}
-                                        placeholder="Confirm new password"
-                                        className={`w-full pr-12 pl-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 ${errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
-                                            }`}
-                                        disabled={isLoading}
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                                    >
-                                        {showConfirmPassword ? (
-                                            <EyeOff className="h-5 w-5 text-gray-400" />
-                                        ) : (
-                                            <Eye className="h-5 w-5 text-gray-400" />
-                                        )}
-                                    </button>
-                                </div>
-                                {errors.confirmPassword && (
-                                    <p className="mt-2 text-sm text-red-600">{errors.confirmPassword}</p>
-                                )}
-                            </div>
-
-                            {/* Password Requirements */}
-                            <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
-                                <p className="font-medium mb-1">Password must contain:</p>
-                                <ul className="text-xs space-y-1">
-                                    <li>• At least 8 characters</li>
-                                    <li>• Mix of uppercase and lowercase letters</li>
-                                    <li>• At least one number</li>
-                                </ul>
-                            </div>
-
-                            {/* Submit Button */}
-                            <button
-                                onClick={handleSubmit}
-                                disabled={isLoading}
-                                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center"
-                            >
-                                {isLoading ? (
-                                    <>
-                                        <Loader className="h-4 w-4 animate-spin mr-2" />
-                                        Resetting Password...
-                                    </>
-                                ) : (
-                                    'Reset Password'
-                                )}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Footer */}
-                <div className="mt-6 text-center">
-                    <p className="text-xs text-gray-500">
-                        Need help? Contact support at{' '}
-                        <span className="text-blue-600">operations@alverpower.com</span>
-                    </p>
-                </div>
             </div>
-        </div>
+        </AuthShell>
     );
 }
 
