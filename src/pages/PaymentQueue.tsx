@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useEscape } from "@/lib/use-escape";
 import { StatTile as StatCard } from "@/components/ui/stat-tile";
 import {
     Clock, CheckCircle2, XCircle, AlertTriangle, RotateCcw, Trash2,
@@ -75,6 +76,7 @@ function QueueDetailModal({ item, onClose, onRetry, onCancel, actionLoading }: {
     onCancel: (id: string) => void;
     actionLoading: string | null;
 }) {
+    useEscape(onClose, !!item);
     if (!item) return null;
 
     const fields: [string, string | number | null | undefined][] = [
@@ -198,6 +200,7 @@ function ConfirmDialog({ title, message, confirmLabel, confirmColor, onConfirm, 
     onConfirm: () => void;
     onCancel: () => void;
 }) {
+    useEscape(onCancel);
     return (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-[var(--overlay)] backdrop-blur-sm" onClick={onCancel}>
             <div className="av-panel shadow-2xl w-full max-w-sm animate-in p-6" onClick={(e) => e.stopPropagation()}>

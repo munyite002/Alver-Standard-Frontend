@@ -4,6 +4,7 @@
 //@ts-nocheck
 
 import { useEffect, useState } from "react";
+import { useEscape } from "@/lib/use-escape";
 import { StatTile as StatCard } from "@/components/ui/stat-tile";
 import { getAllTickets, getTicketStats } from "@/../api/tickets.api";
 import useAxiosWithAuth from "@/../utils/axiosInterceptor";
@@ -70,6 +71,7 @@ function PriorityBadge({ priority }: { priority: string }) {
 
 // ─── Ticket Detail Modal ──────────────────────────────────────────────────────
 function TicketModal({ ticket, isOpen, onClose, onTicketUpdated, axiosInstance }: any) {
+    useEscape(onClose, isOpen);
     const [replyBody, setReplyBody] = useState("");
     const [isSending, setIsSending] = useState(false);
     const [newStatus, setNewStatus] = useState("");

@@ -1,4 +1,5 @@
 import * as XLSX from 'xlsx';
+import { paymentTimeZone } from "@/lib/payment-time";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import type { TariffReport, MeterBreakdown } from '@/../api/reports.api';
@@ -72,10 +73,10 @@ const fmt = (n: number) =>
 
 const fmtNum = (n: number) => new Intl.NumberFormat('en-KE').format(n);
 
-const fmtDate = (dateString: string) =>
+const fmtDate = (dateString: string, timeZone?: string) =>
   new Date(dateString).toLocaleDateString('en-KE', {
     year: 'numeric', month: 'short', day: 'numeric',
-    hour: '2-digit', minute: '2-digit',
+    hour: '2-digit', minute: '2-digit', timeZone,
   });
 
 const fmtDateShort = (dateString: string) =>
@@ -720,7 +721,7 @@ export function generateTariffReportExcel(report: TariffReport): void {
 
       setRow3H(r - 1, 20);
       setCell(ws3, `A${r}`, tx.transId, rowStyle);
-      setCell(ws3, `B${r}`, fmtDate(tx.transTime), rowStyle);
+      setCell(ws3, `B${r}`, fmtDate(tx.transTime, paymentTimeZone(tx.transactionType)), rowStyle);
       setCell(ws3, `C${r}`, tx.meterNumber, rowStyle);
       setNum(ws3, `D${r}`, tx.transAmount, rowKES);
       setNum(ws3, `E${r}`, tx.units, { ...rowRight, numFmt: '#,##0.00' });

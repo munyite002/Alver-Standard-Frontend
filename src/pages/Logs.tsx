@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
+import { useEscape } from "@/lib/use-escape";
 import { StatTile as StatCard } from "@/components/ui/stat-tile";
 import { getAllLogs } from "@/../api/logs.api";
 import useAxiosWithAuth from "@/../utils/axiosInterceptor";
@@ -77,6 +78,7 @@ function LevelBadge({ level }: { level: string }) {
 
 // ─── Log Detail Modal ─────────────────────────────────────────────────────────
 function LogModal({ log, isOpen, onClose }: { log: any | null; isOpen: boolean; onClose: () => void }) {
+  useEscape(onClose, isOpen);
   if (!isOpen || !log) return null;
   const cfg = getLevel(log.level || "info");
   const Icon = cfg.icon;

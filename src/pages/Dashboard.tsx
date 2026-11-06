@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
+import { paymentTimeZone } from "@/lib/payment-time";
 import {
     ArrowUpRight, ArrowDownRight, ChevronLeft, ChevronRight,
     SlidersHorizontal, Receipt, MailCheck
@@ -21,19 +22,19 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 const fmt = (n: number) => new Intl.NumberFormat("en-KE", { style: "currency", currency: "KES", maximumFractionDigits: 0 }).format(n);
 const fmtNum = (n: number) => new Intl.NumberFormat("en-KE").format(n);
 
-const fmtDate = (s: string | Date) => {
+const fmtDate = (s: string | Date, transactionType?: string | null) => {
     if (!s) return "—";
 
     const date = new Date(s);
     if (isNaN(date.getTime())) return "—";
 
     const parts = new Intl.DateTimeFormat("en-GB", {
-        timeZone: "UTC", // display in UTC, then add 2 hours manually
+        timeZone: paymentTimeZone(transactionType),
         day: "2-digit",
         month: "short",
         hour: "2-digit",
         minute: "2-digit",
-        hour12: false,
+        hourCycle: "h23",
     }).formatToParts(date);
 
     const map: Record<string, string> = {};
@@ -41,11 +42,7 @@ const fmtDate = (s: string | Date) => {
         if (p.type !== "literal") map[p.type] = p.value;
     });
 
-    // Add 2 hours to UTC display
-    let hour = (parseInt(map.hour) + 2) % 24;
-    const minute = map.minute;
-    
-    return `${map.day} ${map.month}, ${hour.toString().padStart(2, '0')}:${minute}`;
+    return `${map.day} ${map.month}, ${map.hour}:${map.minute}`;
 };
 
 const getMonthDates = () => {
@@ -124,6 +121,9 @@ function TransactionModal({ tx, onClose }: { tx: Payment | null; onClose: () => 
 
     if (!tx) return null;
 
+    // Some payments store a null token or the literal "N/A"; neither is something a customer can use.
+    const hasToken = !!tx.token && tx.token !== "N/A";
+
     const fmt = (amount: number) => {
         return new Intl.NumberFormat("en-KE", {
             style: "currency",
@@ -137,25 +137,24 @@ function TransactionModal({ tx, onClose }: { tx: Payment | null; onClose: () => 
         const date = new Date(s);
         if (isNaN(date.getTime())) return "—";
 
-        // Add 2 hours to the API time
-        const adjustedDate = new Date(date.getTime() + (2 * 60 * 60 * 1000));
-
         return new Intl.DateTimeFormat("en-GB", {
             day: "2-digit",
             month: "short",
             year: "numeric",
             hour: "2-digit",
             minute: "2-digit",
-            hour12: false
-        }).format(adjustedDate);
+            hourCycle: "h23",
+            timeZone: paymentTimeZone(tx.transactionType),
+        }).format(date);
     };
 
     const handleResendSms = async () => {
+        if (!hasToken) return;
         try {
             setIsSubmitting(true);
             const data = {
                 phone: tx.msisdn,
-                token: tx.token || tx.transactionType
+                token: tx.token
             };
             await resendSms(axiosInstance, data);
             toast.success("Successfully resent token SMS to user");
@@ -187,6 +186,7 @@ function TransactionModal({ tx, onClose }: { tx: Payment | null; onClose: () => 
                     <div className="rounded-lg border border-border bg-muted p-4">
                         <p className="av-label text-[10.5px] text-muted-foreground">Token</p>
                         <p className="av-num mt-1.5 font-mono text-[15px] font-medium break-all text-foreground">{tx.token || 'N/A'}</p>
+                        {!hasToken && <p className="mt-1.5 text-xs text-muted-foreground">No token is recorded for this payment, so there is nothing to resend.</p>}
                     </div>
                     <dl className="grid grid-cols-2 gap-x-6 gap-y-4">
                         {fields.map(([label, val, mono]: any) => (
@@ -203,7 +203,7 @@ function TransactionModal({ tx, onClose }: { tx: Payment | null; onClose: () => 
                 </div>
 
                 <DialogFooter className="flex-row justify-between gap-3 border-t border-border px-6 py-4 sm:justify-between">
-                    <Button variant="outline" onClick={handleResendSms} disabled={isSubmitting}>
+                    <Button variant="outline" onClick={handleResendSms} disabled={isSubmitting || !hasToken}>
                         <MailCheck aria-hidden />
                         {isSubmitting ? "Sending..." : "Re-Send SMS"}
                     </Button>
@@ -450,7 +450,7 @@ export function DashboardPage() {
                                         <td className="px-5 py-3.5 font-mono text-xs whitespace-nowrap text-text-secondary">{tx.transId}</td>
                                         <td className="px-5 py-3.5 font-medium whitespace-nowrap text-foreground">{tx.firstName} {tx.lastName}</td>
                                         <td className="px-5 py-3.5 font-mono text-xs whitespace-nowrap text-text-secondary">{tx.billRefNumber}</td>
-                                        <td className="av-num px-5 py-3.5 text-xs whitespace-nowrap text-muted-foreground">{fmtDate(tx.transTime)}</td>
+                                        <td className="av-num px-5 py-3.5 text-xs whitespace-nowrap text-muted-foreground">{fmtDate(tx.transTime, tx.transactionType)}</td>
                                         <td className="av-num px-5 py-3.5 text-right font-mono text-xs whitespace-nowrap text-text-secondary">{tx.units || 'N/A'}</td>
                                         <td className="av-num px-5 py-3.5 text-right font-semibold whitespace-nowrap text-foreground">{fmt(tx.transAmount)}</td>
                                         <td className="px-5 py-3.5 whitespace-nowrap"><StatusBadge /></td>

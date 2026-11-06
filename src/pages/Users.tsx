@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState, useRef } from 'react';
+import { useEscape } from "@/lib/use-escape";
 import ReactDOM from 'react-dom';
 import {
     Plus, Search, ChevronLeft, ChevronRight, MoreHorizontal,
@@ -83,6 +84,7 @@ function SelectInput({ value, onChange, children }: any) {
 
 // ─── User Form Dialog ─────────────────────────────────────────────────────────
 function UserFormDialog({ open, onClose, editing, accounts, onSubmit, isSaving }: any) {
+    useEscape(onClose, open);
     const [form, setForm] = useState<any>(EMPTY_FORM);
     const set = (key: string, val: any) => setForm((f: any) => ({ ...f, [key]: val }));
 
@@ -193,6 +195,7 @@ function UserFormDialog({ open, onClose, editing, accounts, onSubmit, isSaving }
 
 // ─── Delete Confirm Dialog ────────────────────────────────────────────────────
 function DeleteDialog({ user, onConfirm, onClose }: any) {
+    useEscape(onClose, !!user);
     if (!user) return null;
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[var(--overlay)] backdrop-blur-sm" onClick={onClose}>
@@ -222,6 +225,7 @@ function DeleteDialog({ user, onConfirm, onClose }: any) {
 // ─── Row Action Menu ──────────────────────────────────────────────────────────
 function RowMenu({ user, onEdit, onToggle, onDelete }: any) {
     const [open, setOpen] = useState(false);
+    useEscape(() => setOpen(false), open);
     const buttonRef = useRef<HTMLButtonElement>(null);
     const [position, setPosition] = useState({ top: 0, left: 0 });
 

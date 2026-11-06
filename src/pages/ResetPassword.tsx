@@ -89,6 +89,8 @@ export function ResetPasswordPage() {
             console.error("Error: ", error);
             const errorMessage = error?.response?.data?.message || "An error occurred. Please try again.";
             toast.error(errorMessage);
+        } finally {
+            setIsLoading(false);
         }
   };
 

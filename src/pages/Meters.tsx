@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
+import { useEscape } from "@/lib/use-escape";
 import { useOutletContext } from "react-router-dom";
 import {
   Plus, Search, ChevronLeft, ChevronRight, MoreHorizontal,
@@ -92,6 +93,7 @@ function SelectInput({ value, onChange, children }: any) {
 
 // ─── Meter Form Dialog ────────────────────────────────────────────────────────
 function MeterFormDialog({ open, onClose, editing, tariffs, accounts, onSubmit, isSaving }: any) {
+  useEscape(onClose, open);
   const [form, setForm] = useState<any>(EMPTY_FORM);
   const set = (key: string, val: any) => setForm((f: any) => ({ ...f, [key]: val }));
 
@@ -275,6 +277,7 @@ function TokenDisplay({ label, code, color = "gray" }: any) {
 
 // ─── Meter Actions Dialog ─────────────────────────────────────────────────────
 function MeterActionsDialog({ open, onClose, meter, axiosInstance }: any) {
+  useEscape(onClose, open);
   const [tamperLoading, setTamperLoading] = useState(false);
   const [creditLoading, setCreditLoading] = useState(false);
   const [tamperCode, setTamperCode] = useState<string | null>(null);
@@ -452,10 +455,11 @@ function MeterActionsDialog({ open, onClose, meter, axiosInstance }: any) {
 
 // ─── Delete Confirm Dialog ────────────────────────────────────────────────────
 function DeleteDialog({ meter, onConfirm, onClose }: any) {
+  useEscape(onClose, !!meter);
   if (!meter) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[var(--overlay)] backdrop-blur-sm" onClick={onClose}>
-      <div className="av-panel shadow-2xl w-full max-sm animate-in" onClick={(e) => e.stopPropagation()}>
+      <div className="av-panel shadow-2xl w-full max-w-sm animate-in" onClick={(e) => e.stopPropagation()}>
         <div className="p-6">
           <div className="w-12 h-12 rounded-xl bg-danger-soft flex items-center justify-center mx-auto mb-4">
             <Trash2 className="w-5 h-5 text-danger-text" />
