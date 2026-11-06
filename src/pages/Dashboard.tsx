@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
-import { paymentTimeZone } from "@/lib/payment-time";
 import {
     ArrowUpRight, ArrowDownRight, ChevronLeft, ChevronRight,
     SlidersHorizontal, Receipt, MailCheck
@@ -22,14 +21,14 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 const fmt = (n: number) => new Intl.NumberFormat("en-KE", { style: "currency", currency: "KES", maximumFractionDigits: 0 }).format(n);
 const fmtNum = (n: number) => new Intl.NumberFormat("en-KE").format(n);
 
-const fmtDate = (s: string | Date, transactionType?: string | null) => {
+const fmtDate = (s: string | Date) => {
     if (!s) return "—";
 
     const date = new Date(s);
     if (isNaN(date.getTime())) return "—";
 
     const parts = new Intl.DateTimeFormat("en-GB", {
-        timeZone: paymentTimeZone(transactionType),
+        timeZone: "Africa/Nairobi",
         day: "2-digit",
         month: "short",
         hour: "2-digit",
@@ -144,7 +143,7 @@ function TransactionModal({ tx, onClose }: { tx: Payment | null; onClose: () => 
             hour: "2-digit",
             minute: "2-digit",
             hourCycle: "h23",
-            timeZone: paymentTimeZone(tx.transactionType),
+            timeZone: "Africa/Nairobi",
         }).format(date);
     };
 
@@ -450,7 +449,7 @@ export function DashboardPage() {
                                         <td className="px-5 py-3.5 font-mono text-xs whitespace-nowrap text-text-secondary">{tx.transId}</td>
                                         <td className="px-5 py-3.5 font-medium whitespace-nowrap text-foreground">{tx.firstName} {tx.lastName}</td>
                                         <td className="px-5 py-3.5 font-mono text-xs whitespace-nowrap text-text-secondary">{tx.billRefNumber}</td>
-                                        <td className="av-num px-5 py-3.5 text-xs whitespace-nowrap text-muted-foreground">{fmtDate(tx.transTime, tx.transactionType)}</td>
+                                        <td className="av-num px-5 py-3.5 text-xs whitespace-nowrap text-muted-foreground">{fmtDate(tx.transTime)}</td>
                                         <td className="av-num px-5 py-3.5 text-right font-mono text-xs whitespace-nowrap text-text-secondary">{tx.units || 'N/A'}</td>
                                         <td className="av-num px-5 py-3.5 text-right font-semibold whitespace-nowrap text-foreground">{fmt(tx.transAmount)}</td>
                                         <td className="px-5 py-3.5 whitespace-nowrap"><StatusBadge /></td>
