@@ -1,7 +1,7 @@
 import {
   Settings, Gauge, Logs, FileBarChart,
   FileQuestionIcon, Users, UserCog,
-  LayoutDashboard, ListOrdered, MessageSquareText
+  LayoutDashboard, ListOrdered, MessageSquareText, AlertTriangle
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -22,6 +22,7 @@ const ADMIN_NAV = [
   { to: "/accounts", label: "Accounts", icon: Users, match: ["/accounts"] },
   { to: "/users", label: "Users", icon: UserCog, match: ["/users"] },
   { to: "/tickets", label: "Tickets", icon: FileQuestionIcon, match: ["/tickets"] },
+  { to: "/attention", label: "Needs Attention", icon: AlertTriangle, match: ["/attention"] },
   { to: "/queue", label: "Payment Queue", icon: ListOrdered, match: ["/queue"] },
   { to: "/sms-delivery-reports", label: "SMS Delivery Reports", icon: MessageSquareText, match: ["/sms-delivery-reports"] },
 ];

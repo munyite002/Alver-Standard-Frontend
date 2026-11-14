@@ -14,6 +14,7 @@ import { ReportsPage } from "@/pages/Reports";
 import Tickets from "@/pages/Tickets.js"
 import Users from "@/pages/Users";
 import { PaymentQueuePage } from "@/pages/PaymentQueue";
+import { NeedsAttentionPage } from "@/pages/NeedsAttention";
 import { SmsDeliveryReportsPage } from "@/pages/SmsDeliveryReports";
 // import Configurations from "./pages/Configurations.js";
 import Unauthorized from "@/pages/Unauthorized.js";
@@ -60,6 +61,7 @@ function App() {
                                 <Route path="/accounts" element={<Accounts />} />
                                 <Route path="/users" element={<Users />} />
                                 <Route path="/queue" element={<PaymentQueuePage />} />
+                                <Route path="/attention" element={<NeedsAttentionPage />} />
                                 <Route path="/sms-delivery-reports" element={<SmsDeliveryReportsPage />} />
                             </Route>
                             {/* <Route
